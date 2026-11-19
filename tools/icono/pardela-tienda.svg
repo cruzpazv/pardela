@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 10 88 88" width="88" height="88">
+  <!-- Icono maestro de Pardela (rejilla de icono adaptativo Android 108×108). -->
+  <defs>
+    <linearGradient id="cielo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD54A"/><stop offset="1" stop-color="#FF8A1F"/></linearGradient>
+    <linearGradient id="mar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0E4A73"/><stop offset="1" stop-color="#062236"/></linearGradient>
+  </defs>
+  <rect width="108" height="63" fill="url(#cielo)"/>
+  <path d="M35 63A19 19 0 0 1 73 63Z" fill="#FFF1B8"/>
+  <rect y="63" width="108" height="45" fill="url(#mar)"/>
+  <g fill="#FFD54A" opacity=".85">
+    <rect x="42" y="67" width="24" height="2" rx="1"/>
+    <rect x="46" y="72" width="16" height="2" rx="1" opacity=".7"/>
+    <rect x="50" y="77" width="8" height="2" rx="1" opacity=".5"/>
+  </g>
+  <path d="M18 65.6c3.2 1.2 7 1.3 10.5.4" fill="none" stroke="#FFF1B8" stroke-width="1.3" stroke-linecap="round" opacity=".9"/>
+  <path d="M19.8 68.6c2.4.8 5 .8 7.4.2" fill="none" stroke="#FFF1B8" stroke-width="1.1" stroke-linecap="round" opacity=".5"/>
+  <g transform="translate(54 53.2) rotate(-12) scale(.7) translate(-50 -50)" fill="#1A1410"><path d="M50 44.5C51.3 44.5 52 45.4 52.2 46.6L53.5 47C62 46 72 46.6 80 48.5C86 50 91 52 96 55C90 53.8 85 52.6 79 51.6C71 50.6 62 50.4 54.5 51L54 54L53.5 57.5L50 56.6L46.5 57.5L46 54L45.5 51C38 50.4 29 50.6 21 51.6C15 52.6 10 53.8 4 55C9 52 14 50 20 48.5C28 46.6 38 46 46.5 47L47.8 46.6C48 45.4 48.7 44.5 50 44.5Z"/></g>
+</svg>

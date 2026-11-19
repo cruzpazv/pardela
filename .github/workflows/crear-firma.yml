@@ -1,0 +1,20 @@
+# Ejecutar UNA vez a mano (Actions → Crear firma → Run workflow) CON EL REPO AÚN PRIVADO:
+# en un repo público cualquiera podría descargar el artefacto con la clave.
+# Descarga el artefacto "firma": copia PARDELA_KEYSTORE_B64.txt y PARDELA_KEYSTORE_PASS.txt
+# a Settings → Secrets → Actions con esos mismos nombres. Después borra la ejecución.
+name: Crear firma
+on: workflow_dispatch
+jobs:
+  key:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "17" }
+      - run: |
+          PASS=$(openssl rand -hex 16)
+          keytool -genkeypair -keystore pardela.jks -storepass "$PASS" -keypass "$PASS" \
+            -alias pardela -keyalg RSA -keysize 2048 -validity 20000 -dname "CN=Pardela" 2>/dev/null
+          base64 -w0 pardela.jks > PARDELA_KEYSTORE_B64.txt
+          printf %s "$PASS" > PARDELA_KEYSTORE_PASS.txt
+      - uses: actions/upload-artifact@v4
+        with: { name: firma, path: "PARDELA_KEYSTORE_*.txt", retention-days: 1 }

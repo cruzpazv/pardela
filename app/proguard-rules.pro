@@ -1,0 +1,8 @@
+-keepattributes *Annotation*, InnerClasses
+-keep,includedescriptorclasses class io.github.cruzpazv.pardela.**$$serializer { *; }
+-keepclassmembers class io.github.cruzpazv.pardela.** { *** Companion; }
+-keepclasseswithmembers class io.github.cruzpazv.pardela.** { kotlinx.serialization.KSerializer serializer(...); }
+-dontwarn okhttp3.internal.platform.**
+-dontwarn org.conscrypt.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.openjsse.**

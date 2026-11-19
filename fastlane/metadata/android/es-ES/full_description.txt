@@ -1,0 +1,12 @@
+<p>Pardela muestra sus vuelos como el tablón de un aeropuerto: letras grandes, botones grandes y mensajes claros. Pensada para que la use cualquiera, también las personas mayores.</p>
+<ul>
+<li><b>Buscar un vuelo</b> por su número (por ejemplo IB3166) y ver su estado, horarios, puerta, cinta de equipaje y su avance en directo.</li>
+<li><b>Seguir vuelos</b> y recibir avisos de despegue, aterrizaje, retrasos y cambios de puerta.</li>
+<li><b>Vigilar ahora</b>: un aviso fijo que se actualiza cada minuto mientras el vuelo está en el aire.</li>
+<li><b>Aeropuertos</b>: salidas y llegadas; guarde los que mira a menudo.</li>
+<li><b>Trayectos</b>: avisos de cada vuelo entre dos ciudades.</li>
+<li><b>El avión</b>: foto, fabricante, modelo, matrícula y logotipo de la aerolínea.</li>
+<li>Modo claro y oscuro, letra grande y animaciones que se pueden desactivar.</li>
+</ul>
+<p>Sin cuentas ni registros. Todo se guarda solo en el móvil.</p>
+<p>Los datos en directo vienen de redes de radar abiertas (adsb.fi, adsb.lol), adsbdb.com y planespotters.net. Si lo desea, puede añadir su propia clave gratuita de AeroDataBox para ver horarios, retrasos y el tablón completo de cada aeropuerto.</p>

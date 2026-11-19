@@ -1,0 +1,8 @@
+<p>Pardela shows your flights like an airport departure board, with large text, large buttons and clear messages. The app is in Spanish.</p>
+<ul>
+<li>Search a flight by number and see its status, times, gate, baggage belt and live progress.</li>
+<li>Follow flights and get alerts for take-off, landing, delays and gate changes.</li>
+<li>Live watch: an ongoing notification updated every minute.</li>
+<li>Airport departures and arrivals, route alerts, aircraft photo and details.</li>
+</ul>
+<p>No accounts. Everything is stored on the device. Live data comes from open ADS-B networks (adsb.fi, adsb.lol), adsbdb.com and planespotters.net. An optional personal AeroDataBox key adds schedules and delays.</p>
