@@ -1,5 +1,7 @@
 package io.github.cruzpazv.pardela.ui
 
+import io.github.cruzpazv.pardela.data.intentar
+
 import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -87,7 +89,7 @@ fun Detalle(inicial: Vuelo, atras: () -> Unit) {
         // La primera vez solo radar: el vuelo llega recién buscado o actualizado por el comprobador.
         if (primera) { primera = false; ultimaClave.putIfAbsent(v.clave, ahora) }
         val usarClave = v.conHorarios && ahora - (ultimaClave[v.clave] ?: 0L) > 10 * 60_000L
-        runCatching { Repositorio.refrescar(v, usarClave) }.getOrNull()?.let { n ->
+        intentar { Repositorio.refrescar(v, usarClave) }.getOrNull()?.let { n ->
             if (usarClave) ultimaClave[v.clave] = ahora
             v = if (conAvion) n.copy(avion = v.avion.copy(hex = n.avion.hex ?: v.avion.hex)) else n
             if (Almacen.sigue(v)) Almacen.actualizar(v)
@@ -97,7 +99,7 @@ fun Detalle(inicial: Vuelo, atras: () -> Unit) {
 
     LaunchedEffect(Unit) { while (true) { refrescar(); delay(60_000) } }
     LaunchedEffect(verAvion) {
-        if (verAvion && !conAvion) { runCatching { Repositorio.completarAvion(v) }.getOrNull()?.let { v = it; conAvion = true } }
+        if (verAvion && !conAvion) { intentar { Repositorio.completarAvion(v) }.getOrNull()?.let { v = it; conAvion = true } }
     }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {

@@ -20,7 +20,7 @@ object Aeropuertos {
         lista = ctx.assets.open("aeropuertos.csv").bufferedReader().useLines { lines ->
             lines.mapNotNull { l ->
                 val c = l.split('|')
-                if (c.size < 8) null else runCatching {
+                if (c.size < 8) null else intentar {
                     Aeropuerto(c[0], c[1], c[2], c[3], c[4], c[5].toDouble(), c[6].toDouble(), c[7] == "1")
                 }.getOrNull()
             }.toList()

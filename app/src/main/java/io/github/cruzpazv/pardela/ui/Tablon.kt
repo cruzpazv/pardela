@@ -1,5 +1,7 @@
 package io.github.cruzpazv.pardela.ui
 
+import io.github.cruzpazv.pardela.data.intentar
+
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -75,7 +77,7 @@ fun Tablon(iata: String, atras: () -> Unit, abrir: (Vuelo) -> Unit) {
 
     LaunchedEffect(salidas, vuelta) {
         lista = null; error = null
-        runCatching { Repositorio.tablon(iata, salidas) }
+        intentar { Repositorio.tablon(iata, salidas) }
             .onSuccess { lista = it }.onFailure { error = it.message ?: "Sin conexión" }
         // Sin clave el radar cambia rápido: se refresca solo cada 2 min.
         if (!Almacen.tieneClave) { delay(120_000); vuelta++ }
@@ -124,7 +126,7 @@ fun AjustesPantalla(atras: () -> Unit) {
     fun ajustar(f: (Ajustes) -> Ajustes) = Almacen.ajustar(f)
 
     val exportar = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
-        if (uri != null) mensaje = runCatching {
+        if (uri != null) mensaje = intentar {
             ctx.contentResolver.openOutputStream(uri)?.use { it.write(Almacen.exportar().toByteArray()) } ?: error("sin acceso")
         }.fold({ "✔ Copia guardada" to true }, { "⚠ No se ha podido guardar la copia" to false })
     }
@@ -199,7 +201,7 @@ fun AjustesPantalla(atras: () -> Unit) {
         }
         if (aj.claveApi.isNotEmpty()) Texto("✔ Clave guardada", 18, C.verde, FontWeight.Bold, modifier = Modifier.padding(top = 8.dp))
         BotonSecundario("ABRIR RAPIDAPI.COM", Modifier.padding(top = 10.dp)) {
-            runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://rapidapi.com/aedbx-aedbx/api/aerodatabox"))) }
+            intentar { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://rapidapi.com/aedbx-aedbx/api/aerodatabox"))) }
         }
 
         // ---------- Copia de seguridad ----------
@@ -221,7 +223,7 @@ fun AjustesPantalla(atras: () -> Unit) {
     if (borrar) Confirmar("¿Borrar vuelos, aeropuertos, trayectos y clave?", "BORRAR", { Almacen.cambiar { Datos() }; clave = ""; borrar = false }) { borrar = false }
     importarUri?.let { uri ->
         Confirmar("¿Sustituir todo lo de este móvil por la copia? La clave API se conserva.", "SUSTITUIR", {
-            val ok = runCatching { ctx.contentResolver.openInputStream(uri)?.use { it.readBytes().decodeToString() } }.getOrNull()
+            val ok = intentar { ctx.contentResolver.openInputStream(uri)?.use { it.readBytes().decodeToString() } }.getOrNull()
                 ?.let { Almacen.importar(it) } ?: false
             mensaje = if (ok) "✔ Copia recuperada" to true else "⚠ Ese fichero no es una copia de Pardela" to false
             importarUri = null

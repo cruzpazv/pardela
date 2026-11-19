@@ -1,5 +1,7 @@
 package io.github.cruzpazv.pardela.ui
 
+import io.github.cruzpazv.pardela.data.intentar
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -71,7 +73,7 @@ fun Cabecera(titulo: String, atras: () -> Unit, derecha: @Composable () -> Unit 
 @Composable
 fun Campo(valor: String, cambia: (String) -> Unit, pista: String, alEnviar: () -> Unit) {
     val foco = remember { FocusRequester() }
-    LaunchedEffect(Unit) { runCatching { foco.requestFocus() } }
+    LaunchedEffect(Unit) { intentar { foco.requestFocus() } }
     OutlinedTextField(
         value = valor, onValueChange = cambia, singleLine = true,
         modifier = Modifier.fillMaxWidth().focusRequester(foco),
@@ -116,7 +118,7 @@ fun BuscarVuelo(atras: () -> Unit, abrir: (Vuelo) -> Unit) {
         teclado?.hide()
         cargando = true; error = null; resultados = null
         scope.launch {
-            runCatching { Repositorio.buscarVuelo(texto, LocalDate.now().plusDays(dia)) }
+            intentar { Repositorio.buscarVuelo(texto, LocalDate.now().plusDays(dia)) }
                 .onSuccess { r -> if (r.size == 1) abrir(r[0]) else resultados = r }
                 .onFailure { error = it.message ?: "Sin conexión" }
             cargando = false

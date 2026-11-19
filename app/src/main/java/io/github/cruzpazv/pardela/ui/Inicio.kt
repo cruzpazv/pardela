@@ -1,5 +1,7 @@
 package io.github.cruzpazv.pardela.ui
 
+import io.github.cruzpazv.pardela.data.intentar
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -74,7 +76,7 @@ fun Inicio(ir: (Pantalla) -> Unit) {
         cargando = true
         scope.launch {
             Almacen.datos.value.vuelos.mapNotNull { it.ultimo }.filterNot { it.estado.terminado }.forEach { v ->
-                runCatching { Repositorio.refrescar(v, conClave = false) }.getOrNull()?.let { Almacen.actualizar(it) }
+                intentar { Repositorio.refrescar(v, conClave = false) }.getOrNull()?.let { Almacen.actualizar(it) }
             }
             cargando = false
         }

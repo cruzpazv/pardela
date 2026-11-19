@@ -52,7 +52,7 @@ internal object Red {
                     r.code == 401 || r.code == 403 -> throw ErrorRed("La clave API no es válida")
                     r.code == 429 -> throw ErrorRed("Demasiadas consultas. Espere un momento")
                     !r.isSuccessful -> throw ErrorRed("Error del servidor (${r.code})")
-                    else -> r.body?.string()?.takeIf { it.isNotBlank() }?.let { runCatching { json.parseToJsonElement(it) }.getOrNull() }
+                    else -> r.body?.string()?.takeIf { it.isNotBlank() }?.let { intentar { json.parseToJsonElement(it) }.getOrNull() }
                 }
             }
         }
@@ -63,3 +63,15 @@ internal fun JsonElement?.s(k: String): String? = (o(k) as? JsonPrimitive)?.cont
 internal fun JsonElement?.d(k: String): Double? = (o(k) as? JsonPrimitive)?.doubleOrNull
 internal fun JsonElement?.b(k: String): Boolean? = (o(k) as? JsonPrimitive)?.booleanOrNull
 internal fun JsonElement?.lista(k: String): List<JsonElement> = (o(k) as? JsonArray)?.toList() ?: emptyList()
+
+/**
+ * Como runCatching, pero deja pasar la cancelación de corrutinas.
+ * Si no, al salir de una pantalla la cancelación se mostraba como error.
+ */
+inline fun <T> intentar(bloque: () -> T): Result<T> = try {
+    Result.success(bloque())
+} catch (e: kotlin.coroutines.cancellation.CancellationException) {
+    throw e
+} catch (e: Throwable) {
+    Result.failure(e)
+}

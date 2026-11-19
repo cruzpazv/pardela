@@ -1,5 +1,7 @@
 package io.github.cruzpazv.pardela.notif
 
+import io.github.cruzpazv.pardela.data.intentar
+
 import android.content.Context
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
@@ -31,10 +33,10 @@ class Comprobador(ctx: Context, p: WorkerParameters) : CoroutineWorker(ctx, p) {
             val v = s.ultimo ?: continue
             if (v.estado.terminado) continue
             // Vuelos de días pasados: ya no se consultan (se pueden quitar a mano).
-            val dia = v.fecha?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+            val dia = v.fecha?.let { intentar { LocalDate.parse(it) }.getOrNull() }
             if (dia != null && dia.isBefore(LocalDate.now().minusDays(1))) continue
             val usarClave = Almacen.tieneClave && v.conHorarios && ahora - s.ultimaConsultaClave > intervaloClave(v, ahora)
-            val nuevo = runCatching { Repositorio.refrescar(v, usarClave) }.getOrNull() ?: continue
+            val nuevo = intentar { Repositorio.refrescar(v, usarClave) }.getOrNull() ?: continue
             Avisos.avisar(applicationContext, nuevo, Avisos.cambios(v, nuevo))
             Almacen.cambiar { d ->
                 d.copy(vuelos = d.vuelos.map {
@@ -46,7 +48,7 @@ class Comprobador(ctx: Context, p: WorkerParameters) : CoroutineWorker(ctx, p) {
         for (t in Almacen.datos.value.trayectos) {
             // Con clave: cada 3 h (1 consulta). Sin clave: radar en cada pasada (gratis).
             if (Almacen.tieneClave && ahora - t.ultimaConsulta < TimeUnit.HOURS.toMillis(3)) continue
-            val vuelos = runCatching { vuelosTrayecto(t) }.getOrNull() ?: continue
+            val vuelos = intentar { vuelosTrayecto(t) }.getOrNull() ?: continue
             val nuevos = HashMap<String, Vuelo>()
             for (v in vuelos) {
                 val antes = t.vistos[v.numero]

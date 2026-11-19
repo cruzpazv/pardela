@@ -18,7 +18,7 @@ object Repositorio {
         val numero = Aerolineas.numeroComercial(texto)
         var fallo: Throwable? = null
         if (Almacen.tieneClave) {
-            val r = runCatching { AeroDataBox.porNumero(numero, fecha.toString()) }.onFailure { fallo = it }.getOrNull()
+            val r = intentar { AeroDataBox.porNumero(numero, fecha.toString()) }.onFailure { fallo = it }.getOrNull()
             if (!r.isNullOrEmpty()) return r
         }
         // Sin clave, o la clave ha fallado (agotada, no válida…): radar gratuito.
@@ -57,7 +57,7 @@ object Repositorio {
     suspend fun refrescar(v: Vuelo, conClave: Boolean): Vuelo {
         var n = v
         if (conClave && Almacen.tieneClave && v.fecha != null) {
-            runCatching { AeroDataBox.porNumero(v.numero, v.fecha) }.getOrNull()
+            intentar { AeroDataBox.porNumero(v.numero, v.fecha) }.getOrNull()
                 ?.let { l -> l.firstOrNull { it.salida.lugar.iata == v.salida.lugar.iata } ?: l.firstOrNull() }
                 ?.let { nuevo -> n = nuevo.copy(avion = fusion(nuevo.avion, v.avion), directo = v.directo) }
         }

@@ -1,5 +1,7 @@
 package io.github.cruzpazv.pardela.notif
 
+import io.github.cruzpazv.pardela.data.intentar
+
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
@@ -38,7 +40,7 @@ class VigilanciaService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == PARAR) { parar(); return START_NOT_STICKY }
-        val v = intent?.getStringExtra(EXTRA)?.let { runCatching { json.decodeFromString(Vuelo.serializer(), it) }.getOrNull() }
+        val v = intent?.getStringExtra(EXTRA)?.let { intentar { json.decodeFromString(Vuelo.serializer(), it) }.getOrNull() }
             ?: run { stopSelf(); return START_NOT_STICKY }
         ServiceCompat.startForeground(
             this, ID, aviso(v),
@@ -57,7 +59,7 @@ class VigilanciaService : Service() {
         while (scope.isActive && System.currentTimeMillis() < fin) {
             val ahora = System.currentTimeMillis()
             val usarClave = Almacen.tieneClave && v.conHorarios && ahora - ultimaClave > 15 * 60_000L
-            val n = runCatching { Repositorio.refrescar(v, usarClave) }.getOrNull()
+            val n = intentar { Repositorio.refrescar(v, usarClave) }.getOrNull()
             if (n != null) {
                 if (usarClave) ultimaClave = ahora
                 Avisos.avisar(this, n, Avisos.cambios(v, n))

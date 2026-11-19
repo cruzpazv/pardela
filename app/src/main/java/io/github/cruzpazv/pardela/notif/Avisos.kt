@@ -1,5 +1,7 @@
 package io.github.cruzpazv.pardela.notif
 
+import io.github.cruzpazv.pardela.data.intentar
+
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -59,7 +61,7 @@ object Avisos {
         val i = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
             .putExtra(Settings.EXTRA_APP_PACKAGE, ctx.packageName)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        runCatching { ctx.startActivity(i) }
+        intentar { ctx.startActivity(i) }
     }
 
     /** ¿Estamos dentro de las horas de silencio? Admite rangos que cruzan medianoche (22 → 8). */

@@ -16,7 +16,7 @@ object Almacen {
     fun iniciar(ctx: Context) {
         if (::fichero.isInitialized) return
         fichero = File(ctx.filesDir, "pardela.json")
-        _datos.value = runCatching { json.decodeFromString(Datos.serializer(), fichero.readText()) }.getOrDefault(Datos())
+        _datos.value = intentar { json.decodeFromString(Datos.serializer(), fichero.readText()) }.getOrDefault(Datos())
     }
 
     @Synchronized
@@ -36,7 +36,7 @@ object Almacen {
     )
 
     /** Sustituye todo por la copia, conservando la clave API de este móvil. */
-    fun importar(texto: String): Boolean = runCatching {
+    fun importar(texto: String): Boolean = intentar {
         val d = json.decodeFromString(Datos.serializer(), texto)
         cambiar { actual -> d.copy(ajustes = d.ajustes.copy(claveApi = actual.ajustes.claveApi, bienvenidaVista = true)) }
     }.isSuccess

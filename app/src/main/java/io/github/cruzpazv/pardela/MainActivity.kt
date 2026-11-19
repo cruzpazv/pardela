@@ -21,6 +21,10 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import io.github.cruzpazv.pardela.ui.AvisoFallo
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Modifier
 import io.github.cruzpazv.pardela.data.Almacen
@@ -80,6 +84,8 @@ class MainActivity : ComponentActivity() {
                         Pantalla.Ajustes -> AjustesPantalla(atras)
                     }
                 }
+                var fallo by remember { mutableStateOf(App.ficheroFallo(this@MainActivity).takeIf { it.exists() }?.readText()) }
+                fallo?.let { AvisoFallo(it) { App.ficheroFallo(this@MainActivity).delete(); fallo = null } }
             }
         }
     }

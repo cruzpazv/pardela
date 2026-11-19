@@ -38,9 +38,9 @@ object Radar {
         }
 
     private suspend fun pedir(fi: String, lol: String): List<Contacto> =
-        runCatching { contactos(Red.get("https://opendata.adsb.fi/api/v2/$fi", despacio = true)) }
+        intentar { contactos(Red.get("https://opendata.adsb.fi/api/v2/$fi", despacio = true)) }
             .getOrNull()?.takeIf { it.isNotEmpty() }
-            ?: runCatching { contactos(Red.get("https://api.adsb.lol/v2/$lol")) }.getOrDefault(emptyList())
+            ?: intentar { contactos(Red.get("https://api.adsb.lol/v2/$lol")) }.getOrDefault(emptyList())
 
     suspend fun porIndicativo(cs: String) = pedir("callsign/$cs", "callsign/$cs").firstOrNull()
     suspend fun porHex(hex: String) = pedir("hex/${hex.lowercase()}", "hex/${hex.lowercase()}").firstOrNull()
@@ -61,7 +61,7 @@ object Adsbdb {
     suspend fun ruta(cs: String): Ruta? {
         synchronized(rutas) { if (rutas.containsKey(cs)) return rutas[cs] }
         // Un fallo de red no se guarda: así se reintenta cuando vuelva la conexión.
-        val j = runCatching { Red.get("https://api.adsbdb.com/v0/callsign/$cs") }.getOrElse { return null }
+        val j = intentar { Red.get("https://api.adsbdb.com/v0/callsign/$cs") }.getOrElse { return null }
         val r = j.o("response").o("flightroute")?.let { f ->
             Ruta(lugar(f.o("origin")), lugar(f.o("destination")), f.o("airline").s("iata"), f.o("airline").s("name"), f.s("callsign_iata"))
         }
@@ -71,7 +71,7 @@ object Adsbdb {
 
     suspend fun avion(hexOMatricula: String): Avion? {
         synchronized(aviones) { if (aviones.containsKey(hexOMatricula)) return aviones[hexOMatricula] }
-        val resp = runCatching { Red.get("https://api.adsbdb.com/v0/aircraft/$hexOMatricula") }.getOrElse { return null }
+        val resp = intentar { Red.get("https://api.adsbdb.com/v0/aircraft/$hexOMatricula") }.getOrElse { return null }
         val a = resp.o("response").o("aircraft")?.let { j ->
                 Avion(
                     hex = j.s("mode_s"), matricula = j.s("registration"), tipoIcao = j.s("icao_type"),
@@ -86,7 +86,7 @@ object Adsbdb {
 
 /** Fotos de planespotters.net (hay que mostrar el autor). */
 object Fotos {
-    suspend fun deHex(hex: String): Pair<String, String?>? = runCatching {
+    suspend fun deHex(hex: String): Pair<String, String?>? = intentar {
         Red.get("https://api.planespotters.net/pub/photos/hex/${hex.lowercase()}").lista("photos").firstOrNull()?.let { p ->
             (p.o("thumbnail_large").s("src") ?: p.o("thumbnail").s("src"))?.let { it to p.s("photographer") }
         }
@@ -138,7 +138,7 @@ object AeroDataBox {
     }
 
     private fun utc(t: JsonElement?): Long? = t.s("utc")?.let {
-        runCatching { LocalDateTime.parse(it.take(16).replace(' ', 'T')).toInstant(ZoneOffset.UTC).toEpochMilli() }.getOrNull()
+        intentar { LocalDateTime.parse(it.take(16).replace(' ', 'T')).toInstant(ZoneOffset.UTC).toEpochMilli() }.getOrNull()
     }
 
     private fun hhmm(t: JsonElement?): String? = t.s("local")?.takeIf { it.length >= 16 }?.substring(11, 16)
