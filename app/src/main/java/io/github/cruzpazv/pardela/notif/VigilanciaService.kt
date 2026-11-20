@@ -81,7 +81,7 @@ class VigilanciaService : Service() {
         .setContentText(linea(v))
         .setOngoing(true)
         .setOnlyAlertOnce(true)
-        .setColor(0xFFFFC400.toInt())
+        .setColor(0xFFE5B45C.toInt())
         .setContentIntent(Avisos.abrirApp(this, v.clave))
         .apply { Repositorio.progreso(v)?.let { setProgress(100, (it * 100).toInt(), false) } }
         .addAction(0, "DEJAR DE VIGILAR", PendingIntent.getService(

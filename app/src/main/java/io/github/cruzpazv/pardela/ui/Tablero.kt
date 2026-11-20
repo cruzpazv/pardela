@@ -65,9 +65,9 @@ data class Paleta(
 
 val Oscura = Paleta(
     fondo = Color(0xFF050505), panel = Color(0xFF161616), celda = Color(0xFF222222), raya = Color(0xFF000000),
-    ambar = Color(0xFFFFC400), texto = Color(0xFFF2F2F2), gris = Color(0xFFA6A6A6),
+    ambar = Color(0xFFE5B45C), texto = Color(0xFFF2F2F2), gris = Color(0xFFA6A6A6),
     verde = Color(0xFF39D98A), rojo = Color(0xFFFF5A4E), azul = Color(0xFF5AB4FF),
-    boton = Color(0xFFFFC400), sobreBoton = Color(0xFF000000), sobreAzul = Color(0xFF000000),
+    boton = Color(0xFFE5B45C), sobreBoton = Color(0xFF000000), sobreAzul = Color(0xFF000000),
 )
 
 /** Claro: ámbar tostado y estados oscurecidos para contraste ≥ 4.5:1 sobre blanco. */
@@ -75,7 +75,7 @@ val Clara = Paleta(
     fondo = Color(0xFFE8E6E0), panel = Color(0xFFFFFFFF), celda = Color(0xFF2A2A2A), raya = Color(0xFF000000),
     ambar = Color(0xFF8A5300), texto = Color(0xFF151515), gris = Color(0xFF555555),
     verde = Color(0xFF17703F), rojo = Color(0xFFB3261E), azul = Color(0xFF0B5CAD),
-    boton = Color(0xFFFFC400), sobreBoton = Color(0xFF000000), sobreAzul = Color(0xFFFFFFFF),
+    boton = Color(0xFFE5B45C), sobreBoton = Color(0xFF000000), sobreAzul = Color(0xFFFFFFFF),
 )
 
 /**

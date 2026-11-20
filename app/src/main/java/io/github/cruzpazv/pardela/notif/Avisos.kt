@@ -84,7 +84,7 @@ object Avisos {
             .setPriority(if (callado) NotificationCompat.PRIORITY_LOW else NotificationCompat.PRIORITY_HIGH)
             .setSilent(callado)
             .setCategory(NotificationCompat.CATEGORY_STATUS)
-            .setColor(0xFFFFC400.toInt())
+            .setColor(0xFFE5B45C.toInt())
             .setAutoCancel(true)
             .setContentIntent(abrirApp(ctx, v.clave))
             .build()
