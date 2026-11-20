@@ -105,11 +105,15 @@ fun Tablon(iata: String, atras: () -> Unit, abrir: (Vuelo) -> Unit) {
         if (!guardado) Texto("Pulse ★ para guardar este aeropuerto en el inicio.", 15, C.gris, modifier = Modifier.padding(top = 8.dp))
         if (!Almacen.tieneClave) Texto("Sin clave API: solo aviones en el aire cerca del aeropuerto ahora mismo.", 15, C.gris, modifier = Modifier.padding(top = 4.dp))
         Spacer(Modifier.height(6.dp))
+        // Copias locales: el contenido de LazyColumn se evalúa más tarde, cuando el estado ya puede ser null.
+        val err = error
+        val vuelos = lista
+        val esSalidas = salidas
         when {
-            error != null -> AvisoError(error!!)
-            lista == null -> Cargando()
-            lista!!.isEmpty() -> Texto("No hay vuelos que mostrar ahora.", 18, C.gris, modifier = Modifier.padding(16.dp))
-            else -> LazyColumn { items(lista!!) { v -> FilaVuelo(v, salidas) { abrir(v) } } }
+            err != null -> AvisoError(err)
+            vuelos == null -> Cargando()
+            vuelos.isEmpty() -> Texto("No hay vuelos que mostrar ahora.", 18, C.gris, modifier = Modifier.padding(16.dp))
+            else -> LazyColumn { items(vuelos) { v -> FilaVuelo(v, esSalidas) { abrir(v) } } }
         }
     }
 }
