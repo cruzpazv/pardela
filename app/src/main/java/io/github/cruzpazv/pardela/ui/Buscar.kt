@@ -24,7 +24,15 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SelectableDates
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -55,7 +63,11 @@ import io.github.cruzpazv.pardela.data.Almacen
 import io.github.cruzpazv.pardela.data.Repositorio
 import io.github.cruzpazv.pardela.data.Vuelo
 import kotlinx.coroutines.launch
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Composable
 fun Cabecera(titulo: String, atras: () -> Unit, derecha: @Composable () -> Unit = {}) {
@@ -106,7 +118,9 @@ fun AvisoError(texto: String) = Box(Modifier.fillMaxWidth().padding(vertical = 1
 @Composable
 fun BuscarVuelo(atras: () -> Unit, abrir: (Vuelo) -> Unit) {
     var texto by remember { mutableStateOf("") }
-    var dia by remember { mutableStateOf(0L) }
+    val hoy = LocalDate.now()
+    var fecha by remember { mutableStateOf(hoy) }
+    var calendario by remember { mutableStateOf(false) }
     var cargando by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var resultados by remember { mutableStateOf<List<Vuelo>?>(null) }
@@ -118,7 +132,7 @@ fun BuscarVuelo(atras: () -> Unit, abrir: (Vuelo) -> Unit) {
         teclado?.hide()
         cargando = true; error = null; resultados = null
         scope.launch {
-            intentar { Repositorio.buscarVuelo(texto, LocalDate.now().plusDays(dia)) }
+            intentar { Repositorio.buscarVuelo(texto, fecha) }
                 .onSuccess { r -> if (r.size == 1) abrir(r[0]) else resultados = r }
                 .onFailure { error = it.message ?: "Sin conexión" }
             cargando = false
@@ -134,15 +148,21 @@ fun BuscarVuelo(atras: () -> Unit, abrir: (Vuelo) -> Unit) {
             Spacer(Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf(-1L to "AYER", 0L to "HOY", 1L to "MAÑANA").forEach { (d, nombre) ->
-                    val sel = d == dia
+                    val sel = fecha == hoy.plusDays(d)
                     Box(
                         Modifier.weight(1f).heightIn(min = 56.dp).clip(RoundedCornerShape(12.dp))
                             .background(if (sel) C.boton else C.panel).border(2.dp, C.ambar, RoundedCornerShape(12.dp))
-                            .clickable { dia = d },
+                            .clickable { fecha = hoy.plusDays(d) },
                         contentAlignment = Alignment.Center,
                     ) { Texto(nombre, 18, if (sel) C.sobreBoton else C.ambar, FontWeight.Bold) }
                 }
             }
+            Spacer(Modifier.height(8.dp))
+            // Otra fecha: hasta un año vista (límite de AeroDataBox), para guardar el vuelo de un viaje.
+            val otra = fecha < hoy.minusDays(1) || fecha > hoy.plusDays(1)
+            if (otra) Boton(fecha.format(FECHA_LARGA).uppercase(), icono = Icons.Default.DateRange) { calendario = true }
+            else BotonSecundario("OTRA FECHA", icono = Icons.Default.DateRange) { calendario = true }
+            if (calendario) ElegirFecha(fecha, { fecha = it; resultados = null; error = null }) { calendario = false }
         }
         Spacer(Modifier.height(12.dp))
         Boton("BUSCAR", icono = Icons.Default.Search, onClick = ::buscar)
@@ -195,5 +215,49 @@ fun BuscarAeropuerto(origen: String?, atras: () -> Unit, elegido: (Aeropuerto) -
                 }
             }
         }
+    }
+}
+
+private val FECHA_LARGA = DateTimeFormatter.ofPattern("EEEE d 'de' MMMM yyyy", Locale.forLanguageTag("es-ES"))
+
+private fun aMillis(d: LocalDate) = d.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
+private fun deMillis(ms: Long): LocalDate = Instant.ofEpochMilli(ms).atZone(ZoneOffset.UTC).toLocalDate()
+
+/** Calendario para elegir el día del vuelo: de ayer a un año vista. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ElegirFecha(inicial: LocalDate, elegir: (LocalDate) -> Unit, cerrar: () -> Unit) {
+    val desde = LocalDate.now().minusDays(1)
+    val hasta = LocalDate.now().plusDays(365)
+    val estado = rememberDatePickerState(
+        initialSelectedDateMillis = aMillis(inicial),
+        yearRange = desde.year..hasta.year,
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long) = deMillis(utcTimeMillis).let { it >= desde && it <= hasta }
+            override fun isSelectableYear(year: Int) = year in desde.year..hasta.year
+        },
+    )
+    val colores = DatePickerDefaults.colors(
+        containerColor = C.panel,
+        titleContentColor = C.texto, headlineContentColor = C.texto, weekdayContentColor = C.gris,
+        subheadContentColor = C.texto, navigationContentColor = C.texto,
+        yearContentColor = C.texto, currentYearContentColor = C.ambar,
+        selectedYearContainerColor = C.boton, selectedYearContentColor = C.sobreBoton,
+        dayContentColor = C.texto, disabledDayContentColor = C.gris.copy(alpha = .4f),
+        selectedDayContainerColor = C.boton, selectedDayContentColor = C.sobreBoton,
+        todayContentColor = C.ambar, todayDateBorderColor = C.ambar,
+    )
+    DatePickerDialog(
+        onDismissRequest = cerrar,
+        colors = colores,
+        confirmButton = {
+            TextButton(onClick = { estado.selectedDateMillis?.let { elegir(deMillis(it)) }; cerrar() }) {
+                Texto("ACEPTAR", 18, C.ambar, FontWeight.Bold)
+            }
+        },
+        dismissButton = { TextButton(onClick = cerrar) { Texto("CANCELAR", 18, C.gris, FontWeight.Bold) } },
+    ) {
+        DatePicker(estado, colors = colores, showModeToggle = false,
+            title = { Texto("¿Qué día sale el vuelo?", 20, C.texto, FontWeight.Bold, modifier = Modifier.padding(start = 24.dp, top = 16.dp)) })
     }
 }

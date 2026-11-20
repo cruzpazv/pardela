@@ -155,10 +155,11 @@ fun Detalle(inicial: Vuelo, atras: () -> Unit) {
 
         Spacer(Modifier.height(12.dp))
         if (esteVigilado) BotonSecundario("DEJAR DE VIGILAR", icono = Icons.Default.Close) { VigilanciaService.parar(ctx) }
+        else if (!Repositorio.radarUtil(v) && !v.estado.terminado) Texto("Podrá vigilarlo en directo el día del vuelo, unas horas antes de salir.", 16, C.gris, modifier = Modifier.padding(4.dp))
         else Boton("VIGILAR AHORA", icono = Icons.Default.Notifications, fondo = C.azul, letra = C.sobreAzul) {
             if (Build.VERSION.SDK_INT >= 33) permiso.launch(Manifest.permission.POST_NOTIFICATIONS) else VigilanciaService.empezar(ctx, v)
         }
-        Texto("Aviso fijo en la pantalla del móvil que se actualiza cada minuto.", 15, C.gris, modifier = Modifier.padding(4.dp))
+        if (esteVigilado || Repositorio.radarUtil(v) || v.estado.terminado) Texto("Aviso fijo en la pantalla del móvil que se actualiza cada minuto.", 15, C.gris, modifier = Modifier.padding(4.dp))
 
         Spacer(Modifier.height(12.dp))
         BotonSecundario(if (verAvion) "OCULTAR EL AVIÓN" else "VER EL AVIÓN", icono = Icons.Default.Info) { verAvion = !verAvion }

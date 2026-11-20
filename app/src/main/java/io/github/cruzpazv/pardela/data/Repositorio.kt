@@ -21,6 +21,12 @@ object Repositorio {
             val r = intentar { AeroDataBox.porNumero(numero, fecha.toString()) }.onFailure { fallo = it }.getOrNull()
             if (!r.isNullOrEmpty()) return r.map { conAerolinea(it) }
         }
+        // El radar solo ve los vuelos de hoy: para otra fecha daría el vuelo de hoy con ese número.
+        val hoy = LocalDate.now()
+        if (fecha < hoy.minusDays(1) || fecha > hoy.plusDays(1)) {
+            fallo?.let { throw it }
+            return emptyList()
+        }
         // Sin clave, o la clave ha fallado (agotada, no válida…): radar gratuito.
         val radar = listOfNotNull(porRadar(texto, fecha.toString())?.let { conAerolinea(it) })
         if (radar.isEmpty()) fallo?.let { throw it }
@@ -61,7 +67,10 @@ object Repositorio {
                 ?.let { l -> l.firstOrNull { it.salida.lugar.iata == v.salida.lugar.iata } ?: l.firstOrNull() }
                 ?.let { nuevo -> n = nuevo.copy(avion = fusion(nuevo.avion, v.avion), directo = v.directo) }
         }
-        val c = n.avion.hex?.let { Radar.porHex(it) }
+        val c = if (!radarUtil(n)) null
+        else n.avion.hex?.let { Radar.porHex(it) }
+            // El mismo avión puede estar haciendo antes otro vuelo: solo vale si el indicativo coincide.
+            ?.takeIf { n.indicativo == null || it.indicativo.isNullOrBlank() || it.indicativo.equals(n.indicativo, ignoreCase = true) }
             ?: (n.indicativo ?: Aerolineas.indicativo(n.numero))?.let { Radar.porIndicativo(it) }
         n = n.copy(
             // Se guarda la última posición conocida aunque el avión salga de cobertura (la UI indica si es antigua).
@@ -74,6 +83,22 @@ object Repositorio {
         // Un vuelo no "desdespega": evita avisos repetidos si una fuente va con retraso o el radar pierde la señal.
         if (rango(n.estado) < rango(v.estado) && rango(v.estado) > 0) n = n.copy(estado = v.estado)
         return conAerolinea(n)
+    }
+
+    /**
+     * ¿Tiene sentido buscar este vuelo en el radar? Solo cerca de su hora (3 h antes de salir a 6 h después de llegar).
+     * Así un vuelo guardado para dentro de un mes no se confunde con el de hoy que lleva el mismo número.
+     */
+    fun radarUtil(v: Vuelo, ahora: Long = System.currentTimeMillis()): Boolean {
+        val hora = 3_600_000L
+        val sale = v.salida.utcPrevista ?: v.salida.utc
+        if (sale != null) {
+            val llega = v.llegada.utcPrevista ?: v.llegada.utc ?: (sale + 6 * hora)
+            return ahora > sale - 3 * hora && ahora < llega + 6 * hora
+        }
+        val dia = v.fecha?.let { intentar { LocalDate.parse(it) }.getOrNull() } ?: return true
+        val hoy = LocalDate.now()
+        return dia >= hoy.minusDays(1) && dia <= hoy
     }
 
     /** Orden del viaje: antes de salir (0) < en vuelo (1) < llegando (2) < aterrizado (3). Cancelado/desviado = -1 (se aceptan siempre). */

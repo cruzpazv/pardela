@@ -36,6 +36,8 @@ class Comprobador(ctx: Context, p: WorkerParameters) : CoroutineWorker(ctx, p) {
             val dia = v.fecha?.let { intentar { LocalDate.parse(it) }.getOrNull() }
             if (dia != null && dia.isBefore(LocalDate.now().minusDays(1))) continue
             val usarClave = Almacen.tieneClave && v.conHorarios && ahora - s.ultimaConsultaClave > intervaloClave(v, ahora)
+            // Vuelo de otro día y sin tocar consulta con clave: no hay nada que mirar.
+            if (!usarClave && !Repositorio.radarUtil(v, ahora)) continue
             val nuevo = intentar { Repositorio.refrescar(v, usarClave) }.getOrNull() ?: continue
             Avisos.avisar(applicationContext, nuevo, Avisos.cambios(v, nuevo))
             Almacen.cambiar { d ->
@@ -83,7 +85,12 @@ class Comprobador(ctx: Context, p: WorkerParameters) : CoroutineWorker(ctx, p) {
         val sale = v.salida.utcPrevista ?: v.salida.utc ?: return TimeUnit.HOURS.toMillis(3)
         val llega = v.llegada.utcPrevista ?: v.llegada.utc ?: (sale + TimeUnit.HOURS.toMillis(3))
         val activo = ahora > sale - TimeUnit.HOURS.toMillis(4) && ahora < llega + TimeUnit.HOURS.toMillis(1)
-        return if (activo) TimeUnit.MINUTES.toMillis(30) else TimeUnit.HOURS.toMillis(3)
+        return when {
+            activo -> TimeUnit.MINUTES.toMillis(30)
+            // Vuelos lejanos (p. ej. dentro de un mes): una consulta al día basta para ver cambios de horario.
+            sale - ahora > TimeUnit.DAYS.toMillis(2) -> TimeUnit.HOURS.toMillis(24)
+            else -> TimeUnit.HOURS.toMillis(3)
+        }
     }
 
     companion object {
