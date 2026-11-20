@@ -13,7 +13,7 @@ Letra grande, botones grandes y avisos claros. Sin cuentas: todo se queda en su 
   <img src="https://img.shields.io/badge/idioma-español-orange" alt="En español">
 </p>
 
-> **Estado:** en desarrollo, todavía sin primera versión publicada.
+> **Estado:** primera versión (1.0.0). Si encuentra un fallo, abra un [issue](https://github.com/cruzpazv/pardela/issues).
 
 La pardela es un ave marina de Canarias que cruza el océano y siempre vuelve a casa.
 
