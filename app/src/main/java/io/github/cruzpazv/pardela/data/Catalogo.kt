@@ -56,7 +56,7 @@ object Aerolineas {
     private val lista = listOf(
         Aerolinea("IB", "IBE", "Iberia"), Aerolinea("I2", "IBS", "Iberia Express"),
         Aerolinea("YW", "ANE", "Air Nostrum"), Aerolinea("VY", "VLG", "Vueling"),
-        Aerolinea("UX", "AEA", "Air Europa"), Aerolinea("NT", "IBB", "Binter"),
+        Aerolinea("UX", "AEA", "Air Europa"), Aerolinea("NT", "IBB", "Binter"), Aerolinea("ZN", "NAY", "Naysa"),
         Aerolinea("V7", "VOE", "Volotea"), Aerolinea("FR", "RYR", "Ryanair"),
         Aerolinea("U2", "EZY", "easyJet"), Aerolinea("EC", "EJU", "easyJet Europe"),
         Aerolinea("DS", "EZS", "easyJet Suiza"), Aerolinea("W6", "WZZ", "Wizz Air"),
@@ -98,6 +98,20 @@ object Aerolineas {
 
     fun iata(c: String?) = c?.let { porIata[it.uppercase()] }
     fun icao(c: String?) = c?.let { porIcao[it.uppercase()] }
+
+    /**
+     * Operadoras sin código IATA propio que vuelan para otra aerolínea: (nombre, IATA de la marca para el logo).
+     * RSC = Canarias Airlines (Canair), filial de Binter; adsbdb aún la da como una aerolínea mexicana antigua.
+     */
+    private val filiales = mapOf("RSC" to ("Canarias Airlines (Binter)" to "NT"))
+    fun filial(icao: String?) = icao?.let { filiales[it.uppercase()] }
+
+    /**
+     * Las operadoras de Binter (Canair = RSC, Naysa = ZN) venden sus vuelos como NT. Un número con su
+     * propio código no se vende al público: casi siempre es un posicionamiento (el avión vuela vacío).
+     */
+    private val sinVenta = setOf("RSC", "ZN", "NAY")
+    fun posicionamiento(numero: String) = partir(numero)?.first in sinVenta
 
     /** URL del logo. Sin clave: CDN público de logos por código IATA. */
     fun logo(iata: String?) = iata?.takeIf { it.length == 2 }?.let { "https://pics.avs.io/200/80/${it.uppercase()}.png" }

@@ -1,5 +1,6 @@
 package io.github.cruzpazv.pardela.ui
 
+import io.github.cruzpazv.pardela.data.Aerolineas
 import io.github.cruzpazv.pardela.data.intentar
 
 import android.Manifest
@@ -109,9 +110,15 @@ fun Detalle(inicial: Vuelo, atras: () -> Unit) {
             }
         }
 
+        if (Aerolineas.posicionamiento(v.numero)) {
+            Box(Modifier.fillMaxWidth().padding(bottom = 10.dp).clip(RoundedCornerShape(12.dp)).background(C.ambar.copy(alpha = .15f)).padding(14.dp)) {
+                Texto("ⓘ Seguramente es un vuelo de posicionamiento: el avión vuela vacío para empezar el día en otra isla. " +
+                    "No se vende al público, por eso puede faltar información.", 17, C.texto)
+            }
+        }
         Tarjeta {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                LogoAerolinea(v.aerolineaIata, 44)
+                LogoAerolinea(v.aerolineaIata, 44, nombre = v.aerolineaNombre)
                 Spacer(Modifier.width(14.dp))
                 Column(Modifier.weight(1f)) {
                     Paletas(v.numero, 24)

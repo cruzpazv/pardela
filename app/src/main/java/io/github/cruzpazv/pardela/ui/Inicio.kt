@@ -1,5 +1,6 @@
 package io.github.cruzpazv.pardela.ui
 
+import io.github.cruzpazv.pardela.data.Aerolineas
 import io.github.cruzpazv.pardela.data.intentar
 
 import androidx.compose.foundation.background
@@ -172,7 +173,7 @@ fun FilaVuelo(v: Vuelo, salidas: Boolean, onClick: () -> Unit) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Paletas(ext.hora ?: "--:--", 20)
             Spacer(Modifier.width(10.dp))
-            LogoAerolinea(v.aerolineaIata, 30)
+            LogoAerolinea(v.aerolineaIata, 30, nombre = v.aerolineaNombre)
             Spacer(Modifier.width(10.dp))
             Texto(v.numero, 20, C.texto, FontWeight.Bold, mono = true, lineas = 1)
         }
@@ -186,6 +187,7 @@ fun FilaVuelo(v: Vuelo, salidas: Boolean, onClick: () -> Unit) {
                     ext.puerta?.let { add("PUERTA $it") }
                 }
                 if (extra.isNotEmpty()) Texto(extra.joinToString("  ·  "), 15, C.gris, lineas = 1)
+                if (Aerolineas.posicionamiento(v.numero)) Texto("ⓘ Probable posicionamiento, sin pasajeros", 15, C.gris, lineas = 1)
             }
             EtiquetaEstado(v.estado)
         }

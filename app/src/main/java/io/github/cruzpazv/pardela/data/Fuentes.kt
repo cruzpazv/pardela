@@ -69,15 +69,20 @@ object Adsbdb {
         return r
     }
 
-    private val aerolineas = HashMap<String, Pair<String?, String?>?>()
+    data class InfoAerolinea(val iata: String?, val icao: String?, val nombre: String?, val pais: String?)
 
-    /** IATA y nombre de una aerolínea por su código ICAO (RYR → FR, Ryanair). */
-    suspend fun aerolinea(icao: String): Pair<String?, String?>? {
-        synchronized(aerolineas) { if (aerolineas.containsKey(icao)) return aerolineas[icao] }
-        val j = intentar { Red.get("https://api.adsbdb.com/v0/airline/$icao") }.getOrElse { return null }
-        val a = j.lista("response").firstOrNull()?.let { it.s("iata") to it.s("name") }
-        synchronized(aerolineas) { aerolineas[icao] = a }
-        return a
+    private val aerolineas = HashMap<String, List<InfoAerolinea>>()
+
+    /**
+     * Aerolíneas con ese código ICAO (RYR) o IATA (FR). Un código IATA puede estar repetido
+     * en varios países (ZN = Naysa en España y Zenith en Tailandia): se devuelven todas.
+     */
+    suspend fun aerolineas(codigo: String): List<InfoAerolinea> {
+        synchronized(aerolineas) { aerolineas[codigo]?.let { return it } }
+        val j = intentar { Red.get("https://api.adsbdb.com/v0/airline/$codigo") }.getOrElse { return emptyList() }
+        val l = j.lista("response").map { InfoAerolinea(it.s("iata"), it.s("icao"), it.s("name"), it.s("country_iso")) }
+        synchronized(aerolineas) { aerolineas[codigo] = l }
+        return l
     }
 
     suspend fun avion(hexOMatricula: String): Avion? {

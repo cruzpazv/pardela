@@ -257,12 +257,13 @@ fun EtiquetaEstado(e: Estado) {
 
 /** Logo de la aerolínea sobre fondo blanco; si no hay, sus siglas. */
 @Composable
-fun LogoAerolinea(iata: String?, alto: Int = 40, modifier: Modifier = Modifier) {
+fun LogoAerolinea(iata: String?, alto: Int = 40, modifier: Modifier = Modifier, nombre: String? = null) {
     val caja = modifier.clip(RoundedCornerShape(8.dp)).background(Color.White).border(1.dp, C.gris.copy(alpha = .35f), RoundedCornerShape(8.dp)).padding(4.dp)
         .width((alto * 2.3f * Escala.current).dp).height((alto * Escala.current).dp)
     val siglas = @Composable {
         Box(Modifier.width((alto * 2.3f * Escala.current).dp).height((alto * Escala.current).dp), contentAlignment = Alignment.Center) {
-            Texto(iata ?: "✈", 18, Color.Black, FontWeight.Bold, mono = true)
+            val corto = nombre?.substringBefore(" ")?.uppercase()?.takeIf { it.length in 3..10 }
+            Texto(corto ?: iata ?: "✈", if (corto != null) 14 else 18, Color.Black, FontWeight.Bold, mono = true, lineas = 1)
         }
     }
     val url = Aerolineas.logo(iata)

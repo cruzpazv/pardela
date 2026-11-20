@@ -176,12 +176,20 @@ object Repositorio {
         val pre = Aerolineas.partir(v.indicativo ?: "")?.first?.takeIf { it.length == 3 }
             ?: Aerolineas.partir(v.numero)?.first
         val cat = pre?.let { if (it.length == 3) Aerolineas.icao(it) else Aerolineas.iata(it) }
-        var iata = v.aerolineaIata ?: cat?.iata ?: pre?.takeIf { it.length == 2 }
-        var nombre = v.aerolineaNombre ?: cat?.nombre
+        val filial = if (cat == null) Aerolineas.filial(pre) else null
+        var iata = v.aerolineaIata ?: cat?.iata ?: filial?.second ?: pre?.takeIf { it.length == 2 }
+        var nombre = v.aerolineaNombre ?: cat?.nombre ?: filial?.first
         if (iata == null || nombre == null) {
-            (cat?.icao ?: pre?.takeIf { it.length == 3 })?.let { Adsbdb.aerolinea(it) }?.let { (i, n) ->
-                iata = iata ?: i
-                nombre = nombre ?: n
+            val icao = cat?.icao ?: pre?.takeIf { it.length == 3 }
+            val opciones = (icao ?: iata)?.let { Adsbdb.aerolineas(it) }.orEmpty()
+            // Si el código está repetido, vale la del indicativo o la de un país de la ruta; si no, mejor nada que una equivocada.
+            val paises = listOf(v.salida, v.llegada).mapNotNull { Aeropuertos.iata(it.lugar.iata)?.pais }
+            val elegida = opciones.singleOrNull()
+                ?: opciones.firstOrNull { icao != null && it.icao == icao }
+                ?: opciones.filter { it.pais in paises }.singleOrNull()
+            elegida?.let {
+                iata = iata ?: it.iata
+                nombre = nombre ?: it.nombre
             }
         }
         return v.copy(aerolineaIata = iata, aerolineaNombre = nombre)
