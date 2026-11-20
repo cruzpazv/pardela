@@ -69,6 +69,17 @@ object Adsbdb {
         return r
     }
 
+    private val aerolineas = HashMap<String, Pair<String?, String?>?>()
+
+    /** IATA y nombre de una aerolínea por su código ICAO (RYR → FR, Ryanair). */
+    suspend fun aerolinea(icao: String): Pair<String?, String?>? {
+        synchronized(aerolineas) { if (aerolineas.containsKey(icao)) return aerolineas[icao] }
+        val j = intentar { Red.get("https://api.adsbdb.com/v0/airline/$icao") }.getOrElse { return null }
+        val a = j.lista("response").firstOrNull()?.let { it.s("iata") to it.s("name") }
+        synchronized(aerolineas) { aerolineas[icao] = a }
+        return a
+    }
+
     suspend fun avion(hexOMatricula: String): Avion? {
         synchronized(aviones) { if (aviones.containsKey(hexOMatricula)) return aviones[hexOMatricula] }
         val resp = intentar { Red.get("https://api.adsbdb.com/v0/aircraft/$hexOMatricula") }.getOrElse { return null }

@@ -19,10 +19,10 @@ object Repositorio {
         var fallo: Throwable? = null
         if (Almacen.tieneClave) {
             val r = intentar { AeroDataBox.porNumero(numero, fecha.toString()) }.onFailure { fallo = it }.getOrNull()
-            if (!r.isNullOrEmpty()) return r
+            if (!r.isNullOrEmpty()) return r.map { conAerolinea(it) }
         }
         // Sin clave, o la clave ha fallado (agotada, no válida…): radar gratuito.
-        val radar = listOfNotNull(porRadar(texto, fecha.toString()))
+        val radar = listOfNotNull(porRadar(texto, fecha.toString())?.let { conAerolinea(it) })
         if (radar.isEmpty()) fallo?.let { throw it }
         return radar
     }
@@ -73,7 +73,7 @@ object Repositorio {
             n = n.copy(estado = Estado.EN_VUELO)
         // Un vuelo no "desdespega": evita avisos repetidos si una fuente va con retraso o el radar pierde la señal.
         if (rango(n.estado) < rango(v.estado) && rango(v.estado) > 0) n = n.copy(estado = v.estado)
-        return n
+        return conAerolinea(n)
     }
 
     /** Orden del viaje: antes de salir (0) < en vuelo (1) < llegando (2) < aterrizado (3). Cancelado/desviado = -1 (se aceptan siempre). */
@@ -137,10 +137,29 @@ object Repositorio {
     }
 
     suspend fun tablon(iata: String, salidas: Boolean): List<Vuelo> {
-        if (Almacen.tieneClave) {
-            return AeroDataBox.tablon(iata, salidas).sortedBy { (if (salidas) it.salida else it.llegada).utc ?: Long.MAX_VALUE }
+        val l = if (Almacen.tieneClave) AeroDataBox.tablon(iata, salidas).sortedBy { (if (salidas) it.salida else it.llegada).utc ?: Long.MAX_VALUE }
+        else tablonRadar(iata, salidas)
+        return l.map { conAerolinea(it) }
+    }
+
+    /**
+     * Rellena el código IATA (para el logo) y el nombre de la aerolínea si la fuente no los trae.
+     * Orden: datos del vuelo → prefijo del número o del indicativo → catálogo interno → adsbdb.
+     */
+    private suspend fun conAerolinea(v: Vuelo): Vuelo {
+        if (v.aerolineaIata != null && v.aerolineaNombre != null) return v
+        val pre = Aerolineas.partir(v.indicativo ?: "")?.first?.takeIf { it.length == 3 }
+            ?: Aerolineas.partir(v.numero)?.first
+        val cat = pre?.let { if (it.length == 3) Aerolineas.icao(it) else Aerolineas.iata(it) }
+        var iata = v.aerolineaIata ?: cat?.iata ?: pre?.takeIf { it.length == 2 }
+        var nombre = v.aerolineaNombre ?: cat?.nombre
+        if (iata == null || nombre == null) {
+            (cat?.icao ?: pre?.takeIf { it.length == 3 })?.let { Adsbdb.aerolinea(it) }?.let { (i, n) ->
+                iata = iata ?: i
+                nombre = nombre ?: n
+            }
         }
-        return tablonRadar(iata, salidas)
+        return v.copy(aerolineaIata = iata, aerolineaNombre = nombre)
     }
 
     /** Sin clave: aviones a ~50 millas, se queda con los que salen/llegan aquí. */
