@@ -183,6 +183,18 @@ object Repositorio {
         }
     }
 
+    /**
+     * Recorrido para el mapa: el real (adsb.lol, últimas 24 h) si se conoce el avión y el vuelo es de hoy;
+     * si no, las posiciones vistas mientras la app estaba abierta.
+     */
+    suspend fun recorrido(v: Vuelo): List<EnDirecto> {
+        val hex = v.avion.hex
+        if (hex == null || !radarUtil(v)) return rastro(v)
+        val desde = v.salida.utcPrevista ?: v.salida.utc
+        val hasta = if (v.estado.terminado) (v.llegada.utcPrevista ?: v.llegada.utc)?.plus(30 * 60_000L) else null
+        return Radar.recorrido(hex, desde, hasta).ifEmpty { rastro(v) }
+    }
+
     /** Todos los vuelos directos de un día entre dos aeropuertos. Necesita clave. */
     suspend fun buscarTrayecto(origen: String, destino: String, fecha: LocalDate): List<Vuelo> {
         if (!Almacen.tieneClave) error("Para buscar por trayecto hace falta la clave API. Ver AJUSTES.")

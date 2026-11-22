@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -57,7 +58,8 @@ fun hayMapa(v: Vuelo) = v.directo != null ||
 fun MapaPequeno(v: Vuelo, abrir: () -> Unit) {
     Seccion("EN EL MAPA")
     Box(Modifier.fillMaxWidth().height(230.dp).clip(RoundedCornerShape(12.dp))) {
-        MapaVuelo(v, interactivo = false, modifier = Modifier.matchParentSize())
+        val recorrido by produceState(Repositorio.rastro(v), v.avion.hex, v.directo?.momento) { value = Repositorio.recorrido(v) }
+        MapaVuelo(v, recorrido, interactivo = false, modifier = Modifier.matchParentSize())
         // Capa encima: el mapa pequeño no se mueve, solo se abre (así no estorba al deslizar la ficha).
         Box(Modifier.matchParentSize().clickable(onClickLabel = "Ver mapa grande", onClick = abrir))
         Box(
@@ -90,7 +92,8 @@ fun MapaPantalla(inicial: Vuelo, atras: () -> Unit) {
             16, C.gris,
         )
         Box(Modifier.fillMaxWidth().weight(1f).padding(top = 8.dp).clip(RoundedCornerShape(12.dp))) {
-            MapaVuelo(v, interactivo = true, modifier = Modifier.matchParentSize())
+            val recorrido by produceState(Repositorio.rastro(v), v.avion.hex, v.directo?.momento) { value = Repositorio.recorrido(v) }
+            MapaVuelo(v, recorrido, interactivo = true, modifier = Modifier.matchParentSize())
         }
     }
 }
@@ -100,7 +103,7 @@ fun MapaPantalla(inicial: Vuelo, atras: () -> Unit) {
  * y el avión orientado según su rumbo.
  */
 @Composable
-private fun MapaVuelo(v: Vuelo, interactivo: Boolean, modifier: Modifier) {
+private fun MapaVuelo(v: Vuelo, recorrido: List<EnDirecto>, interactivo: Boolean, modifier: Modifier) {
     val oscuro = C.fondo.luminance() < 0.5f
     val colores = Colores(C.ambar.toArgb(), C.gris.toArgb(), C.azul.toArgb())
     AndroidView(
@@ -117,7 +120,7 @@ private fun MapaVuelo(v: Vuelo, interactivo: Boolean, modifier: Modifier) {
                 isVerticalMapRepetitionEnabled = false
             }
         },
-        update = { m -> dibujar(m, v, Repositorio.rastro(v), oscuro, colores) },
+        update = { m -> dibujar(m, v, recorrido, oscuro, colores) },
         onRelease = { it.onDetach() },
     )
 }

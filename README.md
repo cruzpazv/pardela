@@ -31,7 +31,7 @@ Todas las versiones van firmadas con la misma clave, así que cada una se instal
 - **Aeropuertos:** tablón de salidas y llegadas. Guarde los que mira a menudo.
 - **Trayectos:** un aviso de cada vuelo entre dos ciudades (por ejemplo, Gran Canaria → Madrid).
 - **El avión:** foto, fabricante, modelo, matrícula y logotipo de la aerolínea.
-- **Mapa:** por dónde va el avión, la ruta prevista y el recorrido que ha hecho mientras lo mira.
+- **Mapa:** por dónde va el avión, la ruta prevista y el recorrido real que ha hecho.
 
 ## Pensada para que la use cualquiera
 - Letra grande por defecto y botones de al menos 68 dp.
@@ -50,7 +50,7 @@ Todas las versiones van firmadas con la misma clave, así que cada una se instal
 ## De dónde salen los datos
 | Fuente | ¿Necesita clave? | Para qué |
 |---|---|---|
-| [adsb.fi](https://adsb.fi) / [adsb.lol](https://adsb.lol) | no | posición de los aviones en directo (radar ADS-B abierto) |
+| [adsb.fi](https://adsb.fi) / [adsb.lol](https://adsb.lol) | no | posición de los aviones en directo y recorrido de las últimas 24 h (radar ADS-B abierto; datos de adsb.lol bajo licencia ODbL) |
 | [adsbdb.com](https://www.adsbdb.com) | no | ruta de cada vuelo y ficha del avión |
 | [planespotters.net](https://www.planespotters.net) | no | foto del avión, con su autor |
 | pics.avs.io | no | logotipos de aerolíneas |

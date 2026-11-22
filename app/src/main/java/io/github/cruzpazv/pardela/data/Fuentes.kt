@@ -1,6 +1,10 @@
 package io.github.cruzpazv.pardela.data
 
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.doubleOrNull
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
@@ -44,6 +48,46 @@ object Radar {
 
     suspend fun porIndicativo(cs: String) = pedir("callsign/$cs", "callsign/$cs").firstOrNull()
     suspend fun porHex(hex: String) = pedir("hex/${hex.lowercase()}", "hex/${hex.lowercase()}").firstOrNull()
+    private val recorridos = HashMap<String, Pair<Long, List<EnDirecto>>>()
+
+    /**
+     * Recorrido real del avión en un vuelo. adsb.lol guarda las últimas 24 h de cada avión (datos abiertos, ODbL),
+     * así que sale completo aunque la app haya estado cerrada. [desde]/[hasta] = horas del vuelo (ms), si se saben.
+     */
+    suspend fun recorrido(hex: String, desde: Long?, hasta: Long?): List<EnDirecto> {
+        val h = hex.lowercase()
+        val k = "$h|$desde|$hasta"
+        synchronized(recorridos) { recorridos[k]?.let { (t, l) -> if (System.currentTimeMillis() - t < 60_000L) return l } }
+        val j = intentar { Red.get("https://adsb.lol/data/traces/${h.takeLast(2)}/trace_full_$h.json") }.getOrNull() ?: return emptyList()
+        val base = (j.o("timestamp") as? JsonPrimitive)?.doubleOrNull ?: return emptyList()
+        val puntos = ((j.o("trace") as? JsonArray) ?: emptyList()).mapNotNull { p ->
+            val a = p as? JsonArray ?: return@mapNotNull null
+            fun num(i: Int) = (a.getOrNull(i) as? JsonPrimitive)?.doubleOrNull
+            val t = num(0) ?: return@mapNotNull null
+            val alt = a.getOrNull(3) as? JsonPrimitive
+            EnDirecto(
+                lat = num(1) ?: return@mapNotNull null, lon = num(2) ?: return@mapNotNull null,
+                altitudPies = alt?.doubleOrNull?.toInt(), velocidadNudos = num(4)?.toInt(), rumbo = num(5),
+                enTierra = alt?.contentOrNull == "ground", momento = ((base + t) * 1000).toLong(),
+            )
+        }
+        // Se recorre hacia atrás: se saltan los puntos en tierra del final (rodaje) y se para al tocar tierra antes,
+        // en un hueco largo sin señal o al pasar de la hora de salida.
+        val hueco = if (desde != null) 4 * 3_600_000L else 45 * 60_000L
+        val tramo = ArrayList<EnDirecto>()
+        for (p in puntos.asReversed()) {
+            if (hasta != null && p.momento > hasta) continue
+            if (desde != null && p.momento < desde - 30 * 60_000L) break
+            val siguiente = tramo.lastOrNull()
+            if (siguiente != null && siguiente.momento - p.momento > hueco) break
+            if (p.enTierra) { if (tramo.isNotEmpty()) break else continue }
+            tramo.add(p)
+        }
+        val l = tramo.asReversed()
+        synchronized(recorridos) { recorridos[k] = System.currentTimeMillis() to l }
+        return l
+    }
+
     suspend fun porMatricula(reg: String) = pedir("registration/$reg", "reg/$reg").firstOrNull()
     suspend fun cerca(lat: Double, lon: Double, millas: Int) =
         pedir("lat/$lat/lon/$lon/dist/$millas", "point/$lat/$lon/$millas")
