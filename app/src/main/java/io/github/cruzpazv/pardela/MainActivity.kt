@@ -73,7 +73,7 @@ class MainActivity : ComponentActivity() {
                 Box(Modifier.fillMaxSize().background(C.fondo).safeDrawingPadding()) {
                     if (!datos.ajustes.bienvenidaVista) Bienvenida() else when (actual) {
                         Pantalla.Inicio -> Inicio(ir)
-                        Pantalla.BuscarVuelo -> BuscarVuelo(atras) { v -> pila.add(Pantalla.Detalle(v)) }
+                        is Pantalla.BuscarVuelo -> BuscarVuelo(actual.estado, atras) { v -> pila.add(Pantalla.Detalle(v)) }
                         is Pantalla.BuscarAeropuerto -> BuscarAeropuerto(actual.origen, atras) { a ->
                             when {
                                 actual.origen == null -> { pila.removeAt(pila.lastIndex); pila.add(Pantalla.Tablon(a.iata)) }
@@ -84,7 +84,7 @@ class MainActivity : ComponentActivity() {
                         is Pantalla.Detalle -> key(actual) { Detalle(actual.vuelo, atras, { a -> pila.add(Pantalla.HistorialAvion(a)) }) { v -> pila.add(Pantalla.Mapa(v)) } }
                         is Pantalla.Mapa -> key(actual) { MapaPantalla(actual.vuelo, atras) }
                         is Pantalla.HistorialAvion -> key(actual) { HistorialAvion(actual.avion, atras) { v -> pila.add(Pantalla.Detalle(v)) } }
-                        is Pantalla.Tablon -> Tablon(actual.iata, atras) { v -> pila.add(Pantalla.Detalle(v)) }
+                        is Pantalla.Tablon -> Tablon(actual.iata, actual.estado, atras) { v -> pila.add(Pantalla.Detalle(v)) }
                         Pantalla.Ajustes -> AjustesPantalla(atras)
                     }
                 }

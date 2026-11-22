@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -121,20 +122,31 @@ fun AvisoError(texto: String) = Box(Modifier.fillMaxWidth().padding(vertical = 1
     Texto("⚠ $texto", 18, C.rojo)
 }
 
+/** Estado del buscador: vive mientras la pantalla esté en la pila (al volver de un resultado sigue la lista). */
+class EstadoBusqueda {
+    val porTrayecto = mutableStateOf(false)
+    val texto = mutableStateOf("")
+    val origen = mutableStateOf(Almacen.datos.value.aeropuertos.firstOrNull()?.let { Aeropuertos.iata(it) })
+    val destino = mutableStateOf<Aeropuerto?>(null)
+    val fecha = mutableStateOf(LocalDate.now())
+    val error = mutableStateOf<String?>(null)
+    val resultados = mutableStateOf<List<Vuelo>?>(null)
+    val scroll = LazyListState()
+}
+
 @Composable
-fun BuscarVuelo(atras: () -> Unit, abrir: (Vuelo) -> Unit) {
-    val datos by Almacen.datos.collectAsState()
-    var porTrayecto by remember { mutableStateOf(false) }
-    var texto by remember { mutableStateOf("") }
-    var origen by remember { mutableStateOf(datos.aeropuertos.firstOrNull()?.let { Aeropuertos.iata(it) }) }
-    var destino by remember { mutableStateOf<Aeropuerto?>(null) }
+fun BuscarVuelo(e: EstadoBusqueda, atras: () -> Unit, abrir: (Vuelo) -> Unit) {
+    var porTrayecto by e.porTrayecto
+    var texto by e.texto
+    var origen by e.origen
+    var destino by e.destino
     var eligiendo by remember { mutableStateOf<Boolean?>(null) } // true = origen, false = destino
     val hoy = LocalDate.now()
-    var fecha by remember { mutableStateOf(hoy) }
+    var fecha by e.fecha
     var calendario by remember { mutableStateOf(false) }
     var cargando by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
-    var resultados by remember { mutableStateOf<List<Vuelo>?>(null) }
+    var error by e.error
+    var resultados by e.resultados
     val scope = rememberCoroutineScope()
     val teclado = LocalSoftwareKeyboardController.current
 
@@ -232,7 +244,7 @@ fun BuscarVuelo(atras: () -> Unit, abrir: (Vuelo) -> Unit) {
         }
         if (!lista.isNullOrEmpty()) {
             Seccion(if (porTrayecto) "${lista.size} VUELOS · ELIJA EL SUYO" else "ELIJA SU VUELO")
-            LazyColumn { items(lista) { v -> FilaVuelo(v, salidas = true) { abrir(v) } } }
+            LazyColumn(state = e.scroll) { items(lista) { v -> FilaVuelo(v, salidas = true) { abrir(v) } } }
         }
     }
 

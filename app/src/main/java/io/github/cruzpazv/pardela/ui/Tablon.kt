@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -65,20 +66,34 @@ import io.github.cruzpazv.pardela.data.Vuelo
 import io.github.cruzpazv.pardela.notif.Avisos
 import kotlinx.coroutines.delay
 
+/** Estado del tablón: vive mientras la pantalla esté en la pila (al volver de un vuelo sigue igual). */
+class EstadoTablon {
+    val salidas = mutableStateOf(true)
+    val lista = mutableStateOf<List<Vuelo>?>(null)
+    val error = mutableStateOf<String?>(null)
+    val vuelta = mutableIntStateOf(0)
+    var cargado: Pair<Boolean, Int>? = null
+    val scroll = LazyListState()
+}
+
 @Composable
-fun Tablon(iata: String, atras: () -> Unit, abrir: (Vuelo) -> Unit) {
+fun Tablon(iata: String, e: EstadoTablon, atras: () -> Unit, abrir: (Vuelo) -> Unit) {
     val datos by Almacen.datos.collectAsState()
     val ap = Aeropuertos.iata(iata)
-    var salidas by remember { mutableStateOf(true) }
-    var lista by remember { mutableStateOf<List<Vuelo>?>(null) }
-    var error by remember { mutableStateOf<String?>(null) }
-    var vuelta by remember { mutableIntStateOf(0) }
+    var salidas by e.salidas
+    var lista by e.lista
+    var error by e.error
+    var vuelta by e.vuelta
     val guardado = iata in datos.aeropuertos
 
     LaunchedEffect(salidas, vuelta) {
-        lista = null; error = null
-        intentar { Repositorio.tablon(iata, salidas) }
-            .onSuccess { lista = it }.onFailure { error = it.message ?: "Sin conexión" }
+        val pedido = salidas to vuelta
+        // Al volver de un vuelo no se recarga: se mantiene la lista y su posición.
+        if (e.cargado != pedido) {
+            lista = null; error = null
+            intentar { Repositorio.tablon(iata, salidas) }
+                .onSuccess { lista = it; e.cargado = pedido }.onFailure { error = it.message ?: "Sin conexión" }
+        }
         // Sin clave el radar cambia rápido: se refresca solo cada 2 min.
         if (!Almacen.tieneClave) { delay(120_000); vuelta++ }
     }
@@ -113,7 +128,7 @@ fun Tablon(iata: String, atras: () -> Unit, abrir: (Vuelo) -> Unit) {
             err != null -> AvisoError(err)
             vuelos == null -> Cargando()
             vuelos.isEmpty() -> Texto("No hay vuelos que mostrar ahora.", 18, C.gris, modifier = Modifier.padding(16.dp))
-            else -> LazyColumn { items(vuelos) { v -> FilaVuelo(v, esSalidas) { abrir(v) } } }
+            else -> LazyColumn(state = e.scroll) { items(vuelos) { v -> FilaVuelo(v, esSalidas) { abrir(v) } } }
         }
     }
 }

@@ -100,7 +100,7 @@ fun Inicio(ir: (Pantalla) -> Unit) {
         }
 
         Spacer(Modifier.height(18.dp))
-        Boton("BUSCAR UN VUELO", icono = Icons.Default.Search) { ir(Pantalla.BuscarVuelo) }
+        Boton("BUSCAR UN VUELO", icono = Icons.Default.Search) { ir(Pantalla.BuscarVuelo()) }
         Spacer(Modifier.height(10.dp))
         Boton("VER UN AEROPUERTO", icono = Icons.Default.Place) { ir(Pantalla.BuscarAeropuerto(null)) }
         Spacer(Modifier.height(10.dp))
@@ -179,17 +179,18 @@ fun FilaVuelo(v: Vuelo, salidas: Boolean, conOrigen: Boolean = false, onClick: (
             Texto(v.numero, 20, C.texto, FontWeight.Bold, mono = true, lineas = 1)
         }
         Spacer(Modifier.height(8.dp))
+        fun nombre(l: Extremo) = l.lugar.ciudad.ifBlank { l.lugar.iata.ifBlank { "?" } }.uppercase()
+        // Con origen (historial del avión): la ruta entera ocupa su propia línea, sin cortar.
+        if (conOrigen) Texto("${nombre(v.salida)} → ${nombre(v.llegada)}", 19, C.ambar, FontWeight.Bold, mono = true, modifier = Modifier.padding(bottom = 6.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                fun nombre(l: Extremo) = l.lugar.ciudad.ifBlank { l.lugar.iata.ifBlank { "?" } }.uppercase()
-                val destino = if (conOrigen) "${nombre(v.salida)} → ${nombre(v.llegada)}" else (if (salidas) "A " else "DE ") + nombre(otro)
-                Texto(destino, 19, C.ambar, FontWeight.Bold, mono = true, lineas = 1)
+                if (!conOrigen) Texto((if (salidas) "A " else "DE ") + nombre(otro), 19, C.ambar, FontWeight.Bold, mono = true, lineas = 1)
                 val extra = buildList {
                     v.fecha?.let { add(it.takeLast(5).split("-").reversed().joinToString("/")) }
                     ext.horaPrevista?.takeIf { it != ext.hora }?.let { add("PREVISTO $it") }
                     ext.puerta?.let { add("PUERTA $it") }
                 }
-                if (extra.isNotEmpty()) Texto(extra.joinToString("  ·  "), 15, C.gris, lineas = 1)
+                if (extra.isNotEmpty()) Texto(extra.joinToString("  ·  "), 15, C.gris, lineas = if (conOrigen) 2 else 1)
                 if (Aerolineas.posicionamiento(v.numero)) Texto("ⓘ Probable posicionamiento, sin pasajeros", 15, C.gris, lineas = 1)
             }
             EtiquetaEstado(v.estado)
