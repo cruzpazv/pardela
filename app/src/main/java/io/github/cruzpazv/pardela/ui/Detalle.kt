@@ -4,6 +4,8 @@ import io.github.cruzpazv.pardela.data.Aerolineas
 import io.github.cruzpazv.pardela.data.intentar
 
 import android.Manifest
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -26,6 +28,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
@@ -175,8 +178,32 @@ fun Detalle(inicial: Vuelo, atras: () -> Unit, verHistorial: (Avion) -> Unit, ve
         Spacer(Modifier.height(12.dp))
         BotonSecundario(if (verAvion) "OCULTAR EL AVIÓN" else "VER EL AVIÓN", icono = Icons.Default.Info) { verAvion = !verAvion }
         if (verAvion) FichaAvion(v, conAvion, verHistorial)
+
+        Seccion("VER EN OTRAS WEBS")
+        Texto("Se abre en el navegador del móvil.", 15, C.gris, modifier = Modifier.padding(bottom = 8.dp))
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            enlacesExternos(v).forEach { (nombre, url) ->
+                BotonSecundario(nombre, icono = Icons.AutoMirrored.Filled.ExitToApp) {
+                    runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
+                }
+            }
+        }
         Spacer(Modifier.height(30.dp))
     }
+}
+
+/**
+ * El mismo vuelo en webs conocidas. Flightradar24 y FlightAware buscan por número;
+ * adsb.lol (la fuente de radar de Pardela) por el código del avión, y muestra su recorrido.
+ */
+private fun enlacesExternos(v: Vuelo): List<Pair<String, String>> {
+    val numero = v.numero.lowercase()
+    val indicativo = v.indicativo ?: Aerolineas.indicativo(v.numero) ?: v.numero
+    return listOfNotNull(
+        "FLIGHTRADAR24" to "https://www.flightradar24.com/data/flights/$numero",
+        "FLIGHTAWARE" to "https://www.flightaware.com/live/flight/${indicativo.uppercase()}",
+        v.avion.hex?.let { "ADSB.LOL (MAPA EN DIRECTO)" to "https://adsb.lol/?icao=${it.lowercase()}" },
+    )
 }
 
 @Composable
