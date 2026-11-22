@@ -82,7 +82,7 @@ object Repositorio {
             n = n.copy(estado = Estado.EN_VUELO)
         // Un vuelo no "desdespega": evita avisos repetidos si una fuente va con retraso o el radar pierde la señal.
         if (rango(n.estado) < rango(v.estado) && rango(v.estado) > 0) n = n.copy(estado = v.estado)
-        return conAerolinea(n)
+        return conAerolinea(n).also { apuntar(it) }
     }
 
     /**
@@ -165,6 +165,22 @@ object Repositorio {
         val l = if (Almacen.tieneClave) AeroDataBox.tablon(iata, salidas).sortedBy { (if (salidas) it.salida else it.llegada).utc ?: Long.MAX_VALUE }
         else tablonRadar(iata, salidas)
         return l.map { conAerolinea(it) }
+    }
+
+    private val rastros = HashMap<String, MutableList<EnDirecto>>()
+
+    /** Posiciones vistas de un vuelo mientras la app estaba abierta (para dibujar su recorrido en el mapa). */
+    fun rastro(v: Vuelo): List<EnDirecto> = synchronized(rastros) { rastros[v.clave]?.toList().orEmpty() }
+
+    private fun apuntar(v: Vuelo) {
+        val d = v.directo?.takeIf { it.reciente && !it.enTierra } ?: return
+        synchronized(rastros) {
+            val l = rastros.getOrPut(v.clave) { mutableListOf() }
+            if (l.lastOrNull()?.momento != d.momento) {
+                l.add(d)
+                if (l.size > 600) l.removeAt(0)
+            }
+        }
     }
 
     /** Todos los vuelos directos de un día entre dos aeropuertos. Necesita clave. */

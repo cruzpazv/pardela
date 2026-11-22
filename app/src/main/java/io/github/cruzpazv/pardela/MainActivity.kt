@@ -37,6 +37,7 @@ import io.github.cruzpazv.pardela.ui.BuscarVuelo
 import io.github.cruzpazv.pardela.ui.C
 import io.github.cruzpazv.pardela.ui.Detalle
 import io.github.cruzpazv.pardela.ui.HistorialAvion
+import io.github.cruzpazv.pardela.ui.MapaPantalla
 import io.github.cruzpazv.pardela.ui.Inicio
 import io.github.cruzpazv.pardela.ui.Pantalla
 import io.github.cruzpazv.pardela.ui.TemaTablon
@@ -80,7 +81,8 @@ class MainActivity : ComponentActivity() {
                                 else -> { Almacen.anadirTrayecto(actual.origen, a.iata); pila.removeAt(pila.lastIndex) }
                             }
                         }
-                        is Pantalla.Detalle -> key(actual) { Detalle(actual.vuelo, atras) { a -> pila.add(Pantalla.HistorialAvion(a)) } }
+                        is Pantalla.Detalle -> key(actual) { Detalle(actual.vuelo, atras, { a -> pila.add(Pantalla.HistorialAvion(a)) }) { v -> pila.add(Pantalla.Mapa(v)) } }
+                        is Pantalla.Mapa -> key(actual) { MapaPantalla(actual.vuelo, atras) }
                         is Pantalla.HistorialAvion -> key(actual) { HistorialAvion(actual.avion, atras) { v -> pila.add(Pantalla.Detalle(v)) } }
                         is Pantalla.Tablon -> Tablon(actual.iata, atras) { v -> pila.add(Pantalla.Detalle(v)) }
                         Pantalla.Ajustes -> AjustesPantalla(atras)

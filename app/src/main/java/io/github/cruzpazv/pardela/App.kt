@@ -6,12 +6,14 @@ import io.github.cruzpazv.pardela.data.Aeropuertos
 import io.github.cruzpazv.pardela.data.Almacen
 import io.github.cruzpazv.pardela.notif.Avisos
 import io.github.cruzpazv.pardela.notif.Comprobador
+import io.github.cruzpazv.pardela.ui.prepararMapa
 import java.io.File
 
 class App : Application() {
     override fun onCreate() {
         super.onCreate()
         guardarFallos()
+        prepararMapa(this, "Pardela/${BuildConfig.VERSION_NAME} (Android; +${BuildConfig.CONTACTO})")
         Almacen.iniciar(this)
         Aeropuertos.cargar(this)
         Avisos.crearCanales(this)

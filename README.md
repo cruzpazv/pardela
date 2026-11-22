@@ -31,6 +31,7 @@ Todas las versiones van firmadas con la misma clave, así que cada una se instal
 - **Aeropuertos:** tablón de salidas y llegadas. Guarde los que mira a menudo.
 - **Trayectos:** un aviso de cada vuelo entre dos ciudades (por ejemplo, Gran Canaria → Madrid).
 - **El avión:** foto, fabricante, modelo, matrícula y logotipo de la aerolínea.
+- **Mapa:** por dónde va el avión, la ruta prevista y el recorrido que ha hecho mientras lo mira.
 
 ## Pensada para que la use cualquiera
 - Letra grande por defecto y botones de al menos 68 dp.
@@ -54,6 +55,7 @@ Todas las versiones van firmadas con la misma clave, así que cada una se instal
 | [planespotters.net](https://www.planespotters.net) | no | foto del avión, con su autor |
 | pics.avs.io | no | logotipos de aerolíneas |
 | [OurAirports](https://ourairports.com) | no | lista de 3245 aeropuertos, incluida en la app |
+| [OpenStreetMap](https://www.openstreetmap.org/copyright) | no | mapa del vuelo (© colaboradores de OpenStreetMap) |
 | [AeroDataBox](https://rapidapi.com/aedbx-aedbx/api/aerodatabox) | **opcional** | horarios, retrasos, puertas y tablón completo |
 
 **Sin clave**, Pardela funciona con radar: ve los vuelos que están en el aire, su ruta y su avión.
@@ -69,7 +71,7 @@ La clave se guarda solo en su móvil. El plan gratuito tiene unas 600 consultas 
 
 ## Para desarrolladores
 
-Kotlin + Jetpack Compose, sin librerías privativas. Dependencias: OkHttp, Coil, kotlinx.serialization y WorkManager.
+Kotlin + Jetpack Compose, sin librerías privativas. Dependencias: OkHttp, Coil, kotlinx.serialization, WorkManager y osmdroid.
 
 ```
 app/src/main/java/io/github/cruzpazv/pardela/

@@ -12,4 +12,5 @@ sealed interface Pantalla {
     data class Detalle(val vuelo: Vuelo) : Pantalla
     data class Tablon(val iata: String) : Pantalla
     data class HistorialAvion(val avion: Avion) : Pantalla
+    data class Mapa(val vuelo: Vuelo) : Pantalla
 }

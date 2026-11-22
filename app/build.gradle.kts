@@ -58,4 +58,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("io.coil-kt:coil-compose:2.7.0")
+    // Mapas de OpenStreetMap, sin cuenta ni clave.
+    implementation("org.osmdroid:osmdroid-android:6.1.20")
 }

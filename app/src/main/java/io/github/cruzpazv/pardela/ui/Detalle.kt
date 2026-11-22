@@ -70,7 +70,7 @@ import kotlinx.coroutines.launch
 private val ultimaClave = HashMap<String, Long>()
 
 @Composable
-fun Detalle(inicial: Vuelo, atras: () -> Unit, verHistorial: (Avion) -> Unit) {
+fun Detalle(inicial: Vuelo, atras: () -> Unit, verHistorial: (Avion) -> Unit, verMapa: (Vuelo) -> Unit) {
     val ctx = LocalContext.current
     val datos by Almacen.datos.collectAsState()
     val vigilando by VigilanciaService.vigilando.collectAsState()
@@ -147,6 +147,7 @@ fun Detalle(inicial: Vuelo, atras: () -> Unit, verHistorial: (Avion) -> Unit) {
         }
 
         Progreso(v)
+        if (hayMapa(v)) MapaPequeno(v) { verMapa(v) }
 
         if (v.conHorarios) {
             Seccion("SALIDA")
