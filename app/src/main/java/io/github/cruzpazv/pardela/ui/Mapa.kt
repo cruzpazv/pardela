@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -32,6 +31,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import io.github.cruzpazv.pardela.R
 import io.github.cruzpazv.pardela.data.Aeropuertos
+import io.github.cruzpazv.pardela.data.Almacen
 import io.github.cruzpazv.pardela.data.EnDirecto
 import io.github.cruzpazv.pardela.data.Formato
 import io.github.cruzpazv.pardela.data.Repositorio
@@ -87,7 +87,7 @@ fun MapaPantalla(inicial: Vuelo, atras: () -> Unit) {
                 d == null -> "${v.salida.lugar.iata.ifBlank { "?" }} → ${v.llegada.lugar.iata.ifBlank { "?" }} · sin posición del radar"
                 !d.reciente -> "Última posición conocida (el avión está fuera de la cobertura del radar)"
                 d.enTierra -> "En tierra"
-                else -> listOfNotNull(d.altitudPies?.let { Formato.altura(it) }, d.velocidadNudos?.let { Formato.velocidad(it) }).joinToString("  ·  ")
+                else -> listOfNotNull(d.altitudPies?.let { Formato.altura(it, Almacen.ajustes.unidades) }, d.velocidadNudos?.let { Formato.velocidad(it, Almacen.ajustes.unidades) }).joinToString("  ·  ")
             },
             16, C.gris,
         )
