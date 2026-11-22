@@ -26,7 +26,10 @@ jobs:
             echo "::warning::Sin secreto PARDELA_KEYSTORE_B64: APK firmada con clave temporal (no se podrá actualizar encima)."
           fi
       - name: Compilar
-        env: { PARDELA_KEYSTORE_PASS: "${{ secrets.PARDELA_KEYSTORE_PASS }}" }
+        env:
+          PARDELA_KEYSTORE_PASS: "${{ secrets.PARDELA_KEYSTORE_PASS }}"
+          # Opcional: mensaje personal en la pantalla de bienvenida.
+          PARDELA_DEDICATORIA: "${{ secrets.PARDELA_DEDICATORIA }}"
         run: if [ -x ./gradlew ]; then ./gradlew --no-daemon assembleRelease; else gradle --no-daemon assembleRelease; fi
       - run: cp app/build/outputs/apk/release/app-release.apk pardela.apk
       - uses: actions/upload-artifact@v7

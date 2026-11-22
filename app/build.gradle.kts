@@ -18,6 +18,10 @@ android {
         versionCode = 1
         versionName = "1.0.0"
         buildConfigField("String", "CONTACTO", "\"${project.findProperty("pardela.contacto") ?: ""}\"")
+        // Mensaje opcional en la bienvenida. Viene de un secreto de GitHub, así que no queda en el código.
+        val dedicatoria = (System.getenv("PARDELA_DEDICATORIA") ?: "").trim()
+            .replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")
+        buildConfigField("String", "DEDICATORIA", "\"$dedicatoria\"")
     }
     signingConfigs {
         if (ks != null) create("release") {

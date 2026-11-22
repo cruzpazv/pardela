@@ -1,5 +1,8 @@
 package io.github.cruzpazv.pardela.ui
 
+import io.github.cruzpazv.pardela.BuildConfig
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -110,6 +113,14 @@ fun Bienvenida() {
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { Paletas("PARDELA", 26) }
         Spacer(Modifier.height(10.dp))
         Texto("Sus vuelos, como en el tablón del aeropuerto.", 20, C.texto)
+        BuildConfig.DEDICATORIA.takeIf { it.isNotBlank() }?.let { mensaje ->
+            Spacer(Modifier.height(16.dp))
+            Box(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(C.ambar.copy(alpha = .15f))
+                    .border(2.dp, C.ambar, RoundedCornerShape(14.dp)).padding(18.dp),
+                contentAlignment = Alignment.Center,
+            ) { Texto("♥  $mensaje", 21, C.texto, FontWeight.Bold) }
+        }
         Seccion("CLAVE DE AERODATABOX")
         Texto(
             "Opcional. Con ella verá horarios, retrasos, puertas y el tablón completo de cada aeropuerto. " +
