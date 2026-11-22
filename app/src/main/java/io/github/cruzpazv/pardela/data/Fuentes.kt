@@ -136,11 +136,15 @@ object AeroDataBox {
         return tablonRed(iata, salidas).also { l -> synchronized(cacheTablon) { cacheTablon[k] = System.currentTimeMillis() to l } }
     }
 
-    private suspend fun tablonRed(iata: String, salidas: Boolean): List<Vuelo> {
-        val j = get(
-            "/flights/airports/iata/$iata?offsetMinutes=-120&durationMinutes=720&withLeg=true" +
-                "&direction=${if (salidas) "Departure" else "Arrival"}&withCancelled=true&withCodeshared=false&withCargo=false&withPrivate=false"
-        ) ?: return emptyList()
+    private fun filtros(salidas: Boolean) = "withLeg=true&direction=${if (salidas) "Departure" else "Arrival"}" +
+        "&withCancelled=true&withCodeshared=false&withCargo=false&withPrivate=false"
+
+    private suspend fun tablonRed(iata: String, salidas: Boolean): List<Vuelo> =
+        fids(iata, salidas, "/flights/airports/iata/$iata?offsetMinutes=-120&durationMinutes=720&${filtros(salidas)}")
+
+    /** Lee una respuesta de tablón (FIDS) de [iata]. */
+    private suspend fun fids(iata: String, salidas: Boolean, ruta: String): List<Vuelo> {
+        val j = get(ruta) ?: return emptyList()
         val aqui = Aeropuertos.iata(iata)?.lugar ?: Lugar(iata)
         return j.lista(if (salidas) "departures" else "arrivals").mapNotNull { f ->
             if (f.o("departure") == null && f.o("movement") != null) {
@@ -149,8 +153,51 @@ object AeroDataBox {
                 val otro = m.copy(hora = null, horaPrevista = null, utc = null, utcPrevista = null, terminal = null, puerta = null)
                 val este = m.copy(lugar = aqui)
                 vuelo(f, null)?.copy(salida = if (salidas) este else otro, llegada = if (salidas) otro else este)
-            } else vuelo(f, null)
+            } else vuelo(f, null)?.let { v ->
+                // En el tablón de un aeropuerto, AeroDataBox no repite ese aeropuerto en cada vuelo (salía "???").
+                when {
+                    salidas && v.salida.lugar.iata.isBlank() -> v.copy(salida = v.salida.copy(lugar = aqui))
+                    !salidas && v.llegada.lugar.iata.isBlank() -> v.copy(llegada = v.llegada.copy(lugar = aqui))
+                    else -> v
+                }
+            }
         }
+    }
+
+    private val cacheTrayecto = HashMap<String, Pair<Long, List<Vuelo>>>()
+
+    /**
+     * Vuelos directos de un día entre dos aeropuertos: salidas del origen filtradas por destino.
+     * El tablón admite como mucho 12 h por consulta: un día = 2 consultas. Se guarda 30 min.
+     */
+    suspend fun porTrayecto(origen: String, destino: String, fecha: String): List<Vuelo> {
+        val k = "$origen|$destino|$fecha"
+        synchronized(cacheTrayecto) {
+            cacheTrayecto[k]?.let { (t, l) -> if (System.currentTimeMillis() - t < 30 * 60_000L) return l }
+        }
+        val franjas = listOf("${fecha}T00:00" to "${fecha}T11:59", "${fecha}T12:00" to "${fecha}T23:59")
+        val l = franjas.flatMap { (desde, hasta) -> fids(origen, true, "/flights/airports/iata/$origen/$desde/$hasta?${filtros(true)}") }
+            .filter { it.llegada.lugar.iata.equals(destino, ignoreCase = true) }
+            .distinctBy { it.clave }
+            .sortedBy { it.salida.utc ?: Long.MAX_VALUE }
+        synchronized(cacheTrayecto) { cacheTrayecto[k] = System.currentTimeMillis() to l }
+        return l
+    }
+
+    private val cacheAvion = HashMap<String, Pair<Long, List<Vuelo>>>()
+
+    /** Vuelos de un avión (por matrícula o, si no, por código radar) entre dos fechas. Se guarda 30 min. */
+    suspend fun porAvion(avion: Avion, desde: String, hasta: String): List<Vuelo> {
+        val (tipo, id) = avion.matricula?.let { "reg" to it } ?: avion.hex?.let { "icao24" to it.lowercase() } ?: return emptyList()
+        val k = "$tipo|$id|$desde|$hasta"
+        synchronized(cacheAvion) {
+            cacheAvion[k]?.let { (t, l) -> if (System.currentTimeMillis() - t < 30 * 60_000L) return l }
+        }
+        val j = get("/flights/$tipo/$id/$desde/$hasta?withAircraftImage=false&withLocation=false") ?: return emptyList()
+        val items = (j as? kotlinx.serialization.json.JsonArray)?.toList() ?: listOf(j)
+        val l = items.mapNotNull { vuelo(it, null) }
+        synchronized(cacheAvion) { cacheAvion[k] = System.currentTimeMillis() to l }
+        return l
     }
 
     private fun utc(t: JsonElement?): Long? = t.s("utc")?.let {

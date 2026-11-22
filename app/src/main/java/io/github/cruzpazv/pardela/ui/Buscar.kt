@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -40,6 +41,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,7 +58,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import io.github.cruzpazv.pardela.data.Aeropuerto
 import io.github.cruzpazv.pardela.data.Aeropuertos
 import io.github.cruzpazv.pardela.data.Almacen
@@ -117,7 +123,12 @@ fun AvisoError(texto: String) = Box(Modifier.fillMaxWidth().padding(vertical = 1
 
 @Composable
 fun BuscarVuelo(atras: () -> Unit, abrir: (Vuelo) -> Unit) {
+    val datos by Almacen.datos.collectAsState()
+    var porTrayecto by remember { mutableStateOf(false) }
     var texto by remember { mutableStateOf("") }
+    var origen by remember { mutableStateOf(datos.aeropuertos.firstOrNull()?.let { Aeropuertos.iata(it) }) }
+    var destino by remember { mutableStateOf<Aeropuerto?>(null) }
+    var eligiendo by remember { mutableStateOf<Boolean?>(null) } // true = origen, false = destino
     val hoy = LocalDate.now()
     var fecha by remember { mutableStateOf(hoy) }
     var calendario by remember { mutableStateOf(false) }
@@ -127,12 +138,21 @@ fun BuscarVuelo(atras: () -> Unit, abrir: (Vuelo) -> Unit) {
     val scope = rememberCoroutineScope()
     val teclado = LocalSoftwareKeyboardController.current
 
+    fun limpiar() { resultados = null; error = null }
+
     fun buscar() {
-        if (texto.isBlank() || cargando) return
+        if (cargando) return
+        val o = origen; val d = destino
+        if (porTrayecto) {
+            if (o == null || d == null) { error = "Elija el aeropuerto de salida y el de llegada."; return }
+        } else if (texto.isBlank()) return
         teclado?.hide()
         cargando = true; error = null; resultados = null
         scope.launch {
-            intentar { Repositorio.buscarVuelo(texto, fecha) }
+            if (porTrayecto) intentar { Repositorio.buscarTrayecto(o!!.iata, d!!.iata, fecha) }
+                .onSuccess { resultados = it }
+                .onFailure { error = it.message ?: "Sin conexión" }
+            else intentar { Repositorio.buscarVuelo(texto, fecha) }
                 .onSuccess { r -> if (r.size == 1) abrir(r[0]) else resultados = r }
                 .onFailure { error = it.message ?: "Sin conexión" }
             cargando = false
@@ -141,9 +161,35 @@ fun BuscarVuelo(atras: () -> Unit, abrir: (Vuelo) -> Unit) {
 
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Cabecera("BUSCAR UN VUELO", atras)
-        Texto("Escriba el número que aparece en el billete:", 18)
-        Spacer(Modifier.height(8.dp))
-        Campo(texto, { texto = it.uppercase().take(10) }, "Ej: IB3166", ::buscar)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf(false to "POR NÚMERO", true to "POR TRAYECTO").forEach { (t, nombre) ->
+                val sel = t == porTrayecto
+                Box(
+                    Modifier.weight(1f).heightIn(min = 56.dp).clip(RoundedCornerShape(12.dp))
+                        .background(if (sel) C.boton else C.panel).border(2.dp, C.ambar, RoundedCornerShape(12.dp))
+                        .clickable { porTrayecto = t; limpiar() },
+                    contentAlignment = Alignment.Center,
+                ) { Texto(nombre, 17, if (sel) C.sobreBoton else C.ambar, FontWeight.Bold) }
+            }
+        }
+        Spacer(Modifier.height(12.dp))
+        if (!porTrayecto) {
+            Texto("Escriba el número que aparece en el billete:", 18)
+            Spacer(Modifier.height(8.dp))
+            Campo(texto, { texto = it.uppercase().take(10) }, "Ej: IB3166", ::buscar)
+        } else {
+            Texto("Todos los vuelos directos de un día entre dos aeropuertos:", 18)
+            Spacer(Modifier.height(8.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    CasillaAeropuerto("DESDE", origen) { eligiendo = true }
+                    CasillaAeropuerto("HASTA", destino) { eligiendo = false }
+                }
+                IconButton(onClick = { val o = origen; origen = destino; destino = o; limpiar() }) {
+                    Texto("⇅", 34, C.ambar, FontWeight.Black, modifier = Modifier.semantics { contentDescription = "Intercambiar salida y llegada" })
+                }
+            }
+        }
         if (Almacen.tieneClave) {
             Spacer(Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -152,7 +198,7 @@ fun BuscarVuelo(atras: () -> Unit, abrir: (Vuelo) -> Unit) {
                     Box(
                         Modifier.weight(1f).heightIn(min = 56.dp).clip(RoundedCornerShape(12.dp))
                             .background(if (sel) C.boton else C.panel).border(2.dp, C.ambar, RoundedCornerShape(12.dp))
-                            .clickable { fecha = hoy.plusDays(d) },
+                            .clickable { fecha = hoy.plusDays(d); limpiar() },
                         contentAlignment = Alignment.Center,
                     ) { Texto(nombre, 18, if (sel) C.sobreBoton else C.ambar, FontWeight.Bold) }
                 }
@@ -162,22 +208,58 @@ fun BuscarVuelo(atras: () -> Unit, abrir: (Vuelo) -> Unit) {
             val otra = fecha < hoy.minusDays(1) || fecha > hoy.plusDays(1)
             if (otra) Boton(fecha.format(FECHA_LARGA).uppercase(), icono = Icons.Default.DateRange) { calendario = true }
             else BotonSecundario("OTRA FECHA", icono = Icons.Default.DateRange) { calendario = true }
-            if (calendario) ElegirFecha(fecha, { fecha = it; resultados = null; error = null }) { calendario = false }
+            if (calendario) ElegirFecha(fecha, { fecha = it; limpiar() }) { calendario = false }
         }
         Spacer(Modifier.height(12.dp))
         Boton("BUSCAR", icono = Icons.Default.Search, onClick = ::buscar)
         if (!Almacen.tieneClave) {
             Spacer(Modifier.height(8.dp))
-            Texto("Sin clave API solo se encuentran vuelos que están en el aire ahora o su ruta habitual. Ver AJUSTES.", 15, C.gris)
+            Texto(
+                if (porTrayecto) "Buscar por trayecto necesita la clave API. Ver AJUSTES."
+                else "Sin clave API solo se encuentran vuelos que están en el aire ahora o su ruta habitual. Ver AJUSTES.",
+                15, C.gris,
+            )
         }
+        val err = error
+        val lista = resultados
         when {
             cargando -> Cargando()
-            error != null -> AvisoError(error!!)
-            resultados?.isEmpty() == true -> AvisoError("No se ha encontrado ese vuelo. Compruebe el número.")
+            err != null -> AvisoError(err)
+            lista?.isEmpty() == true -> AvisoError(
+                if (porTrayecto) "No hay vuelos directos de ${origen?.iata} a ${destino?.iata} ese día. Si la fecha es lejana, puede que aún no estén los horarios."
+                else "No se ha encontrado ese vuelo. Compruebe el número."
+            )
         }
-        resultados?.takeIf { it.isNotEmpty() }?.let { lista ->
-            Seccion("ELIJA SU VUELO")
+        if (!lista.isNullOrEmpty()) {
+            Seccion(if (porTrayecto) "${lista.size} VUELOS · ELIJA EL SUYO" else "ELIJA SU VUELO")
             LazyColumn { items(lista) { v -> FilaVuelo(v, salidas = true) { abrir(v) } } }
+        }
+    }
+
+    eligiendo?.let { esOrigen ->
+        Dialog(onDismissRequest = { eligiendo = null }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+            Box(Modifier.fillMaxSize().background(C.fondo).safeDrawingPadding()) {
+                ListaAeropuertos(if (esOrigen) "¿DESDE DÓNDE SALE?" else "¿A DÓNDE VA?", { eligiendo = null }) { a ->
+                    if (esOrigen) origen = a else destino = a
+                    eligiendo = null; limpiar()
+                }
+            }
+        }
+    }
+}
+
+/** Casilla con el aeropuerto elegido; al pulsarla se abre la lista para cambiarlo. */
+@Composable
+private fun CasillaAeropuerto(etiqueta: String, a: Aeropuerto?, onClick: () -> Unit) {
+    Tarjeta(onClick) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Texto(etiqueta, 15, C.gris, FontWeight.Bold, mono = true, modifier = Modifier.width((64 * Escala.current).dp))
+            if (a == null) Texto("ELEGIR AEROPUERTO", 18, C.ambar, FontWeight.Bold)
+            else {
+                Paletas(a.iata, 20)
+                Spacer(Modifier.width(10.dp))
+                Texto(a.ciudad.uppercase(), 17, C.texto, FontWeight.Bold, lineas = 1)
+            }
         }
     }
 }
@@ -188,13 +270,19 @@ fun BuscarVuelo(atras: () -> Unit, abrir: (Vuelo) -> Unit) {
  */
 @Composable
 fun BuscarAeropuerto(origen: String?, atras: () -> Unit, elegido: (Aeropuerto) -> Unit) {
-    var texto by remember { mutableStateOf("") }
-    val lista = remember(texto) { Aeropuertos.buscar(texto) }
     val titulo = when {
         origen == null -> "VER UN AEROPUERTO"
         origen.isEmpty() -> "TRAYECTO: ¿DESDE DÓNDE SALE?"
         else -> "TRAYECTO DESDE $origen: ¿A DÓNDE VA?"
     }
+    ListaAeropuertos(titulo, atras, elegido)
+}
+
+/** Buscador de aeropuertos por ciudad o código. */
+@Composable
+private fun ListaAeropuertos(titulo: String, atras: () -> Unit, elegido: (Aeropuerto) -> Unit) {
+    var texto by remember { mutableStateOf("") }
+    val lista = remember(texto) { Aeropuertos.buscar(texto) }
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Cabecera(titulo, atras)
         Texto("Escriba la ciudad o el código (MAD, BCN…):", 18)

@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import io.github.cruzpazv.pardela.data.Extremo
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Refresh
@@ -166,7 +167,7 @@ fun Confirmar(pregunta: String, si: String, alAceptar: () -> Unit, alCancelar: (
 
 /** Fila de tablón: hora | logo + número | ciudad | estado. */
 @Composable
-fun FilaVuelo(v: Vuelo, salidas: Boolean, onClick: () -> Unit) {
+fun FilaVuelo(v: Vuelo, salidas: Boolean, conOrigen: Boolean = false, onClick: () -> Unit) {
     val ext = if (salidas) v.salida else v.llegada
     val otro = if (salidas) v.llegada else v.salida
     Tarjeta(onClick) {
@@ -180,7 +181,9 @@ fun FilaVuelo(v: Vuelo, salidas: Boolean, onClick: () -> Unit) {
         Spacer(Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Texto((if (salidas) "A " else "DE ") + (otro.lugar.ciudad.ifBlank { otro.lugar.iata.ifBlank { "?" } }).uppercase(), 19, C.ambar, FontWeight.Bold, mono = true, lineas = 1)
+                fun nombre(l: Extremo) = l.lugar.ciudad.ifBlank { l.lugar.iata.ifBlank { "?" } }.uppercase()
+                val destino = if (conOrigen) "${nombre(v.salida)} → ${nombre(v.llegada)}" else (if (salidas) "A " else "DE ") + nombre(otro)
+                Texto(destino, 19, C.ambar, FontWeight.Bold, mono = true, lineas = 1)
                 val extra = buildList {
                     v.fecha?.let { add(it.takeLast(5).split("-").reversed().joinToString("/")) }
                     ext.horaPrevista?.takeIf { it != ext.hora }?.let { add("PREVISTO $it") }

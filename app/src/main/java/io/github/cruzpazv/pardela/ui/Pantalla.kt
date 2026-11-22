@@ -1,5 +1,6 @@
 package io.github.cruzpazv.pardela.ui
 
+import io.github.cruzpazv.pardela.data.Avion
 import io.github.cruzpazv.pardela.data.Vuelo
 
 sealed interface Pantalla {
@@ -10,4 +11,5 @@ sealed interface Pantalla {
     data class BuscarAeropuerto(val origen: String?) : Pantalla
     data class Detalle(val vuelo: Vuelo) : Pantalla
     data class Tablon(val iata: String) : Pantalla
+    data class HistorialAvion(val avion: Avion) : Pantalla
 }

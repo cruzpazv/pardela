@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Refresh
@@ -53,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import io.github.cruzpazv.pardela.R
 import io.github.cruzpazv.pardela.data.Almacen
+import io.github.cruzpazv.pardela.data.Avion
 import io.github.cruzpazv.pardela.data.Estado
 import io.github.cruzpazv.pardela.data.Extremo
 import io.github.cruzpazv.pardela.data.Fabricantes
@@ -68,7 +70,7 @@ import kotlinx.coroutines.launch
 private val ultimaClave = HashMap<String, Long>()
 
 @Composable
-fun Detalle(inicial: Vuelo, atras: () -> Unit) {
+fun Detalle(inicial: Vuelo, atras: () -> Unit, verHistorial: (Avion) -> Unit) {
     val ctx = LocalContext.current
     val datos by Almacen.datos.collectAsState()
     val vigilando by VigilanciaService.vigilando.collectAsState()
@@ -100,7 +102,8 @@ fun Detalle(inicial: Vuelo, atras: () -> Unit) {
 
     LaunchedEffect(Unit) { while (true) { refrescar(); delay(60_000) } }
     LaunchedEffect(verAvion) {
-        if (verAvion && !conAvion) { intentar { Repositorio.completarAvion(v) }.getOrNull()?.let { v = it; conAvion = true } }
+        // Aunque falle, se deja de mostrar "cargando" y se enseña lo que haya.
+        if (verAvion && !conAvion) { intentar { Repositorio.completarAvion(v) }.getOrNull()?.let { v = it }; conAvion = true }
     }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
@@ -170,7 +173,7 @@ fun Detalle(inicial: Vuelo, atras: () -> Unit) {
 
         Spacer(Modifier.height(12.dp))
         BotonSecundario(if (verAvion) "OCULTAR EL AVIÓN" else "VER EL AVIÓN", icono = Icons.Default.Info) { verAvion = !verAvion }
-        if (verAvion) FichaAvion(v, conAvion)
+        if (verAvion) FichaAvion(v, conAvion, verHistorial)
         Spacer(Modifier.height(30.dp))
     }
 }
@@ -247,7 +250,7 @@ private fun Horario(e: Extremo, salida: Boolean) {
 }
 
 @Composable
-private fun FichaAvion(v: Vuelo, completo: Boolean) {
+private fun FichaAvion(v: Vuelo, completo: Boolean, verHistorial: (Avion) -> Unit) {
     val a = v.avion
     Seccion("EL AVIÓN")
     Tarjeta {
@@ -262,6 +265,16 @@ private fun FichaAvion(v: Vuelo, completo: Boolean) {
                 modifier = Modifier.fillMaxWidth().aspectRatio(1.5f).clip(RoundedCornerShape(10.dp)),
             )
             Texto("Foto: ${a.fotoAutor ?: "—"} · planespotters.net", 13, C.gris, modifier = Modifier.padding(top = 4.dp, bottom = 12.dp))
+        } ?: Box(
+            Modifier.fillMaxWidth().padding(bottom = 12.dp).clip(RoundedCornerShape(10.dp)).background(C.celda).padding(18.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(painterResource(R.drawable.ic_avion), null, tint = C.gris, modifier = Modifier.size(40.dp))
+                Spacer(Modifier.height(6.dp))
+                Texto("No hay foto de este avión", 18, Oscura.texto, FontWeight.Bold)
+                Texto("planespotters.net todavía no tiene ninguna.", 15, Oscura.gris)
+            }
         }
         DistintivoFabricante(a.tipoIcao, a.fabricante)
         Spacer(Modifier.height(10.dp))
@@ -273,5 +286,9 @@ private fun FichaAvion(v: Vuelo, completo: Boolean) {
         Dato("CÓDIGO", a.tipoIcao)
         Dato("PROPIETARIO", a.propietario)
         Dato("CÓDIGO RADAR", a.hex?.uppercase())
+        if (a.matricula != null || a.hex != null) {
+            Spacer(Modifier.height(12.dp))
+            BotonSecundario("VUELOS ANTERIORES DE ESTE AVIÓN", icono = Icons.Default.DateRange) { verHistorial(a) }
+        }
     }
 }
