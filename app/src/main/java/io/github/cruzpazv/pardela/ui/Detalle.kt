@@ -121,6 +121,8 @@ fun Detalle(inicial: Vuelo, atras: () -> Unit, verHistorial: (Avion) -> Unit, ve
                 Icon(Icons.Default.Refresh, tx(R.string.actualizar), tint = if (cargando) C.gris else C.ambar, modifier = Modifier.size(34.dp))
             }
         }
+        if (!rememberConexion()) AvisoSinConexion()
+        Texto(tx(R.string.actualizado_x, haceCuanto(v.actualizado)), 15, C.gris, modifier = Modifier.padding(bottom = 8.dp))
 
         if (Aerolineas.posicionamiento(v.numero)) {
             Box(Modifier.fillMaxWidth().padding(bottom = 10.dp).clip(RoundedCornerShape(12.dp)).background(C.ambar.copy(alpha = .15f)).padding(14.dp)) {

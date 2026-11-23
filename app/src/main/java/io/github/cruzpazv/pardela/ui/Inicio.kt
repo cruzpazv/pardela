@@ -104,6 +104,8 @@ fun Inicio(ir: (Pantalla) -> Unit) {
             }
         }
 
+        if (!rememberConexion()) { Spacer(Modifier.height(10.dp)); AvisoSinConexion() }
+
         vigilando?.let { clave ->
             val v = datos.vuelos.firstOrNull { it.clave == clave }?.ultimo ?: VigilanciaService.ultimo.collectAsState().value
             Spacer(Modifier.height(14.dp))
@@ -120,7 +122,7 @@ fun Inicio(ir: (Pantalla) -> Unit) {
             }
         }
         if (datos.vuelos.isEmpty()) Texto(tx(R.string.aun_no_sigue_ningun_vuelo_pulse_buscar), 17, C.gris)
-        datos.vuelos.forEach { s -> s.ultimo?.let { v -> FilaVuelo(v, salidas = true) { ir(Pantalla.Detalle(v)) } } }
+        datos.vuelos.forEach { s -> s.ultimo?.let { v -> FilaVuelo(v, salidas = true, conActualizado = true) { ir(Pantalla.Detalle(v)) } } }
 
         }
         when {
@@ -226,7 +228,7 @@ fun Confirmar(pregunta: String, si: String, alAceptar: () -> Unit, alCancelar: (
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun FilaVuelo(v: Vuelo, salidas: Boolean, conOrigen: Boolean = false, conFecha: Boolean = true, onClick: () -> Unit) {
+fun FilaVuelo(v: Vuelo, salidas: Boolean, conOrigen: Boolean = false, conFecha: Boolean = true, conActualizado: Boolean = false, onClick: () -> Unit) {
     val ext = if (salidas) v.salida else v.llegada
     val otro = if (salidas) v.llegada else v.salida
     Tarjeta(onClick) {
@@ -253,6 +255,7 @@ fun FilaVuelo(v: Vuelo, salidas: Boolean, conOrigen: Boolean = false, conFecha: 
         }
         if (extra.isNotEmpty()) Texto(extra.joinToString("  ·  "), 15, C.gris, modifier = Modifier.padding(top = 4.dp))
         if (Aerolineas.posicionamiento(v.numero)) Texto(tx(R.string.i_probable_posicionamiento_sin_pasajer), 15, C.gris)
+        if (conActualizado && !v.estado.terminado) Texto(tx(R.string.actualizado_x, haceCuanto(v.actualizado)), 13, C.gris, modifier = Modifier.padding(top = 4.dp))
     }
 }
 

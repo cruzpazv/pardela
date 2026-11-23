@@ -11,6 +11,11 @@ import android.speech.tts.UtteranceProgressListener
 import android.speech.tts.Voice
 import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.background
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,7 +61,7 @@ fun anadirAlCalendario(ctx: Context, v: Vuelo) {
  * Elige expresamente una voz del idioma de la app (español de España / inglés británico si las hay):
  * si el móvil está en otro idioma, Android usaría su voz por defecto y leería con acento extranjero.
  */
-class Voz(ctx: Context) : TextToSpeech.OnInitListener {
+class Voz(ctx: Context, private val alTerminar: ((falta: Locale?) -> Unit)? = null) : TextToSpeech.OnInitListener {
     private val tts = TextToSpeech(ctx.applicationContext, this)
     private var lista = false
     private var pendiente: String? = null
@@ -67,7 +72,7 @@ class Voz(ctx: Context) : TextToSpeech.OnInitListener {
     var falta by mutableStateOf<Locale?>(null); private set
 
     override fun onInit(estado: Int) {
-        if (estado != TextToSpeech.SUCCESS) { falta = Idioma.locale(); return }
+        if (estado != TextToSpeech.SUCCESS) { falta = Idioma.locale(); alTerminar?.invoke(falta); return }
         val base = Idioma.locale()
         val deseado = when (base.language) {
             "es" -> Locale.forLanguageTag("es-ES")
@@ -89,14 +94,15 @@ class Voz(ctx: Context) : TextToSpeech.OnInitListener {
         tts.setSpeechRate(0.9f) // un poco más despacio que lo normal
         tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
             override fun onStart(id: String?) { hablando = true }
-            override fun onDone(id: String?) { hablando = false }
-            @Deprecated("Android < 5") override fun onError(id: String?) { hablando = false }
-            override fun onError(id: String?, codigo: Int) { hablando = false }
+            override fun onDone(id: String?) { hablando = false; alTerminar?.invoke(null) }
+            @Deprecated("Android < 5") override fun onError(id: String?) { hablando = false; alTerminar?.invoke(null) }
+            override fun onError(id: String?, codigo: Int) { hablando = false; alTerminar?.invoke(null) }
             override fun onStop(id: String?, interrumpido: Boolean) { hablando = false }
         })
         lista = true
         pendiente?.let { decir(it) }
         pendiente = null
+        falta?.let { alTerminar?.invoke(it) }
     }
 
     fun decir(texto: String) {
@@ -130,4 +136,31 @@ fun rememberVoz(): Voz {
     val voz = remember { Voz(ctx) }
     DisposableEffect(Unit) { onDispose { voz.cerrar() } }
     return voz
+}
+
+/** true mientras haya conexión a internet (se actualiza sola al perderla o recuperarla). */
+@Composable
+fun rememberConexion(): Boolean {
+    val ctx = LocalContext.current
+    var hay by remember { mutableStateOf(true) }
+    DisposableEffect(Unit) {
+        val cm = ctx.getSystemService(android.net.ConnectivityManager::class.java)
+        val cb = object : android.net.ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(n: android.net.Network) { hay = true }
+            override fun onLost(n: android.net.Network) { hay = cm?.activeNetwork != null && cm.activeNetwork != n }
+        }
+        hay = cm?.activeNetwork != null
+        intentar { cm?.registerDefaultNetworkCallback(cb) }
+        onDispose { intentar { cm?.unregisterNetworkCallback(cb) } }
+    }
+    return hay
+}
+
+/** Aviso de "sin conexión" para la parte de arriba de las pantallas. */
+@Composable
+fun AvisoSinConexion() {
+    androidx.compose.foundation.layout.Box(
+        androidx.compose.ui.Modifier.fillMaxWidth().padding(bottom = 10.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
+            .background(C.rojo.copy(alpha = .15f)).padding(12.dp),
+    ) { Texto(tx(R.string.sin_conexion_ultimos_datos), 16, C.rojo, androidx.compose.ui.text.font.FontWeight.Bold) }
 }

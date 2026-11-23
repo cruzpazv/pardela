@@ -377,4 +377,6 @@
     <string name="instalar_la_voz">"INSTALL THE VOICE"</string>
     <string name="modo_sencillo">"SIMPLE MODE"</string>
     <string name="modo_sencillo_detalle">"Only the essentials: find a flight, follow it and listen to it. Hides maps, airports, routes and aircraft details."</string>
+    <string name="sin_conexion_ultimos_datos">"No connection: showing the last saved data."</string>
+    <string name="actualizado_x">"Updated %1$s"</string>
 </resources>

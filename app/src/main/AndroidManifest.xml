@@ -41,6 +41,11 @@
             android:exported="false"
             android:foregroundServiceType="dataSync" />
 
+        <!-- Botón ESCUCHAR de los avisos. -->
+        <service
+            android:name=".notif.LecturaService"
+            android:exported="false" />
+
         <receiver
             android:name=".notif.WidgetVuelo"
             android:exported="false"

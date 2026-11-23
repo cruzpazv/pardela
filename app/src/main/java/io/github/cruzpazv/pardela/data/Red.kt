@@ -27,6 +27,12 @@ class ErrorRed(msg: String, val codigo: Int = 0) : IOException(msg)
 
 /** Peticiones HTTP y utilidades JSON tolerantes (las APIs cambian campos a menudo). */
 internal object Red {
+    /** ¿Hay alguna red con internet? Si no se puede saber, se supone que sí. */
+    fun hayConexion(): Boolean = intentar {
+        val cm = io.github.cruzpazv.pardela.App.contexto.getSystemService(android.net.ConnectivityManager::class.java)
+        cm.getNetworkCapabilities(cm.activeNetwork)?.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+    }.getOrDefault(true)
+
     /**
      * RapidAPI indica en cada respuesta cuánto queda del plan: x-ratelimit-<nombre>-remaining / -limit.
      * El nombre depende del plan ("requests", "units"…): se usa el que menos margen deja.

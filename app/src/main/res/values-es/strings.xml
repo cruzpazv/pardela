@@ -377,4 +377,6 @@
     <string name="instalar_la_voz">"INSTALAR LA VOZ"</string>
     <string name="modo_sencillo">"MODO SENCILLO"</string>
     <string name="modo_sencillo_detalle">"Solo lo esencial: buscar un vuelo, seguirlo y escucharlo. Oculta mapas, aeropuertos, trayectos y datos del avión."</string>
+    <string name="sin_conexion_ultimos_datos">"Sin conexión: se muestran los últimos datos guardados."</string>
+    <string name="actualizado_x">"Actualizado %1$s"</string>
 </resources>

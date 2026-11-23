@@ -364,7 +364,7 @@ private fun Interruptor(titulo: String, activo: Boolean, detalle: String? = null
 }
 
 /** "hace 5 min", "hace 3 h", "hace 2 días". */
-private fun haceCuanto(momento: Long): String {
+fun haceCuanto(momento: Long): String {
     val min = (System.currentTimeMillis() - momento) / 60_000
     return when {
         min < 1 -> tx(R.string.ahora_mismo)

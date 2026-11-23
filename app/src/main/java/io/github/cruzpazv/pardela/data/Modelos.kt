@@ -90,6 +90,8 @@ data class Vuelo(
     val fecha: String? = null,
     /** true si los datos vienen del tablón (clave) y no solo de radar. */
     val conHorarios: Boolean = false,
+    /** Última vez que se consultó con conexión (ms). */
+    val actualizado: Long = System.currentTimeMillis(),
 ) {
     val clave get() = "$numero|${fecha ?: ""}|${salida.lugar.iata}"
     val ruta get() = "${salida.lugar.iata.ifBlank { "???" }} → ${llegada.lugar.iata.ifBlank { "???" }}"

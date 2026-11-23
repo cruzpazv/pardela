@@ -85,7 +85,9 @@ object Repositorio {
             n = n.copy(estado = Estado.EN_VUELO)
         // Un vuelo no "desdespega": evita avisos repetidos si una fuente va con retraso o el radar pierde la señal.
         if (rango(n.estado) < rango(v.estado) && rango(v.estado) > 0) n = n.copy(estado = v.estado)
-        return conAerolinea(n).also { apuntar(it) }
+        // Solo cuenta como actualizado si había conexión (si no, son los datos de antes).
+        val momento = if (Red.hayConexion()) System.currentTimeMillis() else v.actualizado
+        return conAerolinea(n.copy(actualizado = momento)).also { apuntar(it) }
     }
 
     /**

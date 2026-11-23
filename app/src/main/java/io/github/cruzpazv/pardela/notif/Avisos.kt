@@ -2,6 +2,7 @@ package io.github.cruzpazv.pardela.notif
 
 import io.github.cruzpazv.pardela.tx
 
+import io.github.cruzpazv.pardela.data.Resumen
 import io.github.cruzpazv.pardela.data.intentar
 
 import android.Manifest
@@ -55,6 +56,14 @@ object Avisos {
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
 
+    /** Busca un vuelo por su clave: seguidos, el que se vigila o los vistos en trayectos. */
+    fun vueloDe(clave: String): Vuelo? {
+        val d = Almacen.datos.value
+        return d.vuelos.firstOrNull { it.clave == clave || it.ultimo?.clave == clave }?.ultimo
+            ?: VigilanciaService.ultimo.value?.takeIf { it.clave == clave }
+            ?: d.trayectos.firstNotNullOfOrNull { t -> t.vistos.values.firstOrNull { it.clave == clave } }
+    }
+
     fun puede(ctx: Context) = Build.VERSION.SDK_INT < 33 ||
         ContextCompat.checkSelfPermission(ctx, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
 
@@ -89,6 +98,19 @@ object Avisos {
             .setColor(0xFFE5B45C.toInt())
             .setAutoCancel(true)
             .setContentIntent(abrirApp(ctx, v.clave))
+            // Botones: oír el vuelo sin abrir la app, o mandarlo a alguien.
+            .addAction(0, tx(R.string.escuchar), PendingIntent.getService(
+                ctx, v.clave.hashCode(), Intent(ctx, LecturaService::class.java).putExtra(LecturaService.EXTRA, v.clave),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            ))
+            .addAction(0, tx(R.string.compartir), PendingIntent.getActivity(
+                ctx, v.clave.hashCode() + 1,
+                Intent.createChooser(
+                    Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, Resumen.compartir(v)),
+                    tx(R.string.compartir_vuelo_x, v.numero),
+                ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            ))
             .build()
         try {
             NotificationManagerCompat.from(ctx).notify(v.clave.hashCode(), n)

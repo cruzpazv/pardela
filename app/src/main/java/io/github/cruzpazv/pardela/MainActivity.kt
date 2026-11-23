@@ -109,11 +109,7 @@ class MainActivity : ComponentActivity() {
 
     private fun abrirDesdeAviso(i: Intent?) {
         val clave = i?.getStringExtra(EXTRA_VUELO) ?: return
-        val d = Almacen.datos.value
-        val v = d.vuelos.firstOrNull { it.clave == clave || it.ultimo?.clave == clave }?.ultimo
-            ?: VigilanciaService.ultimo.value?.takeIf { it.clave == clave }
-            ?: d.trayectos.firstNotNullOfOrNull { t -> t.vistos.values.firstOrNull { it.clave == clave } }
-            ?: return
+        val v = Avisos.vueloDe(clave) ?: return
         pila.add(Pantalla.Detalle(v))
     }
 
