@@ -166,8 +166,8 @@ object Repositorio {
         return (km(o.lat, o.lon, d.lat, d.lon) / total).toFloat().coerceIn(0f, 1f)
     }
 
-    suspend fun tablon(iata: String, salidas: Boolean): List<Vuelo> {
-        val l = if (Almacen.tieneClave) AeroDataBox.tablon(iata, salidas).sortedBy { (if (salidas) it.salida else it.llegada).utc ?: Long.MAX_VALUE }
+    suspend fun tablon(iata: String, salidas: Boolean, conClave: Boolean = true): List<Vuelo> {
+        val l = if (conClave && Almacen.tieneClave) AeroDataBox.tablon(iata, salidas).sortedBy { (if (salidas) it.salida else it.llegada).utc ?: Long.MAX_VALUE }
         else tablonRadar(iata, salidas)
         return l.map { conAerolinea(it) }
     }

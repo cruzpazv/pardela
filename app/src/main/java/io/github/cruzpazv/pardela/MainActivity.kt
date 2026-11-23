@@ -38,6 +38,8 @@ import io.github.cruzpazv.pardela.ui.BuscarVuelo
 import io.github.cruzpazv.pardela.ui.C
 import io.github.cruzpazv.pardela.ui.Detalle
 import io.github.cruzpazv.pardela.ui.Guia
+import io.github.cruzpazv.pardela.ui.ModoPantalla
+import io.github.cruzpazv.pardela.ui.ModoPantallaElegir
 import io.github.cruzpazv.pardela.ui.HistorialAvion
 import io.github.cruzpazv.pardela.ui.MapaPantalla
 import io.github.cruzpazv.pardela.ui.AvionesCerca
@@ -56,6 +58,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Idioma.refrescar(this)
+        // Tablet fija: si se pidió, la app arranca directamente en modo pantalla.
+        Almacen.ajustes.let { a ->
+            if (savedInstanceState == null && a.bienvenidaVista && a.pantallaAlAbrir && a.pantallaModo.isNotEmpty()) pila.add(Pantalla.ModoPantalla)
+        }
         abrirDesdeAviso(intent)
 
         setContent {
@@ -97,7 +103,9 @@ class MainActivity : ComponentActivity() {
                         is Pantalla.HistorialAvion -> key(actual) { HistorialAvion(actual.avion, atras) { v -> pila.add(Pantalla.Detalle(v)) } }
                         is Pantalla.Tablon -> Tablon(actual.iata, actual.estado, atras, { c -> pila.add(c) }) { v -> pila.add(Pantalla.Detalle(v)) }
                         Pantalla.Guia -> Guia(atras)
-                        Pantalla.Ajustes -> AjustesPantalla(atras, { pila.add(Pantalla.Guia) }) { s -> pila.add(Pantalla.AjustesDe(s)) }
+                        Pantalla.Ajustes -> AjustesPantalla(atras, { pila.add(Pantalla.Guia) }, { pila.add(Pantalla.ModoPantallaElegir) }) { s -> pila.add(Pantalla.AjustesDe(s)) }
+                        Pantalla.ModoPantallaElegir -> ModoPantallaElegir(atras) { pila.add(Pantalla.ModoPantalla) }
+                        Pantalla.ModoPantalla -> ModoPantalla(atras) { v -> pila.add(Pantalla.Detalle(v)) }
                         is Pantalla.AjustesDe -> key(actual) { AjustesSeccion(actual.seccion, atras) }
                     }
                 }

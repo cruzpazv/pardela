@@ -10,6 +10,8 @@ sealed interface Pantalla {
     class BuscarVuelo : Pantalla { val estado = EstadoBusqueda() }
     data object Ajustes : Pantalla
     data object Guia : Pantalla
+    data object ModoPantallaElegir : Pantalla
+    data object ModoPantalla : Pantalla
     data class AjustesDe(val seccion: SeccionAjustes) : Pantalla
     /** origen: null = ver tablón; "" = elegir origen de trayecto; "MAD" = elegir destino. */
     data class BuscarAeropuerto(val origen: String?) : Pantalla

@@ -39,6 +39,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -81,7 +82,7 @@ enum class SeccionAjustes { ASPECTO, AVISOS, CLAVE, COPIA, DATOS }
 
 /** Menú principal de Ajustes: un apartado por fila, con un resumen de cómo está. */
 @Composable
-fun AjustesPantalla(atras: () -> Unit, verGuia: () -> Unit, abrir: (SeccionAjustes) -> Unit) {
+fun AjustesPantalla(atras: () -> Unit, verGuia: () -> Unit, verModoPantalla: () -> Unit, abrir: (SeccionAjustes) -> Unit) {
     val ctx = LocalContext.current
     val datos by Almacen.datos.collectAsState()
     val aj = datos.ajustes
@@ -107,6 +108,7 @@ fun AjustesPantalla(atras: () -> Unit, verGuia: () -> Unit, abrir: (SeccionAjust
         ) { abrir(SeccionAjustes.CLAVE) }
         Apartado(tx(R.string.copia_de_seguridad), Icons.Default.Share, tx(R.string.pasar_sus_datos_a_otro_movil)) { abrir(SeccionAjustes.COPIA) }
         Apartado(tx(R.string.datos_y_privacidad), Icons.Default.Info, tx(R.string.de_donde_salen_los_datos_borrar_todo)) { abrir(SeccionAjustes.DATOS) }
+        Apartado(tx(R.string.modo_pantalla), Icons.Default.PlayArrow, tx(R.string.modo_pantalla_detalle)) { verModoPantalla() }
         Apartado(tx(R.string.como_se_usa), Icons.Default.Star, tx(R.string.como_se_usa_detalle)) { verGuia() }
     }
 }
@@ -349,7 +351,7 @@ private fun BotonRedondo(signo: String, descripcion: String, onClick: () -> Unit
 }
 
 @Composable
-private fun Interruptor(titulo: String, activo: Boolean, detalle: String? = null, cambia: (Boolean) -> Unit) {
+internal fun Interruptor(titulo: String, activo: Boolean, detalle: String? = null, cambia: (Boolean) -> Unit) {
     Tarjeta({ cambia(!activo) }) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {

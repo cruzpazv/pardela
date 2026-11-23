@@ -166,7 +166,7 @@ private fun FilaCercano(a: Repositorio.Cercano, onClick: () -> Unit) {
 
 /** Mapa con los aviones cercanos, girados según su rumbo. Tocar uno abre su vuelo. */
 @Composable
-private fun MapaCerca(centro: GeoPoint, aviones: List<Repositorio.Cercano>, modifier: Modifier, abrir: (Vuelo) -> Unit) {
+internal fun MapaCerca(centro: GeoPoint, aviones: List<Repositorio.Cercano>, modifier: Modifier, abrir: (Vuelo) -> Unit) {
     val oscuro = C.fondo.luminance() < 0.5f
     val ambar = C.ambar.toArgb()
     val azul = C.azul.toArgb()
@@ -222,12 +222,12 @@ private fun MapaCerca(centro: GeoPoint, aviones: List<Repositorio.Cercano>, modi
     )
 }
 
-private fun tienePermiso(ctx: Context) =
+internal fun tienePermiso(ctx: Context) =
     ContextCompat.checkSelfPermission(ctx, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
 
 /** Última posición conocida o, si no hay, una nueva (red o GPS, sin Google Play Services). */
 @Suppress("MissingPermission")
-private suspend fun ubicacion(ctx: Context): Location? {
+internal suspend fun ubicacion(ctx: Context): Location? {
     if (!tienePermiso(ctx)) return null
     val lm = ctx.getSystemService(Context.LOCATION_SERVICE) as? LocationManager ?: return null
     val reciente = intentar {

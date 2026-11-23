@@ -406,4 +406,20 @@
     <string name="segun_x_vuelos">"Based on %1$s flights in recent months."</string>
     <string name="puntualidad_sin_datos">"There is no punctuality data for this flight."</string>
     <string name="puntualidad_no_disponible">"Punctuality could not be retrieved. Your AeroDataBox plan may not include it."</string>
+    <string name="modo_pantalla">"DISPLAY MODE"</string>
+    <string name="modo_pantalla_detalle">"Leave a tablet showing flights"</string>
+    <string name="modo_pantalla_intro">"To leave a tablet or phone plugged in and showing flights. The screen stays on and updates itself with the free radar, without using your key."</string>
+    <string name="que_mostrar">"WHAT TO SHOW"</string>
+    <string name="pantalla_cerca">"NEARBY AIRCRAFT"</string>
+    <string name="pantalla_cerca_detalle">"Map and list of the aircraft flying by."</string>
+    <string name="pantalla_tablon">"AIRPORT BOARD"</string>
+    <string name="pantalla_tablon_detalle">"Departures and arrivals, switching every 30 s. Only aircraft the radar can see."</string>
+    <string name="pantalla_vuelos_detalle">"The flights you follow, with status and times."</string>
+    <string name="donde">"WHERE"</string>
+    <string name="mi_ubicacion">"MY LOCATION"</string>
+    <string name="guarde_antes_aeropuerto">"First save an airport with ★ on its board."</string>
+    <string name="abrir_siempre_asi">"ALWAYS OPEN LIKE THIS"</string>
+    <string name="abrir_siempre_asi_detalle">"When Pardela opens, it starts straight in display mode. To leave, use the back gesture or button."</string>
+    <string name="salir">"Exit"</string>
+    <string name="pantalla_sin_ubicacion">"Your location is unknown. Choose an airport in Settings → Display mode."</string>
 </resources>

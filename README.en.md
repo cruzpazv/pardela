@@ -39,6 +39,7 @@ Every version is signed with the same key, so each one installs over the previou
 - **At the destination:** local time, current weather and the forecast for when it lands.
 - **Share, calendar and voice:** send the flight by WhatsApp, add it to your calendar or hear its status read aloud.
 - **Widgets** for the home screen (large and small) with the next flight.
+- **Display mode** to leave a tablet on a stand (an Amazon Fire, for example): nearby aircraft, an airport board or your flights, always on and updating itself.
 - **Which plane is flying over?** Map and list of aircraft in the air near you or near an airport, with their route.
 
 ## Made for everyone

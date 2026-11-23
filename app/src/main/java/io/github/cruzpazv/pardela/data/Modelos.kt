@@ -177,6 +177,10 @@ data class Ajustes(
     val modoSencillo: Boolean = false,
     // La guía rápida ya se ha visto.
     val guiaVista: Boolean = false,
+    // Modo pantalla (tablet fija): qué mostrar ("cerca", "tablon", "vuelos"), dónde y si arranca así.
+    val pantallaModo: String = "",
+    val pantallaIata: String = "",
+    val pantallaAlAbrir: Boolean = false,
 )
 
 @Serializable

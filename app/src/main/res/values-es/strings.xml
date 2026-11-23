@@ -406,4 +406,20 @@
     <string name="segun_x_vuelos">"Según %1$s vuelos de los últimos meses."</string>
     <string name="puntualidad_sin_datos">"No hay datos de puntualidad de este vuelo."</string>
     <string name="puntualidad_no_disponible">"No se ha podido consultar la puntualidad. Puede que su plan de AeroDataBox no la incluya."</string>
+    <string name="modo_pantalla">"MODO PANTALLA"</string>
+    <string name="modo_pantalla_detalle">"Dejar una tablet fija mostrando vuelos"</string>
+    <string name="modo_pantalla_intro">"Para dejar una tablet o un móvil fijo, enchufado, mostrando vuelos. La pantalla no se apaga y se actualiza sola con el radar gratuito, sin gastar la clave."</string>
+    <string name="que_mostrar">"QUÉ MOSTRAR"</string>
+    <string name="pantalla_cerca">"AVIONES CERCA"</string>
+    <string name="pantalla_cerca_detalle">"Mapa y lista de los aviones que pasan."</string>
+    <string name="pantalla_tablon">"TABLÓN DE UN AEROPUERTO"</string>
+    <string name="pantalla_tablon_detalle">"Salidas y llegadas, alternando cada 30 s. Solo aviones que ve el radar."</string>
+    <string name="pantalla_vuelos_detalle">"Los vuelos que sigue, con estado y horas."</string>
+    <string name="donde">"DÓNDE"</string>
+    <string name="mi_ubicacion">"MI UBICACIÓN"</string>
+    <string name="guarde_antes_aeropuerto">"Guarde antes un aeropuerto con ★ en su tablón."</string>
+    <string name="abrir_siempre_asi">"ABRIR SIEMPRE ASÍ"</string>
+    <string name="abrir_siempre_asi_detalle">"Al abrir Pardela, empieza directamente en modo pantalla. Para salir, use el gesto o el botón de atrás."</string>
+    <string name="salir">"Salir"</string>
+    <string name="pantalla_sin_ubicacion">"No se sabe dónde está. Elija un aeropuerto en Ajustes → Modo pantalla."</string>
 </resources>
