@@ -35,6 +35,9 @@ object Idioma {
         if (nuevo != codigo) { codigo = nuevo; cache = null }
     }
 
+    /** Solo para las pruebas: fija el idioma sin tocar el sistema. */
+    internal fun fijarParaPruebas(c: String) { codigo = c; cache = null }
+
     fun actual(ctx: Context): String = codigo ?: leer(ctx).also { codigo = it }
 
     /** Idioma para fechas, números y voz. */

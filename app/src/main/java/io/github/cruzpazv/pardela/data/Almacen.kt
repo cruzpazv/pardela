@@ -23,9 +23,13 @@ object Almacen {
     fun cambiar(f: (Datos) -> Datos) {
         val nuevo = f(_datos.value)
         _datos.value = nuevo
-        val tmp = File(fichero.parentFile, "pardela.json.tmp")
-        tmp.writeText(json.encodeToString(Datos.serializer(), nuevo))
-        tmp.renameTo(fichero)
+        // Si no se puede escribir (móvil lleno…), los datos siguen en memoria y la app no se cierra.
+        intentar {
+            fichero.parentFile?.mkdirs()
+            val tmp = File(fichero.parentFile, "pardela.json.tmp")
+            tmp.writeText(json.encodeToString(Datos.serializer(), nuevo))
+            if (!tmp.renameTo(fichero)) { fichero.writeText(tmp.readText()); tmp.delete() }
+        }
     }
 
     private val jsonBonito = Json { ignoreUnknownKeys = true; prettyPrint = true }

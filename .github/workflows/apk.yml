@@ -25,6 +25,12 @@ jobs:
           else
             echo "::warning::Sin secreto PARDELA_KEYSTORE_B64: APK firmada con clave temporal (no se podrá actualizar encima)."
           fi
+      - name: Pruebas
+        run: if [ -x ./gradlew ]; then ./gradlew --no-daemon testDebugUnitTest; else gradle --no-daemon testDebugUnitTest; fi
+      - name: Informe de pruebas
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with: { name: informe-pruebas, path: app/build/reports/tests/, retention-days: 14 }
       - name: Compilar
         env:
           PARDELA_KEYSTORE_PASS: "${{ secrets.PARDELA_KEYSTORE_PASS }}"

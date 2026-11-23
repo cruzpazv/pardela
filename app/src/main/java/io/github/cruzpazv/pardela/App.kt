@@ -58,7 +58,7 @@ class App : Application() {
     companion object {
         /** Contexto de la aplicación, para los textos traducidos fuera de las pantallas. */
         lateinit var contexto: Context
-            private set
+            internal set
         fun ficheroFallo(app: android.content.Context) = File(app.filesDir, "fallo.txt")
     }
 }

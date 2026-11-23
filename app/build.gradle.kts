@@ -45,6 +45,8 @@ android {
     }
     kotlinOptions { jvmTarget = "17" }
     buildFeatures { compose = true; buildConfig = true }
+    // Las pruebas usan los textos de verdad (res/values*).
+    testOptions { unitTests { isIncludeAndroidResources = true } }
     lint { checkReleaseBuilds = false; abortOnError = false }
     // Quita el bloque cifrado de dependencias que AGP mete para Google Play (no hace falta fuera de Play).
     dependenciesInfo { includeInApk = false; includeInBundle = false }
@@ -64,4 +66,9 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.7.0")
     // Mapas de OpenStreetMap, sin cuenta ni clave.
     implementation("org.osmdroid:osmdroid-android:6.1.20")
+
+    // Pruebas automáticas (se ejecutan en Actions antes de compilar). Robolectric simula Android sin emulador.
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.robolectric:robolectric:4.14.1")
+    testImplementation("androidx.test:core:1.6.1")
 }

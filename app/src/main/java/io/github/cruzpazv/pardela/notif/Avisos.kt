@@ -120,7 +120,12 @@ object Avisos {
         val rA = antes.salida.retraso ?: 0
         val rN = ahora.salida.retraso ?: 0
         if (a.avisoRetraso && ahora.estado != Estado.RETRASADO && ahora.estado.ordinal < Estado.EN_VUELO.ordinal && kotlin.math.abs(rN - rA) >= 10) {
-            r += Cambio(if (rN > 0) tx(R.string.retraso_de_x_min_nueva_salida_x, rN, ahora.salida.horaPrevista) else tx(R.string.sale_a_su_hora_x, ahora.salida.horaPrevista ?: ahora.salida.hora))
+            val nueva = ahora.salida.horaPrevista
+            r += Cambio(when {
+                rN > 0 && nueva != null -> tx(R.string.retraso_de_x_min_nueva_salida_x, rN, nueva)
+                rN > 0 -> tx(R.string.retraso_x_min, rN)
+                else -> tx(R.string.sale_a_su_hora_x, nueva ?: ahora.salida.hora ?: "")
+            })
         }
         if (a.avisoPuerta && ahora.salida.puerta != null && ahora.salida.puerta != antes.salida.puerta && ahora.estado != Estado.EMBARCANDO)
             r += Cambio(tx(R.string.puerta_de_embarque_x, ahora.salida.puerta))

@@ -105,7 +105,7 @@ object Repositorio {
     }
 
     /** Orden del viaje: antes de salir (0) < en vuelo (1) < llegando (2) < aterrizado (3). Cancelado/desviado = -1 (se aceptan siempre). */
-    private fun rango(e: Estado) = when (e) {
+    internal fun rango(e: Estado) = when (e) {
         Estado.EN_VUELO -> 1
         Estado.APROXIMANDO -> 2
         Estado.ATERRIZADO -> 3
@@ -129,7 +129,7 @@ object Repositorio {
     )
 
     /** Estado deducido solo del radar. */
-    private fun estadoRadar(v: Vuelo, antes: Vuelo?): Estado {
+    internal fun estadoRadar(v: Vuelo, antes: Vuelo?): Estado {
         val d = v.directo
         val dest = Aeropuertos.iata(v.llegada.lugar.iata)
         val prev = antes?.estado
