@@ -145,6 +145,7 @@ fun AjustesSeccion(seccion: SeccionAjustes, atras: () -> Unit) {
                 Interruptor(tx(R.string.letra_grande_2), aj.textoGrande) { v -> ajustar { it.copy(textoGrande = v) } }
                 Interruptor(tx(R.string.animaciones), aj.animaciones, tx(R.string.las_letras_del_tablon_giran_al_cambiar)) { v -> ajustar { it.copy(animaciones = v) } }
                 Interruptor(tx(R.string.colores_para_daltonismo_2), aj.daltonismo, tx(R.string.azul_y_naranja_en_vez_de_verde_y_rojo)) { v -> ajustar { it.copy(daltonismo = v) } }
+                Interruptor(tx(R.string.ocultar_posicionamientos), aj.ocultarPosicionamiento, tx(R.string.ocultar_posicionamientos_detalle)) { v -> ajustar { it.copy(ocultarPosicionamiento = v) } }
                 Seccion(tx(R.string.tema))
                 Elegir(Tema.entries, aj.tema, { it.texto }) { tm -> ajustar { it.copy(tema = tm) } }
                 Texto(tx(R.string.auto_claro_u_oscuro_segun_el_movil), 15, C.gris, modifier = Modifier.padding(top = 6.dp))

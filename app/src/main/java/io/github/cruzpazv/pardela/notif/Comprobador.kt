@@ -3,6 +3,7 @@ package io.github.cruzpazv.pardela.notif
 import io.github.cruzpazv.pardela.R
 import io.github.cruzpazv.pardela.tx
 
+import io.github.cruzpazv.pardela.data.Aerolineas
 import io.github.cruzpazv.pardela.data.intentar
 
 import android.content.Context
@@ -79,9 +80,9 @@ class Comprobador(ctx: Context, p: WorkerParameters) : CoroutineWorker(ctx, p) {
     }
 
     private suspend fun vuelosTrayecto(t: Trayecto): List<Vuelo> {
-        val salidas = Repositorio.tablon(t.origen, salidas = true).filter { it.llegada.lugar.iata == t.destino }
+        val salidas = Aerolineas.visibles(Repositorio.tablon(t.origen, salidas = true)).filter { it.llegada.lugar.iata == t.destino }
         if (Almacen.tieneClave) return salidas
-        val llegadas = Repositorio.tablon(t.destino, salidas = false).filter { it.salida.lugar.iata == t.origen }
+        val llegadas = Aerolineas.visibles(Repositorio.tablon(t.destino, salidas = false)).filter { it.salida.lugar.iata == t.origen }
         return (salidas + llegadas).distinctBy { it.numero }
     }
 

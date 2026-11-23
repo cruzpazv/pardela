@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import io.github.cruzpazv.pardela.R
+import io.github.cruzpazv.pardela.data.Aerolineas
 import io.github.cruzpazv.pardela.data.Aeropuertos
 import io.github.cruzpazv.pardela.data.Almacen
 import io.github.cruzpazv.pardela.data.Formato
@@ -106,9 +107,10 @@ fun AvionesCerca(lat: Double?, lon: Double?, titulo: String, atras: () -> Unit, 
             c != null -> {
                 Texto(tx(R.string.aviones_en_el_aire_a_menos_de_unos_50), 16, C.gris)
                 Spacer(Modifier.height(8.dp))
-                MapaCerca(c, lista.orEmpty(), Modifier.fillMaxWidth().weight(1f).clip(RoundedCornerShape(12.dp))) { abrir(it) }
+                val visibles = lista?.let { l -> l.filter { it.vuelo in Aerolineas.visibles(l.map { a -> a.vuelo }) } }
+                MapaCerca(c, visibles.orEmpty(), Modifier.fillMaxWidth().weight(1f).clip(RoundedCornerShape(12.dp))) { abrir(it) }
                 Spacer(Modifier.height(8.dp))
-                val l = lista
+                val l = visibles
                 when {
                     l == null -> Cargando()
                     l.isEmpty() -> Texto(tx(R.string.ahora_mismo_no_hay_aviones_a_la_vista), 17, C.gris)

@@ -3,6 +3,7 @@ package io.github.cruzpazv.pardela.ui
 import io.github.cruzpazv.pardela.R
 import io.github.cruzpazv.pardela.tx
 
+import io.github.cruzpazv.pardela.data.Aerolineas
 import io.github.cruzpazv.pardela.data.intentar
 
 import android.content.Intent
@@ -130,7 +131,7 @@ fun Tablon(iata: String, e: EstadoTablon, atras: () -> Unit, verCerca: (Pantalla
         Spacer(Modifier.height(6.dp))
         // Copias locales: el contenido de LazyColumn se evalúa más tarde, cuando el estado ya puede ser null.
         val err = error
-        val vuelos = lista
+        val vuelos = lista?.let { l -> if (datos.ajustes.ocultarPosicionamiento) Aerolineas.visibles(l) else l }
         val esSalidas = salidas
         when {
             err != null -> AvisoError(err)

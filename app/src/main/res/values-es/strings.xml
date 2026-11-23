@@ -370,4 +370,6 @@
     <string name="pestana_guardados">"GUARDADOS"</string>
     <string name="widget_nombre_mini">"Próximo vuelo (pequeño)"</string>
     <string name="widget_descripcion_mini">"El próximo vuelo que sigue, en tamaño pequeño."</string>
+    <string name="ocultar_posicionamientos">"OCULTAR VUELOS SIN PASAJEROS"</string>
+    <string name="ocultar_posicionamientos_detalle">"Posicionamientos (Canair RSC, Naysa ZN): el avión vuela vacío. No salen en tablones, búsquedas, aviones cerca ni avisos de trayectos."</string>
 </resources>

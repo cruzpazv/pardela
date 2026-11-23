@@ -169,6 +169,8 @@ data class Ajustes(
     val recordatorio: Int = 3,
     // Idioma elegido en la app: "" = el del móvil, "es", "en".
     val idioma: String = "",
+    // Ocultar vuelos sin pasajeros (posicionamientos de las filiales de Binter).
+    val ocultarPosicionamiento: Boolean = false,
 )
 
 @Serializable

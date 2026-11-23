@@ -370,4 +370,6 @@
     <string name="pestana_guardados">"SAVED"</string>
     <string name="widget_nombre_mini">"Next flight (small)"</string>
     <string name="widget_descripcion_mini">"The next flight you follow, in a small size."</string>
+    <string name="ocultar_posicionamientos">"HIDE FLIGHTS WITHOUT PASSENGERS"</string>
+    <string name="ocultar_posicionamientos_detalle">"Positioning flights (Canair RSC, Naysa ZN): the aircraft flies empty. Hidden from boards, searches, nearby aircraft and route alerts."</string>
 </resources>

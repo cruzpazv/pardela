@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.github.cruzpazv.pardela.data.Aerolineas
 import io.github.cruzpazv.pardela.data.Avion
 import io.github.cruzpazv.pardela.data.Repositorio
 import io.github.cruzpazv.pardela.data.Vuelo
@@ -38,7 +39,7 @@ fun HistorialAvion(avion: Avion, atras: () -> Unit, abrir: (Vuelo) -> Unit) {
         Spacer(Modifier.height(8.dp))
         // Copias locales: el contenido de LazyColumn se evalúa más tarde.
         val err = error
-        val vuelos = lista
+        val vuelos = lista?.let { Aerolineas.visibles(it) }
         when {
             err != null -> AvisoError(err)
             vuelos == null -> Cargando()

@@ -113,6 +113,10 @@ object Aerolineas {
     private val sinVenta = setOf("RSC", "ZN", "NAY")
     fun posicionamiento(numero: String) = partir(numero)?.first in sinVenta
 
+    /** Quita los posicionamientos si el usuario lo ha pedido en Ajustes. */
+    fun visibles(l: List<Vuelo>): List<Vuelo> =
+        if (Almacen.ajustes.ocultarPosicionamiento) l.filterNot { posicionamiento(it.numero) } else l
+
     /** URL del logo. Sin clave: CDN público de logos por código IATA. */
     fun logo(iata: String?) = iata?.takeIf { it.length == 2 }?.let { "https://pics.avs.io/200/80/${it.uppercase()}.png" }
 

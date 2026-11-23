@@ -3,6 +3,7 @@ package io.github.cruzpazv.pardela.ui
 import io.github.cruzpazv.pardela.R
 import io.github.cruzpazv.pardela.tx
 
+import io.github.cruzpazv.pardela.data.Aerolineas
 import io.github.cruzpazv.pardela.data.intentar
 
 import androidx.compose.foundation.background
@@ -236,7 +237,7 @@ fun BuscarVuelo(e: EstadoBusqueda, atras: () -> Unit, abrir: (Vuelo) -> Unit) {
             )
         }
         val err = error
-        val lista = resultados
+        val lista = resultados?.let { if (porTrayecto) Aerolineas.visibles(it) else it }
         when {
             cargando -> Cargando()
             err != null -> AvisoError(err)
