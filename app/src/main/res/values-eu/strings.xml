@@ -372,4 +372,7 @@
     <string name="widget_descripcion_mini">"El próximo vuelo que sigue, en tamaño pequeño."</string>
     <string name="ocultar_posicionamientos">"OCULTAR VUELOS SIN PASAJEROS"</string>
     <string name="ocultar_posicionamientos_detalle">"Posicionamientos (Canair RSC, Naysa ZN): el avión vuela vacío. No salen en tablones, búsquedas, aviones cerca ni avisos de trayectos."</string>
+    <string name="parar">"■ PARAR"</string>
+    <string name="falta_voz_x">"El móvil no tiene instalada la voz en %1$s, así que no puede leer en voz alta en este idioma."</string>
+    <string name="instalar_la_voz">"INSTALAR LA VOZ"</string>
 </resources>

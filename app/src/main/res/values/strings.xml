@@ -372,4 +372,7 @@
     <string name="widget_descripcion_mini">"The next flight you follow, in a small size."</string>
     <string name="ocultar_posicionamientos">"HIDE FLIGHTS WITHOUT PASSENGERS"</string>
     <string name="ocultar_posicionamientos_detalle">"Positioning flights (Canair RSC, Naysa ZN): the aircraft flies empty. Hidden from boards, searches, nearby aircraft and route alerts."</string>
+    <string name="parar">"■ STOP"</string>
+    <string name="falta_voz_x">"The phone does not have the %1$s voice installed, so it cannot read aloud in this language."</string>
+    <string name="instalar_la_voz">"INSTALL THE VOICE"</string>
 </resources>

@@ -157,8 +157,12 @@ fun Detalle(inicial: Vuelo, atras: () -> Unit, verHistorial: (Avion) -> Unit, ve
 
         Spacer(Modifier.height(10.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            BotonSecundario(tx(R.string.escuchar), Modifier.weight(1f)) { voz.decir(Resumen.voz(v)) }
+            BotonSecundario(if (voz.hablando) tx(R.string.parar) else tx(R.string.escuchar), Modifier.weight(1f)) { voz.alternar(Resumen.voz(v)) }
             BotonSecundario(tx(R.string.compartir), Modifier.weight(1f), icono = Icons.Default.Share) { compartirVuelo(ctx, v) }
+        }
+        voz.falta?.let { idioma ->
+            Texto(tx(R.string.falta_voz_x, idioma.getDisplayLanguage(idioma)), 16, C.rojo, FontWeight.Bold, modifier = Modifier.padding(top = 8.dp))
+            BotonSecundario(tx(R.string.instalar_la_voz), Modifier.padding(top = 6.dp)) { instalarVoz(ctx) }
         }
 
         Progreso(v)
