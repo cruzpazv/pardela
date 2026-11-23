@@ -57,7 +57,8 @@ class VigilanciaService : Service() {
     private suspend fun bucle(inicial: Vuelo) {
         var v = inicial
         var ultimaClave = 0L
-        val fin = System.currentTimeMillis() + 8 * 3600_000L
+        // Android 15 limita este tipo de servicio a 6 h al día: se para antes, limpiamente.
+        val fin = System.currentTimeMillis() + 6 * 3600_000L
         while (scope.isActive && System.currentTimeMillis() < fin) {
             val ahora = System.currentTimeMillis()
             val usarClave = Almacen.tieneClave && v.conHorarios && ahora - ultimaClave > 15 * 60_000L

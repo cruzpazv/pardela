@@ -42,7 +42,13 @@ object Almacen {
     /** Sustituye todo por la copia, conservando la clave API de este móvil. */
     fun importar(texto: String): Boolean = intentar {
         val d = json.decodeFromString(Datos.serializer(), texto)
-        cambiar { actual -> d.copy(ajustes = d.ajustes.copy(claveApi = actual.ajustes.claveApi, bienvenidaVista = true)) }
+        // Se conservan la clave de este móvil y su cuenta de consultas (las de la copia son de otra clave).
+        cambiar { actual ->
+            d.copy(ajustes = d.ajustes.copy(
+                claveApi = actual.ajustes.claveApi, bienvenidaVista = true,
+                cuotaRestante = actual.ajustes.cuotaRestante, cuotaLimite = actual.ajustes.cuotaLimite, cuotaMomento = actual.ajustes.cuotaMomento,
+            ))
+        }
     }.isSuccess
 
     val ajustes get() = _datos.value.ajustes

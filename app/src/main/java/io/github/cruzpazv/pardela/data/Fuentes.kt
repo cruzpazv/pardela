@@ -57,7 +57,8 @@ object Radar {
     suspend fun recorrido(hex: String, desde: Long?, hasta: Long?): List<EnDirecto> {
         val h = hex.lowercase()
         val k = "$h|$desde|$hasta"
-        synchronized(recorridos) { recorridos[k]?.let { (t, l) -> if (System.currentTimeMillis() - t < 60_000L) return l } }
+        // Cada recorrido pesa ~150 KB: como mucho uno cada 5 min por vuelo (cuida los datos móviles).
+        synchronized(recorridos) { recorridos[k]?.let { (t, l) -> if (System.currentTimeMillis() - t < 5 * 60_000L) return l } }
         val j = intentar { Red.get("https://adsb.lol/data/traces/${h.takeLast(2)}/trace_full_$h.json") }.getOrNull() ?: return emptyList()
         val base = (j.o("timestamp") as? JsonPrimitive)?.doubleOrNull ?: return emptyList()
         val puntos = ((j.o("trace") as? JsonArray) ?: emptyList()).mapNotNull { p ->

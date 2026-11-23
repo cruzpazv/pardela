@@ -66,6 +66,8 @@ import kotlinx.coroutines.launch
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
+private var ultimoRefresco = 0L
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun Inicio(ir: (Pantalla) -> Unit) {
@@ -75,8 +77,11 @@ fun Inicio(ir: (Pantalla) -> Unit) {
     var cargando by remember { mutableStateOf(false) }
     var borrarTrayecto by remember { mutableStateOf<Trayecto?>(null) }
 
-    fun refrescarTodo() {
+    fun refrescarTodo(forzar: Boolean = true) {
         if (cargando) return
+        // Al volver a Inicio no se repite la consulta si se hizo hace menos de 2 min (el botón ↻ sí fuerza).
+        if (!forzar && System.currentTimeMillis() - ultimoRefresco < 2 * 60_000L) return
+        ultimoRefresco = System.currentTimeMillis()
         cargando = true
         scope.launch {
             Almacen.datos.value.vuelos.mapNotNull { it.ultimo }.filterNot { it.estado.terminado }.forEach { v ->
@@ -85,7 +90,7 @@ fun Inicio(ir: (Pantalla) -> Unit) {
             cargando = false
         }
     }
-    LaunchedEffect(Unit) { refrescarTodo() }
+    LaunchedEffect(Unit) { refrescarTodo(forzar = false) }
 
     var guardados by Pantalla.Inicio.guardados
 
@@ -119,7 +124,7 @@ fun Inicio(ir: (Pantalla) -> Unit) {
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.weight(1f)) { Seccion(tx(R.string.mis_vuelos)) }
-            if (datos.vuelos.isNotEmpty()) IconButton(onClick = ::refrescarTodo, modifier = Modifier.padding(top = 14.dp)) {
+            if (datos.vuelos.isNotEmpty()) IconButton(onClick = { refrescarTodo() }, modifier = Modifier.padding(top = 14.dp)) {
                 Icon(Icons.Default.Refresh, tx(R.string.actualizar), tint = if (cargando) C.gris else C.ambar, modifier = Modifier.size(32.dp))
             }
         }

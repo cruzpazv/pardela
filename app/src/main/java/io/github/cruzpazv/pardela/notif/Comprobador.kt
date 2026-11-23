@@ -62,7 +62,7 @@ class Comprobador(ctx: Context, p: WorkerParameters) : CoroutineWorker(ctx, p) {
                 val antes = t.vistos[v.numero]
                 val textos = if (antes == null) {
                     if (t.ultimaConsulta == 0L) emptyList() // primera vez: solo memoriza
-                    else if (v.conHorarios) listOf(Avisos.Cambio(tx(R.string.nuevo_vuelo_en_su_trayecto_sale_x, v.salida.hora ?: "hoy")))
+                    else if (v.conHorarios) listOf(Avisos.Cambio(tx(R.string.nuevo_vuelo_en_su_trayecto_sale_x, v.salida.hora ?: tx(R.string.hoy).lowercase())))
                     else listOf(Avisos.Cambio(tx(R.string.en_el_aire_x, v.estado.texto.lowercase())))
                 } else Avisos.cambios(antes, v)
                 Avisos.avisar(applicationContext, v, textos)
