@@ -247,6 +247,30 @@ object Repositorio {
     }
 
     /** Sin clave: aviones a ~50 millas, se queda con los que salen/llegan aquí. */
+    data class Cercano(val vuelo: Vuelo, val km: Double)
+
+    /** Aviones en el aire a menos de ~55 km (30 millas náuticas) de un punto, con su ruta si se conoce. */
+    suspend fun cerca(lat: Double, lon: Double): List<Cercano> = coroutineScope {
+        val hoy = LocalDate.now().toString()
+        val aviones = Radar.cerca(lat, lon, 30).filter { !it.directo.enTierra }
+            .map { it to km(it.directo.lat, it.directo.lon, lat, lon) }.sortedBy { it.second }.take(30)
+        val limite = Semaphore(4)
+        aviones.map { (c, distancia) ->
+            async {
+                val cs = c.indicativo?.takeIf { it.isNotBlank() }
+                val r = cs?.let { limite.withPermit { Adsbdb.ruta(it) } }
+                val v = Vuelo(
+                    numero = r?.numero ?: cs ?: c.matricula ?: c.hex.uppercase(), indicativo = cs,
+                    aerolineaIata = r?.aerolineaIata, aerolineaNombre = r?.aerolineaNombre,
+                    salida = Extremo(lugar = completar(r?.origen)), llegada = Extremo(lugar = completar(r?.destino)),
+                    avion = Avion(hex = c.hex, matricula = c.matricula, tipoIcao = c.tipo),
+                    directo = c.directo, fecha = hoy,
+                )
+                Cercano(conAerolinea(v.copy(estado = estadoRadar(v, null))), distancia)
+            }
+        }.awaitAll()
+    }
+
     private suspend fun tablonRadar(iata: String, salidas: Boolean): List<Vuelo> = coroutineScope {
         val ap = Aeropuertos.iata(iata) ?: return@coroutineScope emptyList()
         val cerca = Radar.cerca(ap.lat, ap.lon, 50).filter { !it.indicativo.isNullOrBlank() }

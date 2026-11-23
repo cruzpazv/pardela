@@ -36,6 +36,7 @@ Todas las versiones van firmadas con la misma clave, así que cada una se instal
 - **Compartir, calendario y voz:** envíe el vuelo por WhatsApp, guárdelo en el calendario u oiga su estado en voz alta.
 - **Recordatorio** unas horas antes de salir.
 - **Widget** para la pantalla de inicio con el próximo vuelo, su estado y sus horas.
+- **¿Qué avión pasa por aquí?** Mapa y lista de los aviones en el aire cerca de usted o de un aeropuerto, con su ruta.
 
 ## Pensada para que la use cualquiera
 - Letra grande por defecto y botones de al menos 68 dp.
@@ -49,6 +50,7 @@ Todas las versiones van firmadas con la misma clave, así que cada una se instal
 - Sin cuentas, sin registros, sin publicidad y sin rastreadores.
 - Todo se guarda en un único fichero dentro del móvil. La copia en la nube de Android está desactivada.
 - Para pasar sus datos a otro móvil: Ajustes → **Guardar copia** y **Recuperar copia**. La copia no incluye la clave API.
+- La ubicación (solo aproximada) se pide únicamente para «¿Qué avión pasa por aquí?», no se guarda y no sale del móvil: solo se usa para pedir al radar los aviones de la zona.
 - La app solo se conecta a los servicios de datos de la tabla siguiente.
 
 ## De dónde salen los datos

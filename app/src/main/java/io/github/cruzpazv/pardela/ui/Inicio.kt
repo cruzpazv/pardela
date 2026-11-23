@@ -22,6 +22,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Delete
 import io.github.cruzpazv.pardela.data.Extremo
 import androidx.compose.material.icons.filled.Notifications
@@ -105,6 +106,8 @@ fun Inicio(ir: (Pantalla) -> Unit) {
         Boton("VER UN AEROPUERTO", icono = Icons.Default.Place) { ir(Pantalla.BuscarAeropuerto(null)) }
         Spacer(Modifier.height(10.dp))
         BotonSecundario("AVISARME DE UN TRAYECTO", icono = Icons.Default.Notifications) { ir(Pantalla.BuscarAeropuerto("")) }
+        Spacer(Modifier.height(10.dp))
+        BotonSecundario("¿QUÉ AVIÓN PASA POR AQUÍ?", icono = Icons.Default.LocationOn) { ir(Pantalla.Cerca(null, null, "AVIONES CERCA DE USTED")) }
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.weight(1f)) { Seccion("MIS VUELOS") }

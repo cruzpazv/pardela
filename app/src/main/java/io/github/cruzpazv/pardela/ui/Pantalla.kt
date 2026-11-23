@@ -14,4 +14,6 @@ sealed interface Pantalla {
     data class Tablon(val iata: String) : Pantalla { val estado = EstadoTablon() }
     data class HistorialAvion(val avion: Avion) : Pantalla
     data class Mapa(val vuelo: Vuelo) : Pantalla
+    /** Aviones cerca de un punto; sin coordenadas = de la posición del móvil. */
+    data class Cerca(val lat: Double?, val lon: Double?, val titulo: String) : Pantalla
 }

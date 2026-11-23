@@ -32,6 +32,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Star
@@ -77,7 +78,7 @@ class EstadoTablon {
 }
 
 @Composable
-fun Tablon(iata: String, e: EstadoTablon, atras: () -> Unit, abrir: (Vuelo) -> Unit) {
+fun Tablon(iata: String, e: EstadoTablon, atras: () -> Unit, verCerca: (Pantalla.Cerca) -> Unit, abrir: (Vuelo) -> Unit) {
     val datos by Almacen.datos.collectAsState()
     val ap = Aeropuertos.iata(iata)
     var salidas by e.salidas
@@ -100,6 +101,9 @@ fun Tablon(iata: String, e: EstadoTablon, atras: () -> Unit, abrir: (Vuelo) -> U
 
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Cabecera("$iata · ${ap?.ciudad?.uppercase() ?: ""}", atras) {
+            if (ap != null) IconButton(onClick = { verCerca(Pantalla.Cerca(ap.lat, ap.lon, "AVIONES CERCA DE $iata")) }) {
+                Icon(Icons.Default.LocationOn, "Aviones cerca en el mapa", tint = C.ambar, modifier = Modifier.size(34.dp))
+            }
             IconButton(onClick = { Almacen.alternarAeropuerto(iata) }) {
                 Icon(Icons.Default.Star, if (guardado) "Quitar de mis aeropuertos" else "Guardar aeropuerto",
                     tint = if (guardado) C.ambar else C.gris, modifier = Modifier.size(38.dp))

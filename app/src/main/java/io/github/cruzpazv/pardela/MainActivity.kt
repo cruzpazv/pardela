@@ -38,6 +38,7 @@ import io.github.cruzpazv.pardela.ui.C
 import io.github.cruzpazv.pardela.ui.Detalle
 import io.github.cruzpazv.pardela.ui.HistorialAvion
 import io.github.cruzpazv.pardela.ui.MapaPantalla
+import io.github.cruzpazv.pardela.ui.AvionesCerca
 import io.github.cruzpazv.pardela.ui.Inicio
 import io.github.cruzpazv.pardela.ui.Pantalla
 import io.github.cruzpazv.pardela.ui.TemaTablon
@@ -82,9 +83,10 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                         is Pantalla.Detalle -> key(actual) { Detalle(actual.vuelo, atras, { a -> pila.add(Pantalla.HistorialAvion(a)) }) { v -> pila.add(Pantalla.Mapa(v)) } }
+                        is Pantalla.Cerca -> key(actual) { AvionesCerca(actual.lat, actual.lon, actual.titulo, atras) { v -> pila.add(Pantalla.Detalle(v)) } }
                         is Pantalla.Mapa -> key(actual) { MapaPantalla(actual.vuelo, atras) }
                         is Pantalla.HistorialAvion -> key(actual) { HistorialAvion(actual.avion, atras) { v -> pila.add(Pantalla.Detalle(v)) } }
-                        is Pantalla.Tablon -> Tablon(actual.iata, actual.estado, atras) { v -> pila.add(Pantalla.Detalle(v)) }
+                        is Pantalla.Tablon -> Tablon(actual.iata, actual.estado, atras, { c -> pila.add(c) }) { v -> pila.add(Pantalla.Detalle(v)) }
                         Pantalla.Ajustes -> AjustesPantalla(atras)
                     }
                 }
