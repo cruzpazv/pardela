@@ -31,6 +31,7 @@ import io.github.cruzpazv.pardela.data.Almacen
 import io.github.cruzpazv.pardela.notif.Avisos
 import io.github.cruzpazv.pardela.notif.VigilanciaService
 import io.github.cruzpazv.pardela.ui.AjustesPantalla
+import io.github.cruzpazv.pardela.ui.AjustesSeccion
 import io.github.cruzpazv.pardela.ui.Bienvenida
 import io.github.cruzpazv.pardela.ui.BuscarAeropuerto
 import io.github.cruzpazv.pardela.ui.BuscarVuelo
@@ -87,7 +88,8 @@ class MainActivity : ComponentActivity() {
                         is Pantalla.Mapa -> key(actual) { MapaPantalla(actual.vuelo, atras) }
                         is Pantalla.HistorialAvion -> key(actual) { HistorialAvion(actual.avion, atras) { v -> pila.add(Pantalla.Detalle(v)) } }
                         is Pantalla.Tablon -> Tablon(actual.iata, actual.estado, atras, { c -> pila.add(c) }) { v -> pila.add(Pantalla.Detalle(v)) }
-                        Pantalla.Ajustes -> AjustesPantalla(atras)
+                        Pantalla.Ajustes -> AjustesPantalla(atras) { s -> pila.add(Pantalla.AjustesDe(s)) }
+                        is Pantalla.AjustesDe -> key(actual) { AjustesSeccion(actual.seccion, atras) }
                     }
                 }
                 var fallo by remember { mutableStateOf(App.ficheroFallo(this@MainActivity).takeIf { it.exists() }?.readText()) }
