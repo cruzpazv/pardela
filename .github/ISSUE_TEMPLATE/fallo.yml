@@ -1,0 +1,39 @@
+name: Informar de un fallo · Report a bug
+description: Algo no funciona como debería · Something does not work as it should
+labels: [fallo]
+body:
+  - type: textarea
+    id: que
+    attributes:
+      label: ¿Qué ha pasado? · What happened?
+      description: Qué esperaba y qué ha ocurrido · What you expected and what happened instead
+    validations: { required: true }
+  - type: textarea
+    id: pasos
+    attributes:
+      label: Pasos para que vuelva a pasar · Steps to reproduce
+      placeholder: |
+        1. Abrir un aeropuerto guardado · Open a saved airport
+        2. Pulsar LLEGADAS · Tap ARRIVALS
+        3. …
+  - type: textarea
+    id: informe
+    attributes:
+      label: Informe de error · Crash report
+      description: Si la app se cerró, al volver a abrirla sale un informe con el botón COPIAR. Péguelo aquí · If the app closed, reopening it shows a report with a COPY button. Paste it here
+      render: text
+  - type: input
+    id: version
+    attributes:
+      label: Versión de Pardela · Pardela version
+      description: Ajustes del móvil → Apps → Pardela · Phone settings → Apps → Pardela
+  - type: input
+    id: movil
+    attributes:
+      label: Móvil y versión de Android · Phone and Android version
+      placeholder: Pixel 8a, Android 17
+  - type: textarea
+    id: capturas
+    attributes:
+      label: Capturas · Screenshots
+      description: Opcional · Optional

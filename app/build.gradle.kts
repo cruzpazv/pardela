@@ -14,9 +14,13 @@ android {
         applicationId = "io.github.cruzpazv.pardela"
         minSdk = 26
         targetSdk = 35
-        // Subir ambos en cada versión publicada (tag vX.Y.Z). F-Droid los lee de aquí.
-        versionCode = 1
-        versionName = "1.0.0"
+        // Versión automática desde git (no hay que tocarla a mano):
+        //   etiqueta v1.2.3            → 1.2.3        (código 1020300)
+        //   3 commits después de v1.2.3 → 1.2.3-dev3  (código 1020303: se instala encima de la 1.2.3)
+        //   sin etiquetas todavía       → 1.0.0-devN  (código N)
+        val (codigo, nombre) = versionDesdeGit()
+        versionCode = codigo
+        versionName = nombre
         buildConfigField("String", "CONTACTO", "\"${project.findProperty("pardela.contacto") ?: ""}\"")
         // Mensaje opcional en la bienvenida. Viene de un secreto de GitHub, así que no queda en el código.
         val dedicatoria = (System.getenv("PARDELA_DEDICATORIA") ?: "").trim()
@@ -71,4 +75,23 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.robolectric:robolectric:4.14.1")
     testImplementation("androidx.test:core:1.6.1")
+}
+
+/** Ejecuta git en el repo; null si falla (p. ej. sin git o sin etiquetas). */
+fun git(vararg args: String): String? = try {
+    val p = ProcessBuilder("git", *args).directory(rootDir).redirectErrorStream(true).start()
+    val salida = p.inputStream.bufferedReader().readText().trim()
+    if (p.waitFor() == 0) salida else null
+} catch (e: Exception) { null }
+
+fun versionDesdeGit(): Pair<Int, String> {
+    val m = git("describe", "--tags", "--long", "--match", "v[0-9]*")
+        ?.let { Regex("""^v(\d+)\.(\d+)\.(\d+)-(\d+)-g[0-9a-f]+$""").find(it) }
+    if (m == null) {
+        val n = git("rev-list", "--count", "HEAD")?.toIntOrNull() ?: 1
+        return n to "1.0.0-dev$n"
+    }
+    val (a, b, c, desde) = m.destructured.toList().map { it.toInt() }
+    val codigo = a * 1_000_000 + b * 10_000 + c * 100 + minOf(desde, 99)
+    return codigo to (if (desde == 0) "$a.$b.$c" else "$a.$b.$c-dev$desde")
 }

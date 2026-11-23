@@ -4,6 +4,8 @@
 
 <h1 align="center">Pardela</h1>
 
+<p align="center"><b>Español</b> · <a href="README.en.md">English</a></p>
+
 <p align="center">Siga sus vuelos como en el tablón del aeropuerto.<br>
 Letra grande, botones grandes y avisos claros. Sin cuentas: todo se queda en su móvil.</p>
 
@@ -37,10 +39,16 @@ Todas las versiones van firmadas con la misma clave, así que cada una se instal
 - **Recordatorio** unas horas antes de salir.
 - **Widget** para la pantalla de inicio con el próximo vuelo, su estado y sus horas.
 - **¿Qué avión pasa por aquí?** Mapa y lista de los aviones en el aire cerca de usted o de un aeropuerto, con su ruta.
+- **Buscar por trayecto:** todos los vuelos directos de un día entre dos aeropuertos, hasta un año vista.
+- **Historial del avión:** sus vuelos de los últimos 7 días.
 
 ## Pensada para que la use cualquiera
 - Letra grande por defecto y botones de al menos 68 dp.
-- En español o en inglés, según el idioma del móvil (en Android 13 o superior también se puede elegir solo para Pardela).
+- **Modo sencillo** (opcional): solo buscar, seguir y escuchar vuelos.
+- Guía rápida al empezar, que se puede volver a ver desde Ajustes.
+- Cada vuelo indica cuándo se actualizó, y la app avisa si no hay conexión.
+- Los avisos traen botones para **escuchar** o **compartir** el vuelo sin abrir la app.
+- En español o en inglés: el del móvil o el que elija en Ajustes → Aspecto.
 - Modo claro, oscuro o automático.
 - **Colores para daltonismo** (paleta Okabe-Ito). Además, cada estado lleva siempre su símbolo y su texto, nunca solo color: ✔ aterrizado, ⚠ retrasado, ✕ cancelado, ✈ en vuelo.
 - Animaciones que se pueden desactivar.
@@ -84,13 +92,21 @@ Kotlin + Jetpack Compose, sin librerías privativas. Dependencias: OkHttp, Coil,
 ```
 app/src/main/java/io/github/cruzpazv/pardela/
   data/   Modelos, Almacen (JSON local + copias), Catalogo (aeropuertos, aerolíneas, fabricantes), Fuentes (APIs), Repositorio
-  notif/  Avisos (textos, filtros, horas de silencio), Comprobador (WorkManager, 15 min), VigilanciaService (directo)
-  ui/     Tablero (temas, paletas animadas, logos), Bienvenida, Inicio, Buscar, Detalle, Tablon (+ Ajustes)
+  notif/  Avisos (textos, filtros, horas de silencio), Comprobador (WorkManager, 15 min), VigilanciaService (directo),
+          Widget (grande y pequeño), LecturaService (ESCUCHAR desde un aviso)
+  ui/     Tablero (temas, paletas, logos), Bienvenida, Guia, Inicio, Buscar, Detalle, Tablon, Ajustes,
+          Mapa, Cerca, Destino (tiempo), Historial, Acciones (compartir, calendario, voz)
+  Idioma.kt  idioma de la app (texto, fechas, voz)
+app/src/test/  pruebas automáticas (Robolectric)
 tools/    aeropuertos.py (genera el CSV), icono/ (SVG maestro del icono)
 fastlane/ descripción, icono y notas de cada versión
 ```
 
-**Compilar:** JDK 17, Android SDK 35 y `./gradlew assembleRelease`. GitHub Actions compila en cada push (workflow **APK**).
+**Compilar:** JDK 17, Android SDK 35 y `./gradlew assembleRelease`. **Pruebas:** `./gradlew testDebugUnitTest`. GitHub Actions pasa las pruebas y compila en cada push (workflow **APK**).
+
+**Textos:** inglés en `res/values/strings.xml` (por defecto) y español en `res/values-es/`. Las pruebas comprueban que los dos tienen las mismas claves.
+
+**Si la app se cierra:** al volver a abrirla muestra el informe con un botón COPIAR. Cada build guarda en Actions el `mapping.txt` para traducirlo.
 
 **Aeropuertos:** `python3 -I tools/aeropuertos.py airports.csv app/src/main/assets/aeropuertos.csv`, con el CSV de ourairports.com.
 
@@ -109,9 +125,10 @@ rsvg-convert -w 512 -h 512 tools/icono/pardela-tienda.svg -o fastlane/metadata/a
 4. Haz público el repo.
 
 **Publicar una versión:**
-1. Sube `versionCode` y `versionName` en `app/build.gradle.kts`.
-2. Añade `fastlane/metadata/android/es-ES/changelogs/<versionCode>.txt`.
-3. Ejecuta `git tag vX.Y.Z && git push --tags`. Actions compila, firma y crea la Release con `pardela.apk`. Obtainium la detecta solo.
+1. Apunta los cambios en [CHANGELOG.md](CHANGELOG.md).
+2. Ejecuta `git tag vX.Y.Z && git push --tags`. La versión sale de la etiqueta (no hay que editar nada más). Actions pasa las pruebas, compila, firma y crea la Release con `pardela.apk`. Obtainium la detecta sola.
+
+Entre versiones, cada build de `main` se llama `X.Y.Z-devN` y se instala encima de la última versión publicada.
 
 ## Cómo se ha hecho
 Pardela se ha desarrollado con la ayuda de [Claude](https://claude.com/claude-code), un asistente de IA de Anthropic. El diseño, las decisiones y las pruebas son de [cruzpazv](https://github.com/cruzpazv). Los commits en los que ha participado lo indican con la línea `Co-Authored-By`.
