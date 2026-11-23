@@ -95,3 +95,13 @@ fun versionDesdeGit(): Pair<Int, String> {
     val codigo = a * 1_000_000 + b * 10_000 + c * 100 + minOf(desde, 99)
     return codigo to (if (desde == 0) "$a.$b.$c" else "$a.$b.$c-dev$desde")
 }
+
+// Si una prueba falla, el log de Actions muestra el error completo.
+tasks.withType<Test>().configureEach {
+    testLogging {
+        events("failed")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        showStackTraces = true
+        showCauses = true
+    }
+}
