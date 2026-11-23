@@ -15,6 +15,7 @@ import io.github.cruzpazv.pardela.data.Almacen
 import io.github.cruzpazv.pardela.data.Repositorio
 import io.github.cruzpazv.pardela.data.Trayecto
 import io.github.cruzpazv.pardela.data.Vuelo
+import io.github.cruzpazv.pardela.data.VueloSeguido
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
@@ -32,6 +33,7 @@ class Comprobador(ctx: Context, p: WorkerParameters) : CoroutineWorker(ctx, p) {
         for (s in Almacen.datos.value.vuelos) {
             val v = s.ultimo ?: continue
             if (v.estado.terminado) continue
+            recordar(s, v, ahora)
             // Vuelos de días pasados: ya no se consultan (se pueden quitar a mano).
             val dia = v.fecha?.let { intentar { LocalDate.parse(it) }.getOrNull() }
             if (dia != null && dia.isBefore(LocalDate.now().minusDays(1))) continue
@@ -78,6 +80,27 @@ class Comprobador(ctx: Context, p: WorkerParameters) : CoroutineWorker(ctx, p) {
         if (Almacen.tieneClave) return salidas
         val llegadas = Repositorio.tablon(t.destino, salidas = false).filter { it.salida.lugar.iata == t.origen }
         return (salidas + llegadas).distinctBy { it.numero }
+    }
+
+    /** Recordatorio antes de salir (una vez por vuelo). El comprobador pasa cada 15 min: llega con ese margen. */
+    private fun recordar(s: VueloSeguido, v: Vuelo, ahora: Long) {
+        val horas = Almacen.ajustes.recordatorio
+        if (horas <= 0 || s.recordado) return
+        val sale = v.salida.utcPrevista ?: v.salida.utc ?: return
+        val falta = sale - ahora
+        if (falta <= 0 || falta > horas * 3_600_000L) return
+        val min = falta / 60_000
+        val dentro = when {
+            min < 60 -> "$min min"
+            min % 60 < 5 -> "${min / 60} h"
+            else -> "${min / 60} h ${min % 60} min"
+        }
+        val hora = v.salida.horaPrevista ?: v.salida.hora
+        val donde = listOfNotNull(v.salida.terminal?.let { "terminal $it" }, v.salida.puerta?.let { "puerta $it" }).joinToString(", ")
+        val texto = "⏰ Recordatorio: su vuelo sale" + (hora?.let { " a las $it" } ?: "") + ", dentro de $dentro." +
+            (if (donde.isNotEmpty()) " Salida por $donde." else "")
+        Avisos.avisar(applicationContext, v, listOf(Avisos.Cambio(texto)))
+        Almacen.cambiar { d -> d.copy(vuelos = d.vuelos.map { if (it.clave == s.clave) it.copy(recordado = true) else it }) }
     }
 
     /** Cerca de la salida o en vuelo: cada 30 min. Si falta mucho: cada 3 h. */

@@ -176,6 +176,10 @@ fun AjustesPantalla(atras: () -> Unit) {
         Interruptor("CINTA DE EQUIPAJE", aj.avisoCinta) { v -> ajustar { it.copy(avisoCinta = v) } }
         Texto("Las cancelaciones y los desvíos se avisan siempre.", 15, C.gris, modifier = Modifier.padding(top = 4.dp))
 
+        Seccion("RECORDATORIO ANTES DE SALIR")
+        Texto("Un aviso para cada vuelo que sigue, con tiempo para ir al aeropuerto.", 16, C.gris, modifier = Modifier.padding(bottom = 8.dp))
+        Elegir(listOf(0, 2, 3, 24), aj.recordatorio, { if (it == 0) "NO" else if (it == 24) "1 DÍA" else "$it H" }) { h -> ajustar { it.copy(recordatorio = h) } }
+
         Seccion("HORAS DE SILENCIO")
         Interruptor("SILENCIO POR LA NOCHE", aj.silencio, "Los avisos llegan sin sonido. Las cancelaciones sí suenan.") { v -> ajustar { it.copy(silencio = v) } }
         if (aj.silencio) {

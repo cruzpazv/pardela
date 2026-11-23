@@ -97,6 +97,7 @@ data class VueloSeguido(
     val origen: String = "",
     val ultimo: Vuelo? = null,
     val ultimaConsultaClave: Long = 0,
+    val recordado: Boolean = false,
 ) {
     val clave get() = "$numero|${fecha ?: ""}|$origen"
 }
@@ -153,6 +154,8 @@ data class Ajustes(
     val cuotaRestante: Int? = null,
     val cuotaLimite: Int? = null,
     val cuotaMomento: Long = 0,
+    // Recordatorio antes de salir, en horas (0 = no).
+    val recordatorio: Int = 3,
 )
 
 @Serializable

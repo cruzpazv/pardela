@@ -171,6 +171,7 @@ fun Detalle(inicial: Vuelo, atras: () -> Unit, verHistorial: (Avion) -> Unit, ve
             Spacer(Modifier.height(10.dp))
             Texto("ℹ Horarios, puertas y retrasos: añada una clave API en AJUSTES.", 15, C.gris)
         }
+        EnDestino(v)
 
         Spacer(Modifier.height(22.dp))
         if (seguido) BotonSecundario("DEJAR DE SEGUIR", icono = Icons.Default.Close) { Almacen.dejar(v.numero, v.fecha) }

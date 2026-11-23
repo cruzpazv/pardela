@@ -32,6 +32,9 @@ Todas las versiones van firmadas con la misma clave, así que cada una se instal
 - **Trayectos:** un aviso de cada vuelo entre dos ciudades (por ejemplo, Gran Canaria → Madrid).
 - **El avión:** foto, fabricante, modelo, matrícula y logotipo de la aerolínea.
 - **Mapa:** por dónde va el avión, la ruta prevista y el recorrido real que ha hecho.
+- **En el destino:** la hora local, el tiempo ahora y la previsión para cuando aterrice.
+- **Compartir, calendario y voz:** envíe el vuelo por WhatsApp, guárdelo en el calendario u oiga su estado en voz alta.
+- **Recordatorio** unas horas antes de salir.
 
 ## Pensada para que la use cualquiera
 - Letra grande por defecto y botones de al menos 68 dp.
@@ -56,6 +59,7 @@ Todas las versiones van firmadas con la misma clave, así que cada una se instal
 | pics.avs.io | no | logotipos de aerolíneas |
 | [OurAirports](https://ourairports.com) | no | lista de 3245 aeropuertos, incluida en la app |
 | [OpenStreetMap](https://www.openstreetmap.org/copyright) | no | mapa del vuelo (© colaboradores de OpenStreetMap) |
+| [Open-Meteo](https://open-meteo.com) | no | tiempo y hora local en el destino (CC BY 4.0) |
 | [AeroDataBox](https://rapidapi.com/aedbx-aedbx/api/aerodatabox) | **opcional** | horarios, retrasos, puertas y tablón completo |
 
 **Sin clave**, Pardela funciona con radar: ve los vuelos que están en el aire, su ruta y su avión.
