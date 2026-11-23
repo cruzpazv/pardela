@@ -284,7 +284,9 @@ private fun FichaAvion(v: Vuelo, completo: Boolean, verHistorial: (Avion) -> Uni
     Tarjeta {
         if (!completo) { Cargando("CARGANDO…"); return@Tarjeta }
         if (a.hex == null && a.matricula == null && a.modelo == null) {
-            Texto("La aerolínea aún no ha asignado avión a este vuelo.", 18, C.gris); return@Tarjeta
+            Texto("Todavía no hay información del avión de este vuelo.", 18, C.texto, FontWeight.Bold)
+            Texto("La aerolínea suele asignar el avión el mismo día, unas horas antes de salir. Vuelva a mirarlo entonces.", 16, C.gris, modifier = Modifier.padding(top = 4.dp))
+            return@Tarjeta
         }
         a.foto?.let { url ->
             AsyncImage(
@@ -300,8 +302,14 @@ private fun FichaAvion(v: Vuelo, completo: Boolean, verHistorial: (Avion) -> Uni
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(painterResource(R.drawable.ic_avion), null, tint = C.gris, modifier = Modifier.size(40.dp))
                 Spacer(Modifier.height(6.dp))
-                Texto("No hay foto de este avión", 18, Oscura.texto, FontWeight.Bold)
-                Texto("planespotters.net todavía no tiene ninguna.", 15, Oscura.gris)
+                // Solo se sabe el modelo: aún no hay un avión concreto (matrícula) del que buscar foto.
+                val sinAvion = a.matricula == null && a.hex == null
+                Texto(if (sinAvion) "Aún no se sabe qué avión hará este vuelo" else "No hay foto de este avión", 18, Oscura.texto, FontWeight.Bold)
+                Texto(
+                    if (sinAvion) "La aerolínea solo ha indicado el modelo. La matrícula y la foto suelen aparecer el mismo día del vuelo, unas horas antes."
+                    else "planespotters.net todavía no tiene ninguna.",
+                    15, Oscura.gris,
+                )
             }
         }
         DistintivoFabricante(a.tipoIcao, a.fabricante)
