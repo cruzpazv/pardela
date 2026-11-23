@@ -42,7 +42,19 @@ object Almacen {
     }.isSuccess
 
     val ajustes get() = _datos.value.ajustes
-    val tieneClave get() = _datos.value.ajustes.claveApi.isNotBlank()
+    /**
+     * Hay clave y se puede usar. Si RapidAPI dijo que no quedan consultas, se descansa 24 h
+     * (pasado ese tiempo se vuelve a probar: el plan se renueva cada mes).
+     */
+    val tieneClave get() = _datos.value.ajustes.let { a ->
+        a.claveApi.isNotBlank() && !(a.cuotaRestante == 0 && System.currentTimeMillis() - a.cuotaMomento < 24 * 3_600_000L)
+    }
+
+    /** Quedan menos del 10 % de las consultas del mes: se espacian más. */
+    val cuotaBaja get() = _datos.value.ajustes.let { a ->
+        val q = a.cuotaRestante ?: return@let false
+        q < (a.cuotaLimite?.div(10) ?: 30)
+    }
 
     fun sigue(v: Vuelo) = _datos.value.vuelos.any { it.numero == v.numero && it.fecha == v.fecha }
 

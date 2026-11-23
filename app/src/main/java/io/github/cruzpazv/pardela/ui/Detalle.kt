@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -64,6 +65,7 @@ import io.github.cruzpazv.pardela.data.Fabricantes
 import io.github.cruzpazv.pardela.data.Formato
 import io.github.cruzpazv.pardela.data.reciente
 import io.github.cruzpazv.pardela.data.Repositorio
+import io.github.cruzpazv.pardela.data.Resumen
 import io.github.cruzpazv.pardela.data.Vuelo
 import io.github.cruzpazv.pardela.notif.VigilanciaService
 import kotlinx.coroutines.delay
@@ -85,6 +87,7 @@ fun Detalle(inicial: Vuelo, atras: () -> Unit, verHistorial: (Avion) -> Unit, ve
     val seguido = datos.vuelos.any { it.numero == v.numero && it.fecha == v.fecha }
     val esteVigilado = vigilando == v.clave
 
+    val voz = rememberVoz()
     val permiso = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { VigilanciaService.empezar(ctx, v) }
 
     var primera by remember { mutableStateOf(true) }
@@ -94,7 +97,8 @@ fun Detalle(inicial: Vuelo, atras: () -> Unit, verHistorial: (Avion) -> Unit, ve
         val ahora = System.currentTimeMillis()
         // La primera vez solo radar: el vuelo llega recién buscado o actualizado por el comprobador.
         if (primera) { primera = false; ultimaClave.putIfAbsent(v.clave, ahora) }
-        val usarClave = v.conHorarios && ahora - (ultimaClave[v.clave] ?: 0L) > 10 * 60_000L
+        val cada = if (Almacen.cuotaBaja) 40 * 60_000L else 10 * 60_000L // con pocas consultas, más espaciadas
+        val usarClave = v.conHorarios && Almacen.tieneClave && ahora - (ultimaClave[v.clave] ?: 0L) > cada
         intentar { Repositorio.refrescar(v, usarClave) }.getOrNull()?.let { n ->
             if (usarClave) ultimaClave[v.clave] = ahora
             v = if (conAvion) n.copy(avion = v.avion.copy(hex = n.avion.hex ?: v.avion.hex)) else n
@@ -149,6 +153,12 @@ fun Detalle(inicial: Vuelo, atras: () -> Unit, verHistorial: (Avion) -> Unit, ve
             }
         }
 
+        Spacer(Modifier.height(10.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            BotonSecundario("🔊 ESCUCHAR", Modifier.weight(1f)) { voz.decir(Resumen.voz(v)) }
+            BotonSecundario("COMPARTIR", Modifier.weight(1f), icono = Icons.Default.Share) { compartirVuelo(ctx, v) }
+        }
+
         Progreso(v)
         if (hayMapa(v)) MapaPequeno(v) { verMapa(v) }
 
@@ -166,6 +176,10 @@ fun Detalle(inicial: Vuelo, atras: () -> Unit, verHistorial: (Avion) -> Unit, ve
         if (seguido) BotonSecundario("DEJAR DE SEGUIR", icono = Icons.Default.Close) { Almacen.dejar(v.numero, v.fecha) }
         else Boton("SEGUIR ESTE VUELO", icono = Icons.Default.Star) { Almacen.seguir(v) }
         Texto("Le avisaremos de despegue, aterrizaje, retrasos y puerta.", 15, C.gris, modifier = Modifier.padding(4.dp))
+        if (puedeIrAlCalendario(v)) {
+            Spacer(Modifier.height(8.dp))
+            BotonSecundario("AÑADIR AL CALENDARIO", icono = Icons.Default.DateRange) { anadirAlCalendario(ctx, v) }
+        }
 
         Spacer(Modifier.height(12.dp))
         if (esteVigilado) BotonSecundario("DEJAR DE VIGILAR", icono = Icons.Default.Close) { VigilanciaService.parar(ctx) }

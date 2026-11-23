@@ -213,12 +213,26 @@ fun AjustesPantalla(atras: () -> Unit) {
             colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = C.ambar, unfocusedBorderColor = C.gris, cursorColor = C.ambar),
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Boton("GUARDAR", Modifier.weight(1f)) { ajustar { it.copy(claveApi = clave) } }
+            // Al cambiar de clave, la cuenta de consultas anterior ya no vale.
+            Boton("GUARDAR", Modifier.weight(1f)) { ajustar { it.copy(claveApi = clave, cuotaRestante = null, cuotaLimite = null) } }
             if (aj.claveApi.isNotEmpty()) BotonSecundario("QUITAR", Modifier.weight(1f)) {
-                clave = ""; ajustar { it.copy(claveApi = "") }
+                clave = ""; ajustar { it.copy(claveApi = "", cuotaRestante = null, cuotaLimite = null) }
             }
         }
         if (aj.claveApi.isNotEmpty()) Texto("✔ Clave guardada", 18, C.verde, FontWeight.Bold, modifier = Modifier.padding(top = 8.dp))
+        if (aj.claveApi.isNotEmpty()) aj.cuotaRestante?.let { queda ->
+            val limite = aj.cuotaLimite
+            val poco = limite != null && queda < limite / 10
+            Texto(
+                "Consultas que quedan este mes: $queda" + (limite?.let { " de $it" } ?: ""),
+                18, if (poco) C.rojo else C.texto, FontWeight.Bold, modifier = Modifier.padding(top = 6.dp),
+            )
+            Texto(
+                "Según la última consulta, " + haceCuanto(aj.cuotaMomento) + "." +
+                    if (poco) " Quedan pocas: la app usará más el radar gratuito hasta el mes que viene." else "",
+                15, C.gris,
+            )
+        }
         BotonSecundario("ABRIR RAPIDAPI.COM", Modifier.padding(top = 10.dp)) {
             intentar { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://rapidapi.com/aedbx-aedbx/api/aerodatabox"))) }
         }
@@ -303,5 +317,16 @@ private fun Interruptor(titulo: String, activo: Boolean, detalle: String? = null
                 colors = SwitchDefaults.colors(checkedTrackColor = C.boton, checkedThumbColor = C.sobreBoton),
             )
         }
+    }
+}
+
+/** "hace 5 min", "hace 3 h", "hace 2 días". */
+private fun haceCuanto(momento: Long): String {
+    val min = (System.currentTimeMillis() - momento) / 60_000
+    return when {
+        min < 1 -> "ahora mismo"
+        min < 60 -> "hace $min min"
+        min < 24 * 60 -> "hace ${min / 60} h"
+        else -> "hace ${min / (24 * 60)} días"
     }
 }

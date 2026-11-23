@@ -24,6 +24,21 @@ class ErrorRed(msg: String) : IOException(msg)
 
 /** Peticiones HTTP y utilidades JSON tolerantes (las APIs cambian campos a menudo). */
 internal object Red {
+    /**
+     * RapidAPI indica en cada respuesta cuánto queda del plan: x-ratelimit-<nombre>-remaining / -limit.
+     * El nombre depende del plan ("requests", "units"…): se usa el que menos margen deja.
+     */
+    private fun apuntarCuota(r: okhttp3.Response) {
+        val cuotas = r.headers.names()
+            .filter { it.startsWith("x-ratelimit-", ignoreCase = true) && it.endsWith("-remaining", ignoreCase = true) }
+            .mapNotNull { n ->
+                val queda = r.header(n)?.toIntOrNull() ?: return@mapNotNull null
+                queda to r.header(n.dropLast("remaining".length) + "limit")?.toIntOrNull()
+            }
+        val (queda, limite) = cuotas.minByOrNull { it.first } ?: return
+        Almacen.ajustar { it.copy(cuotaRestante = queda, cuotaLimite = limite ?: it.cuotaLimite, cuotaMomento = System.currentTimeMillis()) }
+    }
+
     val agente = "Pardela/${BuildConfig.VERSION_NAME} (Android; +${BuildConfig.CONTACTO})"
 
     private val http = OkHttpClient.Builder()
@@ -47,9 +62,12 @@ internal object Red {
             }
             val req = Request.Builder().url(url).apply { cabeceras.forEach { (k, v) -> header(k, v) } }.build()
             http.newCall(req).execute().use { r ->
+                if (url.contains("rapidapi.com")) apuntarCuota(r)
                 when {
                     r.code == 204 || r.code == 404 -> null
                     r.code == 401 || r.code == 403 -> throw ErrorRed("La clave API no es válida")
+                    r.code == 429 && url.contains("rapidapi.com") ->
+                        throw ErrorRed("Se han agotado las consultas de la clave de este mes, o ha hecho demasiadas seguidas")
                     r.code == 429 -> throw ErrorRed("Demasiadas consultas. Espere un momento")
                     !r.isSuccessful -> throw ErrorRed("Error del servidor (${r.code})")
                     else -> r.body?.string()?.takeIf { it.isNotBlank() }?.let { intentar { json.parseToJsonElement(it) }.getOrNull() }

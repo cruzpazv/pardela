@@ -85,12 +85,14 @@ class Comprobador(ctx: Context, p: WorkerParameters) : CoroutineWorker(ctx, p) {
         val sale = v.salida.utcPrevista ?: v.salida.utc ?: return TimeUnit.HOURS.toMillis(3)
         val llega = v.llegada.utcPrevista ?: v.llegada.utc ?: (sale + TimeUnit.HOURS.toMillis(3))
         val activo = ahora > sale - TimeUnit.HOURS.toMillis(4) && ahora < llega + TimeUnit.HOURS.toMillis(1)
-        return when {
+        val base = when {
             activo -> TimeUnit.MINUTES.toMillis(30)
             // Vuelos lejanos (p. ej. dentro de un mes): una consulta al día basta para ver cambios de horario.
             sale - ahora > TimeUnit.DAYS.toMillis(2) -> TimeUnit.HOURS.toMillis(24)
             else -> TimeUnit.HOURS.toMillis(3)
         }
+        // Con pocas consultas en el mes: cuatro veces más espaciadas; el radar gratuito cubre el resto.
+        return if (Almacen.cuotaBaja) base * 4 else base
     }
 
     companion object {

@@ -149,6 +149,10 @@ data class Ajustes(
     val silencio: Boolean = false,
     val silencioDesde: Int = 22,
     val silencioHasta: Int = 8,
+    // Consultas que le quedan a la clave (lo dice RapidAPI en cada respuesta).
+    val cuotaRestante: Int? = null,
+    val cuotaLimite: Int? = null,
+    val cuotaMomento: Long = 0,
 )
 
 @Serializable
