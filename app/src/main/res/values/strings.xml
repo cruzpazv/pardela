@@ -394,4 +394,16 @@
     <string name="como_se_usa">"HOW TO USE IT"</string>
     <string name="como_se_usa_detalle">"Quick guide in 4 steps"</string>
     <string name="recientes">"RECENT"</string>
+    <string name="puntualidad">"PUNCTUALITY"</string>
+    <string name="suele_ser_puntual_pregunta">"IS IT USUALLY ON TIME?"</string>
+    <string name="usa_una_consulta">"Uses 1 request of your key."</string>
+    <string name="al_salir_x">"Departure: %1$s"</string>
+    <string name="al_llegar_x">"Arrival: %1$s"</string>
+    <string name="suele_puntual">"usually on time"</string>
+    <string name="suele_tarde_x">"usually %1$s min late"</string>
+    <string name="suele_antes_x">"usually %1$s min early"</string>
+    <string name="p80_x">"8 out of 10 arrive less than %1$s min late."</string>
+    <string name="segun_x_vuelos">"Based on %1$s flights in recent months."</string>
+    <string name="puntualidad_sin_datos">"There is no punctuality data for this flight."</string>
+    <string name="puntualidad_no_disponible">"Punctuality could not be retrieved. Your AeroDataBox plan may not include it."</string>
 </resources>

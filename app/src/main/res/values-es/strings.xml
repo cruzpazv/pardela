@@ -394,4 +394,16 @@
     <string name="como_se_usa">"CÓMO SE USA"</string>
     <string name="como_se_usa_detalle">"Guía rápida en 4 pasos"</string>
     <string name="recientes">"RECIENTES"</string>
+    <string name="puntualidad">"PUNTUALIDAD"</string>
+    <string name="suele_ser_puntual_pregunta">"¿SUELE SER PUNTUAL?"</string>
+    <string name="usa_una_consulta">"Usa 1 consulta de la clave."</string>
+    <string name="al_salir_x">"Al salir: %1$s"</string>
+    <string name="al_llegar_x">"Al llegar: %1$s"</string>
+    <string name="suele_puntual">"suele ser puntual"</string>
+    <string name="suele_tarde_x">"suele ir %1$s min tarde"</string>
+    <string name="suele_antes_x">"suele adelantarse %1$s min"</string>
+    <string name="p80_x">"8 de cada 10 llegan con menos de %1$s min de retraso."</string>
+    <string name="segun_x_vuelos">"Según %1$s vuelos de los últimos meses."</string>
+    <string name="puntualidad_sin_datos">"No hay datos de puntualidad de este vuelo."</string>
+    <string name="puntualidad_no_disponible">"No se ha podido consultar la puntualidad. Puede que su plan de AeroDataBox no la incluya."</string>
 </resources>

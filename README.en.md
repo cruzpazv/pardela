@@ -35,6 +35,7 @@ Every version is signed with the same key, so each one installs over the previou
 - **Routes:** an alert for each flight between two cities (for example, Gran Canaria → Madrid).
 - **The aircraft:** photo, manufacturer, model, registration, airline logo and its flights from the last 7 days.
 - **Map:** where the aircraft is, the planned route and the real path it has flown.
+- **Punctuality:** how late that flight usually departs and arrives (with a key).
 - **At the destination:** local time, current weather and the forecast for when it lands.
 - **Share, calendar and voice:** send the flight by WhatsApp, add it to your calendar or hear its status read aloud.
 - **Widgets** for the home screen (large and small) with the next flight.

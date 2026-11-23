@@ -229,6 +229,61 @@ object AeroDataBox {
         return l
     }
 
+    /** Retraso habitual (min, + tarde / − antes) al salir y al llegar, y el percentil 80 de llegada. */
+    data class Puntualidad(val salida: Int?, val llegada: Int?, val llegadaP80: Int?, val vuelos: Int?)
+
+    private val cachePuntualidad = HashMap<String, Puntualidad?>()
+
+    /**
+     * Estadísticas de retraso de un número de vuelo (consulta de nivel 3: puede no estar en el plan gratuito).
+     * Se lee de forma tolerante: se buscan los registros con "medianDelay" bajo claves de origen o destino.
+     */
+    suspend fun puntualidad(numero: String, origenIcao: String?, destinoIcao: String?): Puntualidad? {
+        synchronized(cachePuntualidad) { if (cachePuntualidad.containsKey(numero)) return cachePuntualidad[numero] }
+        val j = get("/flights/$numero/delays") ?: return null
+        val registros = mutableListOf<Pair<Char, JsonElement>>()
+        fun recoger(e: JsonElement?, lado: Char) {
+            when (e) {
+                is kotlinx.serialization.json.JsonObject -> {
+                    if (e["medianDelay"] != null) registros += lado to e
+                    e.forEach { (k, v) ->
+                        val l = when {
+                            k.contains("origin", true) || k.contains("depart", true) -> 's'
+                            k.contains("destin", true) || k.contains("arriv", true) -> 'l'
+                            else -> lado
+                        }
+                        recoger(v, l)
+                    }
+                }
+                is JsonArray -> e.forEach { recoger(it, lado) }
+                else -> {}
+            }
+        }
+        recoger(j, '?')
+        fun mejor(lado: Char, icao: String?) = registros.filter { it.first == lado }.map { it.second }.let { l ->
+            l.firstOrNull { it.s("airportIcao").equals(icao, true) } ?: l.maxByOrNull { it.d("numConsideredFlights") ?: 0.0 }
+        }
+        val s = mejor('s', origenIcao) ?: mejor('?', origenIcao)
+        val l = mejor('l', destinoIcao)
+        if (s == null && l == null) {
+            synchronized(cachePuntualidad) { cachePuntualidad[numero] = null }
+            return null
+        }
+        val p80 = l?.lista("delayPercentiles")?.firstOrNull { p -> p.d("percentile")?.let { it == 80.0 || it in 0.79..0.81 } == true }?.s("delay")
+        val r = Puntualidad(minutos(s?.s("medianDelay")), minutos(l?.s("medianDelay")), minutos(p80), (l ?: s)?.d("numConsideredFlights")?.toInt())
+        synchronized(cachePuntualidad) { cachePuntualidad[numero] = r }
+        return r
+    }
+
+    /** "00:08:00", "-00:04:00", "1.02:00:00" → minutos. */
+    private fun minutos(t: String?): Int? {
+        val texto = t?.trim() ?: return null
+        val m = Regex("""^(-)?(?:(\d+)\.)?(\d+):(\d+)""").find(texto) ?: return null
+        val (signo, dias, h, min) = m.destructured
+        val total = (dias.toIntOrNull() ?: 0) * 1440 + h.toInt() * 60 + min.toInt()
+        return if (signo == "-") -total else total
+    }
+
     private val cacheAvion = HashMap<String, Pair<Long, List<Vuelo>>>()
 
     /** Vuelos de un avión (por matrícula o, si no, por código radar) entre dos fechas. Se guarda 30 min. */

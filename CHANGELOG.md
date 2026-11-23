@@ -13,6 +13,7 @@ Primera versión · First version.
 - Ficha del avión con foto e historial de 7 días; aviso de vuelos de posicionamiento (y opción de ocultarlos).
 - Mapa con la ruta prevista, el recorrido real y la posición en directo.
 - Hora local y tiempo en el destino.
+- Puntualidad habitual del vuelo (con clave).
 - Compartir, añadir al calendario y escuchar el estado en voz alta.
 
 **Aeropuertos y trayectos**

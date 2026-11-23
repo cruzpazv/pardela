@@ -181,6 +181,7 @@ fun Detalle(inicial: Vuelo, atras: () -> Unit, verHistorial: (Avion) -> Unit, ve
             Texto(tx(R.string.i_horarios_puertas_y_retrasos_anada_un), 15, C.gris)
         }
         EnDestino(v)
+        if (!sencillo && v.conHorarios && Almacen.tieneClave) Puntualidad(v)
 
         Spacer(Modifier.height(22.dp))
         if (seguido) BotonSecundario(tx(R.string.dejar_de_seguir), icono = Icons.Default.Close) { Almacen.dejar(v.numero, v.fecha) }
@@ -352,6 +353,40 @@ private fun FichaAvion(v: Vuelo, completo: Boolean, verHistorial: (Avion) -> Uni
         if (a.matricula != null || a.hex != null) {
             Spacer(Modifier.height(12.dp))
             BotonSecundario(tx(R.string.vuelos_anteriores_de_este_avion), icono = Icons.Default.DateRange) { verHistorial(a) }
+        }
+    }
+}
+
+/** ¿Suele ser puntual? Bajo demanda: gasta una consulta de la clave. */
+@Composable
+private fun Puntualidad(v: Vuelo) {
+    val scope = rememberCoroutineScope()
+    var estado by remember(v.numero) { mutableStateOf<Result<io.github.cruzpazv.pardela.data.AeroDataBox.Puntualidad?>?>(null) }
+    var cargando by remember { mutableStateOf(false) }
+    Seccion(tx(R.string.puntualidad))
+    val r = estado
+    when {
+        cargando -> Cargando(tx(R.string.cargando))
+        r == null -> {
+            BotonSecundario(tx(R.string.suele_ser_puntual_pregunta)) {
+                cargando = true
+                scope.launch { estado = intentar { Repositorio.puntualidad(v) }; cargando = false }
+            }
+            Texto(tx(R.string.usa_una_consulta), 14, C.gris, modifier = Modifier.padding(top = 4.dp))
+        }
+        r.isFailure -> AvisoError(r.exceptionOrNull()?.message ?: tx(R.string.sin_conexion))
+        r.getOrNull() == null -> Texto(tx(R.string.puntualidad_sin_datos), 17, C.gris)
+        else -> Tarjeta {
+            val p = r.getOrNull()!!
+            fun habitual(m: Int) = when {
+                kotlin.math.abs(m) <= 5 -> tx(R.string.suele_puntual)
+                m > 0 -> tx(R.string.suele_tarde_x, m)
+                else -> tx(R.string.suele_antes_x, -m)
+            }
+            p.salida?.let { Texto(tx(R.string.al_salir_x, habitual(it)), 19, C.texto, FontWeight.Bold) }
+            p.llegada?.let { Texto(tx(R.string.al_llegar_x, habitual(it)), 19, C.texto, FontWeight.Bold, modifier = Modifier.padding(top = 4.dp)) }
+            p.llegadaP80?.takeIf { it > 5 }?.let { Texto(tx(R.string.p80_x, it), 16, C.texto, modifier = Modifier.padding(top = 6.dp)) }
+            p.vuelos?.let { Texto(tx(R.string.segun_x_vuelos, it), 14, C.gris, modifier = Modifier.padding(top = 6.dp)) }
         }
     }
 }

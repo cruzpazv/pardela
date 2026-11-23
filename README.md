@@ -41,6 +41,7 @@ Todas las versiones van firmadas con la misma clave, así que cada una se instal
 - **¿Qué avión pasa por aquí?** Mapa y lista de los aviones en el aire cerca de usted o de un aeropuerto, con su ruta.
 - **Buscar por trayecto:** todos los vuelos directos de un día entre dos aeropuertos, hasta un año vista.
 - **Historial del avión:** sus vuelos de los últimos 7 días.
+- **Puntualidad:** cuánto suele retrasarse ese vuelo al salir y al llegar (con clave).
 
 ## Pensada para que la use cualquiera
 - Letra grande por defecto y botones de al menos 68 dp.

@@ -206,6 +206,17 @@ object Repositorio {
         return AeroDataBox.porTrayecto(origen, destino, fecha.toString()).map { conAerolinea(it) }
     }
 
+    /** Puntualidad habitual de este número de vuelo. Necesita clave (y que el plan incluya la consulta). */
+    suspend fun puntualidad(v: Vuelo): AeroDataBox.Puntualidad? {
+        if (!Almacen.tieneClave) return null
+        return try {
+            AeroDataBox.puntualidad(v.numero, Aeropuertos.iata(v.salida.lugar.iata)?.icao, Aeropuertos.iata(v.llegada.lugar.iata)?.icao)
+        } catch (e: ErrorRed) {
+            if (e.codigo == 401 || e.codigo == 403) error(tx(R.string.puntualidad_no_disponible))
+            throw e
+        }
+    }
+
     /** Vuelos del avión en los últimos 7 días, del más reciente al más antiguo. Necesita clave. */
     suspend fun historialAvion(a: Avion): List<Vuelo> {
         if (!Almacen.tieneClave) error(tx(R.string.para_ver_los_vuelos_anteriores_del_avi))
