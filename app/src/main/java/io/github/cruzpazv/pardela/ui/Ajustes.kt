@@ -2,6 +2,7 @@ package io.github.cruzpazv.pardela.ui
 
 import io.github.cruzpazv.pardela.R
 import io.github.cruzpazv.pardela.tx
+import io.github.cruzpazv.pardela.Idioma
 
 import io.github.cruzpazv.pardela.data.intentar
 import android.content.Intent
@@ -149,6 +150,13 @@ fun AjustesSeccion(seccion: SeccionAjustes, atras: () -> Unit) {
                 Texto(tx(R.string.auto_claro_u_oscuro_segun_el_movil), 15, C.gris, modifier = Modifier.padding(top = 6.dp))
                 Seccion(tx(R.string.unidades))
                 Elegir(Unidades.entries, aj.unidades, { it.texto }) { u -> ajustar { it.copy(unidades = u) } }
+                Seccion(tx(R.string.idioma))
+                val ctx = LocalContext.current
+                // Los nombres de los idiomas van siempre en su propio idioma, para encontrarlos aunque no se entienda el actual.
+                Elegir(Idioma.disponibles, Idioma.actual(ctx), {
+                    when (it) { "es" -> "ESPAÑOL"; "en" -> "ENGLISH"; else -> tx(R.string.tema_auto) }
+                }) { codigo -> Idioma.cambiar(ctx, codigo) }
+                Texto(tx(R.string.idioma_auto), 15, C.gris, modifier = Modifier.padding(top = 6.dp))
             }
             SeccionAjustes.AVISOS -> AjustesAvisos(aj, ::ajustar)
             SeccionAjustes.CLAVE -> AjustesClave(aj, ::ajustar)

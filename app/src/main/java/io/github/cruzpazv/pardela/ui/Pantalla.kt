@@ -4,7 +4,8 @@ import io.github.cruzpazv.pardela.data.Avion
 import io.github.cruzpazv.pardela.data.Vuelo
 
 sealed interface Pantalla {
-    data object Inicio : Pantalla
+    /** Inicio con dos pestañas; recuerda cuál estaba abierta al volver de otra pantalla. */
+    data object Inicio : Pantalla { val guardados = androidx.compose.runtime.mutableStateOf(false) }
     /** Cada pantalla de la pila guarda su estado: al volver atrás se ve igual que se dejó. */
     class BuscarVuelo : Pantalla { val estado = EstadoBusqueda() }
     data object Ajustes : Pantalla

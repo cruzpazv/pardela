@@ -364,4 +364,8 @@
     <string name="cielo_chubascos_de_nieve">"snow showers"</string>
     <string name="cielo_tormenta">"thunderstorm"</string>
     <string name="cielo_tormenta_con_granizo">"thunderstorm with hail"</string>
+    <string name="idioma">"LANGUAGE"</string>
+    <string name="idioma_auto">"AUTO: the phone's language."</string>
+    <string name="pestana_inicio">"HOME"</string>
+    <string name="pestana_guardados">"SAVED"</string>
 </resources>

@@ -27,9 +27,11 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         contexto = this
+        app = this
         guardarFallos()
         prepararMapa(this, "Pardela/${BuildConfig.VERSION_NAME} (Android; +${BuildConfig.CONTACTO})")
         Almacen.iniciar(this)
+        reaplicarIdioma()
         Aeropuertos.cargar(this)
         Avisos.crearCanales(this)
         Comprobador.programar(this)
@@ -59,6 +61,11 @@ class App : Application() {
         /** Contexto de la aplicación, para los textos traducidos fuera de las pantallas. */
         lateinit var contexto: Context
             private set
+        private lateinit var app: App
+
+        /** Vuelve a calcular el contexto de los textos con el idioma elegido (Android 12 o anterior). */
+        fun reaplicarIdioma() { contexto = Idioma.envolver(app) }
+
         fun ficheroFallo(app: android.content.Context) = File(app.filesDir, "fallo.txt")
     }
 }

@@ -364,4 +364,8 @@
     <string name="cielo_chubascos_de_nieve">"chubascos de nieve"</string>
     <string name="cielo_tormenta">"tormenta"</string>
     <string name="cielo_tormenta_con_granizo">"tormenta con granizo"</string>
+    <string name="idioma">"IDIOMA"</string>
+    <string name="idioma_auto">"AUTO: el idioma del móvil."</string>
+    <string name="pestana_inicio">"INICIO"</string>
+    <string name="pestana_guardados">"GUARDADOS"</string>
 </resources>

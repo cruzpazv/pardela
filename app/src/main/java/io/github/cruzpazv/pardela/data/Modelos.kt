@@ -167,6 +167,8 @@ data class Ajustes(
     val cuotaMomento: Long = 0,
     // Recordatorio antes de salir, en horas (0 = no).
     val recordatorio: Int = 3,
+    // Idioma elegido en la app: "" = el del móvil, "es", "en".
+    val idioma: String = "",
 )
 
 @Serializable

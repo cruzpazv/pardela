@@ -49,6 +49,9 @@ class MainActivity : ComponentActivity() {
     private val pila = mutableStateListOf<Pantalla>(Pantalla.Inicio)
     private val pedirPermiso = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
 
+    // Android 12 o anterior: la pantalla usa el idioma elegido en Ajustes.
+    override fun attachBaseContext(base: android.content.Context) = super.attachBaseContext(Idioma.envolver(base))
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         abrirDesdeAviso(intent)

@@ -7,6 +7,7 @@ import io.github.cruzpazv.pardela.data.Aerolineas
 import io.github.cruzpazv.pardela.data.intentar
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -61,13 +63,6 @@ import kotlinx.coroutines.launch
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
-@Composable
-fun Reloj() {
-    var hora by remember { mutableStateOf(LocalTime.now()) }
-    LaunchedEffect(Unit) { while (true) { hora = LocalTime.now(); delay(1000) } }
-    Paletas(hora.format(DateTimeFormatter.ofPattern("HH:mm")), 20, C.texto)
-}
-
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun Inicio(ir: (Pantalla) -> Unit) {
@@ -89,10 +84,14 @@ fun Inicio(ir: (Pantalla) -> Unit) {
     }
     LaunchedEffect(Unit) { refrescarTodo() }
 
+    var guardados by Pantalla.Inicio.guardados
+
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
             Paletas("PARDELA", 24)
-            Reloj()
+            IconButton(onClick = { ir(Pantalla.Ajustes) }, modifier = Modifier.size(56.dp)) {
+                Icon(Icons.Default.Settings, tx(R.string.ajustes), tint = C.ambar, modifier = Modifier.size(38.dp))
+            }
         }
 
         vigilando?.let { clave ->
@@ -103,6 +102,22 @@ fun Inicio(ir: (Pantalla) -> Unit) {
             }
         }
 
+        // Dos pestañas: lo que se puede hacer y lo que tiene guardado.
+        Spacer(Modifier.height(14.dp))
+        val total = datos.vuelos.size + datos.aeropuertos.size + datos.trayectos.size
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf(false to tx(R.string.pestana_inicio), true to tx(R.string.pestana_guardados) + if (total > 0) " ($total)" else "").forEach { (g, nombre) ->
+                val sel = g == guardados
+                Box(
+                    Modifier.weight(1f).heightIn(min = 60.dp).clip(RoundedCornerShape(12.dp))
+                        .background(if (sel) C.boton else C.panel).border(2.dp, C.ambar, RoundedCornerShape(12.dp))
+                        .clickable { guardados = g },
+                    contentAlignment = Alignment.Center,
+                ) { Texto(nombre, 19, if (sel) C.sobreBoton else C.ambar, FontWeight.Bold) }
+            }
+        }
+
+        if (!guardados) {
         Spacer(Modifier.height(18.dp))
         Boton(tx(R.string.buscar_un_vuelo), icono = Icons.Default.Search) { ir(Pantalla.BuscarVuelo()) }
         Spacer(Modifier.height(10.dp))
@@ -111,6 +126,7 @@ fun Inicio(ir: (Pantalla) -> Unit) {
         BotonSecundario(tx(R.string.avisarme_de_un_trayecto), icono = Icons.Default.Notifications) { ir(Pantalla.BuscarAeropuerto("")) }
         Spacer(Modifier.height(10.dp))
         BotonSecundario(tx(R.string.que_avion_pasa_por_aqui), icono = Icons.Default.LocationOn) { ir(Pantalla.Cerca(null, null, tx(R.string.aviones_cerca_de_usted))) }
+        } else {
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.weight(1f)) { Seccion(tx(R.string.mis_vuelos)) }
@@ -150,8 +166,7 @@ fun Inicio(ir: (Pantalla) -> Unit) {
             }
         }
 
-        Spacer(Modifier.height(26.dp))
-        BotonSecundario(tx(R.string.ajustes), icono = Icons.Default.Settings) { ir(Pantalla.Ajustes) }
+        }
         Spacer(Modifier.height(30.dp))
     }
 
