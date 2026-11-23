@@ -35,6 +35,7 @@ Todas las versiones van firmadas con la misma clave, así que cada una se instal
 - **En el destino:** la hora local, el tiempo ahora y la previsión para cuando aterrice.
 - **Compartir, calendario y voz:** envíe el vuelo por WhatsApp, guárdelo en el calendario u oiga su estado en voz alta.
 - **Recordatorio** unas horas antes de salir.
+- **Widget** para la pantalla de inicio con el próximo vuelo, su estado y sus horas.
 
 ## Pensada para que la use cualquiera
 - Letra grande por defecto y botones de al menos 68 dp.

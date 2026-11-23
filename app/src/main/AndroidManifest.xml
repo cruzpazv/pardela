@@ -37,5 +37,17 @@
             android:name=".notif.VigilanciaService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+
+        <receiver
+            android:name=".notif.WidgetVuelo"
+            android:exported="false"
+            android:label="@string/widget_nombre">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_vuelo_info" />
+        </receiver>
     </application>
 </manifest>

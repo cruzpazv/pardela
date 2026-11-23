@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Pardela</string>
+    <string name="widget_nombre">Próximo vuelo</string>
+    <string name="widget_descripcion">El próximo vuelo que sigue, con su estado y sus horas.</string>
 </resources>
