@@ -105,3 +105,17 @@ tasks.withType<Test>().configureEach {
         showCauses = true
     }
 }
+
+// Robolectric necesita un Android completo (~150 MB). Se baja aquí como dependencia de Gradle (queda en la
+// caché de Actions) y no durante las pruebas: Maven Central respondía 429 (demasiadas descargas) a Robolectric.
+val androidSimulado: Configuration by configurations.creating { isTransitive = false }
+dependencies { androidSimulado("org.robolectric:android-all-instrumented:15-robolectric-12650502-i7") }
+val prepararAndroidSimulado = tasks.register<Sync>("prepararAndroidSimulado") {
+    from(androidSimulado)
+    into(layout.buildDirectory.dir("android-simulado"))
+}
+tasks.withType<Test>().configureEach {
+    dependsOn(prepararAndroidSimulado)
+    systemProperty("robolectric.offline", "true")
+    systemProperty("robolectric.dependency.dir", layout.buildDirectory.dir("android-simulado").get().asFile.absolutePath)
+}

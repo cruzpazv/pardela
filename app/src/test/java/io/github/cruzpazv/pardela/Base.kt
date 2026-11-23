@@ -15,7 +15,7 @@ import org.robolectric.annotation.Config
  * (sin WorkManager ni canales), textos en español y datos limpios.
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(application = Application::class, sdk = [34])
+@Config(application = Application::class) // Android 15 (el targetSdk): es el que se descarga en build.gradle.kts
 abstract class Base {
     @Before
     fun preparar() {
