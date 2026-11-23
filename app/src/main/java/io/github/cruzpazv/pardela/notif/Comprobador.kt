@@ -1,5 +1,8 @@
 package io.github.cruzpazv.pardela.notif
 
+import io.github.cruzpazv.pardela.R
+import io.github.cruzpazv.pardela.tx
+
 import io.github.cruzpazv.pardela.data.intentar
 
 import android.content.Context
@@ -58,8 +61,8 @@ class Comprobador(ctx: Context, p: WorkerParameters) : CoroutineWorker(ctx, p) {
                 val antes = t.vistos[v.numero]
                 val textos = if (antes == null) {
                     if (t.ultimaConsulta == 0L) emptyList() // primera vez: solo memoriza
-                    else if (v.conHorarios) listOf(Avisos.Cambio("Nuevo vuelo en su trayecto: sale ${v.salida.hora ?: "hoy"}"))
-                    else listOf(Avisos.Cambio("✈ En el aire: ${v.estado.texto.lowercase()}"))
+                    else if (v.conHorarios) listOf(Avisos.Cambio(tx(R.string.nuevo_vuelo_en_su_trayecto_sale_x, v.salida.hora ?: "hoy")))
+                    else listOf(Avisos.Cambio(tx(R.string.en_el_aire_x, v.estado.texto.lowercase())))
                 } else Avisos.cambios(antes, v)
                 Avisos.avisar(applicationContext, v, textos)
                 nuevos[v.numero] = v
@@ -91,14 +94,14 @@ class Comprobador(ctx: Context, p: WorkerParameters) : CoroutineWorker(ctx, p) {
         if (falta <= 0 || falta > horas * 3_600_000L) return
         val min = falta / 60_000
         val dentro = when {
-            min < 60 -> "$min min"
-            min % 60 < 5 -> "${min / 60} h"
-            else -> "${min / 60} h ${min % 60} min"
+            min < 60 -> tx(R.string.x_min, min)
+            min % 60 < 5 -> tx(R.string.x_h_2, min / 60)
+            else -> tx(R.string.x_h_x_min, min / 60, min % 60)
         }
         val hora = v.salida.horaPrevista ?: v.salida.hora
-        val donde = listOfNotNull(v.salida.terminal?.let { "terminal $it" }, v.salida.puerta?.let { "puerta $it" }).joinToString(", ")
-        val texto = "⏰ Recordatorio: su vuelo sale" + (hora?.let { " a las $it" } ?: "") + ", dentro de $dentro." +
-            (if (donde.isNotEmpty()) " Salida por $donde." else "")
+        val donde = listOfNotNull(v.salida.terminal?.let { tx(R.string.terminal_x, it) }, v.salida.puerta?.let { tx(R.string.puerta_x_2, it) }).joinToString(", ")
+        val texto = tx(R.string.recordatorio_su_vuelo_sale) + (hora?.let { tx(R.string.a_las_x, it) } ?: "") + tx(R.string.dentro_de_x, dentro) +
+            (if (donde.isNotEmpty()) tx(R.string.salida_por_x, donde) else "")
         Avisos.avisar(applicationContext, v, listOf(Avisos.Cambio(texto)))
         Almacen.cambiar { d -> d.copy(vuelos = d.vuelos.map { if (it.clave == s.clave) it.copy(recordado = true) else it }) }
     }

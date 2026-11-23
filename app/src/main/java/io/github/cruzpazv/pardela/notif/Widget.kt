@@ -1,5 +1,7 @@
 package io.github.cruzpazv.pardela.notif
 
+import io.github.cruzpazv.pardela.tx
+
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
@@ -46,9 +48,9 @@ object Widget {
         if (v == null) {
             r.setTextViewText(R.id.numero, "PARDELA")
             r.setTextViewText(R.id.dia, "")
-            r.setTextViewText(R.id.ruta, "Sin vuelos próximos")
+            r.setTextViewText(R.id.ruta, tx(R.string.sin_vuelos_proximos))
             r.setTextViewText(R.id.estado, "")
-            r.setTextViewText(R.id.horas, "Toque aquí para buscar un vuelo y pulse SEGUIR.")
+            r.setTextViewText(R.id.horas, tx(R.string.toque_aqui_para_buscar_un_vuelo_y_puls))
             r.setOnClickPendingIntent(R.id.widget, Avisos.abrirApp(ctx))
         } else {
             r.setTextViewText(R.id.numero, v.numero)
@@ -68,9 +70,9 @@ object Widget {
         val f = fecha ?: return ""
         val hoy = LocalDate.now()
         return when (f) {
-            hoy.toString() -> "HOY"
-            hoy.plusDays(1).toString() -> "MAÑANA"
-            hoy.minusDays(1).toString() -> "AYER"
+            hoy.toString() -> tx(R.string.hoy)
+            hoy.plusDays(1).toString() -> tx(R.string.manana)
+            hoy.minusDays(1).toString() -> tx(R.string.ayer)
             else -> f.takeLast(5).split("-").reversed().joinToString("/")
         }
     }
@@ -78,12 +80,12 @@ object Widget {
     private fun horas(v: Vuelo): String {
         val s = v.salida; val l = v.llegada
         return when (v.estado) {
-            Estado.ATERRIZADO -> "Llegó a las ${l.horaPrevista ?: l.hora ?: "?"}" + (l.cinta?.let { " · cinta $it" } ?: "")
-            Estado.EN_VUELO, Estado.APROXIMANDO -> "Llega a las ${l.horaPrevista ?: l.hora ?: "?"}" + (l.cinta?.let { " · cinta $it" } ?: "")
+            Estado.ATERRIZADO -> tx(R.string.llego_a_las_x, l.horaPrevista ?: l.hora ?: "?") + (l.cinta?.let { tx(R.string.cinta_x, it) } ?: "")
+            Estado.EN_VUELO, Estado.APROXIMANDO -> tx(R.string.llega_a_las_x, l.horaPrevista ?: l.hora ?: "?") + (l.cinta?.let { tx(R.string.cinta_x, it) } ?: "")
             else -> listOfNotNull(
-                (s.horaPrevista ?: s.hora)?.let { "Sale $it" },
-                s.puerta?.let { "puerta $it" },
-                (l.horaPrevista ?: l.hora)?.let { "llega $it" },
+                (s.horaPrevista ?: s.hora)?.let { tx(R.string.sale_x, it) },
+                s.puerta?.let { tx(R.string.puerta_x_2, it) },
+                (l.horaPrevista ?: l.hora)?.let { tx(R.string.llega_x, it) },
             ).joinToString(" · ")
         }
     }

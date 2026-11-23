@@ -1,5 +1,8 @@
 package io.github.cruzpazv.pardela.ui
 
+import io.github.cruzpazv.pardela.R
+import io.github.cruzpazv.pardela.tx
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,11 +30,11 @@ fun HistorialAvion(avion: Avion, atras: () -> Unit, abrir: (Vuelo) -> Unit) {
     var error by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(Unit) {
         intentar { Repositorio.historialAvion(avion) }
-            .onSuccess { lista = it }.onFailure { error = it.message ?: "Sin conexión" }
+            .onSuccess { lista = it }.onFailure { error = it.message ?: tx(R.string.sin_conexion) }
     }
     Column(Modifier.fillMaxSize().padding(16.dp)) {
-        Cabecera("AVIÓN ${avion.matricula ?: avion.hex?.uppercase() ?: ""}", atras)
-        Texto("Vuelos de los últimos 7 días, del más reciente al más antiguo.", 17, C.gris)
+        Cabecera(tx(R.string.avion_x, avion.matricula ?: avion.hex?.uppercase() ?: ""), atras)
+        Texto(tx(R.string.vuelos_de_los_ultimos_7_dias_del_mas_r), 17, C.gris)
         Spacer(Modifier.height(8.dp))
         // Copias locales: el contenido de LazyColumn se evalúa más tarde.
         val err = error
@@ -39,7 +42,7 @@ fun HistorialAvion(avion: Avion, atras: () -> Unit, abrir: (Vuelo) -> Unit) {
         when {
             err != null -> AvisoError(err)
             vuelos == null -> Cargando()
-            vuelos.isEmpty() -> Texto("No consta ningún vuelo de este avión en los últimos 7 días.", 18, C.gris, modifier = Modifier.padding(16.dp))
+            vuelos.isEmpty() -> Texto(tx(R.string.no_consta_ningun_vuelo_de_este_avion_e), 18, C.gris, modifier = Modifier.padding(16.dp))
             else -> LazyColumn { items(vuelos) { v -> FilaVuelo(v, salidas = true, conOrigen = true) { abrir(v) } } }
         }
     }

@@ -1,5 +1,8 @@
 package io.github.cruzpazv.pardela.ui
 
+import io.github.cruzpazv.pardela.R
+import io.github.cruzpazv.pardela.tx
+
 import io.github.cruzpazv.pardela.data.intentar
 
 import androidx.compose.foundation.background
@@ -82,7 +85,7 @@ fun Cabecera(titulo: String, atras: () -> Unit, derecha: @Composable () -> Unit 
         Box(
             Modifier.size(60.dp).clip(RoundedCornerShape(14.dp)).background(C.panel).clickable(onClick = atras),
             contentAlignment = Alignment.Center,
-        ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver", tint = C.ambar, modifier = Modifier.size(36.dp)) }
+        ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, tx(R.string.volver), tint = C.ambar, modifier = Modifier.size(36.dp)) }
         Spacer(Modifier.width(14.dp))
         Box(Modifier.weight(1f)) { Texto(titulo, 22, C.ambar, FontWeight.Bold, mono = true, lineas = 2) }
         derecha()
@@ -109,7 +112,7 @@ fun Campo(valor: String, cambia: (String) -> Unit, pista: String, alEnviar: () -
 }
 
 @Composable
-fun Cargando(texto: String = "BUSCANDO…") {
+fun Cargando(texto: String = tx(R.string.buscando)) {
     Row(Modifier.fillMaxWidth().padding(24.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
         CircularProgressIndicator(color = C.ambar, strokeWidth = 4.dp, modifier = Modifier.size(36.dp))
         Spacer(Modifier.width(16.dp))
@@ -156,25 +159,25 @@ fun BuscarVuelo(e: EstadoBusqueda, atras: () -> Unit, abrir: (Vuelo) -> Unit) {
         if (cargando) return
         val o = origen; val d = destino
         if (porTrayecto) {
-            if (o == null || d == null) { error = "Elija el aeropuerto de salida y el de llegada."; return }
+            if (o == null || d == null) { error = tx(R.string.elija_el_aeropuerto_de_salida_y_el_de); return }
         } else if (texto.isBlank()) return
         teclado?.hide()
         cargando = true; error = null; resultados = null
         scope.launch {
             if (porTrayecto) intentar { Repositorio.buscarTrayecto(o!!.iata, d!!.iata, fecha) }
                 .onSuccess { resultados = it }
-                .onFailure { error = it.message ?: "Sin conexión" }
+                .onFailure { error = it.message ?: tx(R.string.sin_conexion) }
             else intentar { Repositorio.buscarVuelo(texto, fecha) }
                 .onSuccess { r -> if (r.size == 1) abrir(r[0]) else resultados = r }
-                .onFailure { error = it.message ?: "Sin conexión" }
+                .onFailure { error = it.message ?: tx(R.string.sin_conexion) }
             cargando = false
         }
     }
 
     Column(Modifier.fillMaxSize().padding(16.dp)) {
-        Cabecera("BUSCAR UN VUELO", atras)
+        Cabecera(tx(R.string.buscar_un_vuelo), atras)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf(false to "POR NÚMERO", true to "POR TRAYECTO").forEach { (t, nombre) ->
+            listOf(false to tx(R.string.por_numero), true to tx(R.string.por_trayecto)).forEach { (t, nombre) ->
                 val sel = t == porTrayecto
                 Box(
                     Modifier.weight(1f).heightIn(min = 56.dp).clip(RoundedCornerShape(12.dp))
@@ -186,26 +189,26 @@ fun BuscarVuelo(e: EstadoBusqueda, atras: () -> Unit, abrir: (Vuelo) -> Unit) {
         }
         Spacer(Modifier.height(12.dp))
         if (!porTrayecto) {
-            Texto("Escriba el número que aparece en el billete:", 18)
+            Texto(tx(R.string.escriba_el_numero_que_aparece_en_el_bi), 18)
             Spacer(Modifier.height(8.dp))
-            Campo(texto, { texto = it.uppercase().take(10) }, "Ej: IB3166", ::buscar)
+            Campo(texto, { texto = it.uppercase().take(10) }, tx(R.string.ej_ib3166), ::buscar)
         } else {
-            Texto("Todos los vuelos directos de un día entre dos aeropuertos:", 18)
+            Texto(tx(R.string.todos_los_vuelos_directos_de_un_dia_en), 18)
             Spacer(Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    CasillaAeropuerto("DESDE", origen) { eligiendo = true }
-                    CasillaAeropuerto("HASTA", destino) { eligiendo = false }
+                    CasillaAeropuerto(tx(R.string.desde), origen) { eligiendo = true }
+                    CasillaAeropuerto(tx(R.string.hasta), destino) { eligiendo = false }
                 }
                 IconButton(onClick = { val o = origen; origen = destino; destino = o; limpiar() }) {
-                    Texto("⇅", 34, C.ambar, FontWeight.Black, modifier = Modifier.semantics { contentDescription = "Intercambiar salida y llegada" })
+                    Texto("⇅", 34, C.ambar, FontWeight.Black, modifier = Modifier.semantics { contentDescription = tx(R.string.intercambiar_salida_y_llegada) })
                 }
             }
         }
         if (Almacen.tieneClave) {
             Spacer(Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(-1L to "AYER", 0L to "HOY", 1L to "MAÑANA").forEach { (d, nombre) ->
+                listOf(-1L to tx(R.string.ayer), 0L to tx(R.string.hoy), 1L to tx(R.string.manana)).forEach { (d, nombre) ->
                     val sel = fecha == hoy.plusDays(d)
                     Box(
                         Modifier.weight(1f).heightIn(min = 56.dp).clip(RoundedCornerShape(12.dp))
@@ -219,16 +222,16 @@ fun BuscarVuelo(e: EstadoBusqueda, atras: () -> Unit, abrir: (Vuelo) -> Unit) {
             // Otra fecha: hasta un año vista (límite de AeroDataBox), para guardar el vuelo de un viaje.
             val otra = fecha < hoy.minusDays(1) || fecha > hoy.plusDays(1)
             if (otra) Boton(fecha.format(FECHA_LARGA).uppercase(), icono = Icons.Default.DateRange) { calendario = true }
-            else BotonSecundario("OTRA FECHA", icono = Icons.Default.DateRange) { calendario = true }
+            else BotonSecundario(tx(R.string.otra_fecha), icono = Icons.Default.DateRange) { calendario = true }
             if (calendario) ElegirFecha(fecha, { fecha = it; limpiar() }) { calendario = false }
         }
         Spacer(Modifier.height(12.dp))
-        Boton("BUSCAR", icono = Icons.Default.Search, onClick = ::buscar)
+        Boton(tx(R.string.buscar), icono = Icons.Default.Search, onClick = ::buscar)
         if (!Almacen.tieneClave) {
             Spacer(Modifier.height(8.dp))
             Texto(
-                if (porTrayecto) "Buscar por trayecto necesita la clave API. Ver AJUSTES."
-                else "Sin clave API solo se encuentran vuelos que están en el aire ahora o su ruta habitual. Ver AJUSTES.",
+                if (porTrayecto) tx(R.string.buscar_por_trayecto_necesita_la_clave)
+                else tx(R.string.sin_clave_api_solo_se_encuentran_vuelo),
                 15, C.gris,
             )
         }
@@ -238,12 +241,12 @@ fun BuscarVuelo(e: EstadoBusqueda, atras: () -> Unit, abrir: (Vuelo) -> Unit) {
             cargando -> Cargando()
             err != null -> AvisoError(err)
             lista?.isEmpty() == true -> AvisoError(
-                if (porTrayecto) "No hay vuelos directos de ${origen?.iata} a ${destino?.iata} ese día. Si la fecha es lejana, puede que aún no estén los horarios."
-                else "No se ha encontrado ese vuelo. Compruebe el número."
+                if (porTrayecto) tx(R.string.no_hay_vuelos_directos_de_x_a_x_ese_di, origen?.iata, destino?.iata)
+                else tx(R.string.no_se_ha_encontrado_ese_vuelo_comprueb)
             )
         }
         if (!lista.isNullOrEmpty()) {
-            Seccion(if (porTrayecto) "${lista.size} VUELOS · ELIJA EL SUYO" else "ELIJA SU VUELO")
+            Seccion(if (porTrayecto) tx(R.string.x_vuelos_elija_el_suyo, lista.size) else tx(R.string.elija_su_vuelo))
             LazyColumn(state = e.scroll) { items(lista) { v -> FilaVuelo(v, salidas = true) { abrir(v) } } }
         }
     }
@@ -251,7 +254,7 @@ fun BuscarVuelo(e: EstadoBusqueda, atras: () -> Unit, abrir: (Vuelo) -> Unit) {
     eligiendo?.let { esOrigen ->
         Dialog(onDismissRequest = { eligiendo = null }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
             Box(Modifier.fillMaxSize().background(C.fondo).safeDrawingPadding()) {
-                ListaAeropuertos(if (esOrigen) "¿DESDE DÓNDE SALE?" else "¿A DÓNDE VA?", { eligiendo = null }) { a ->
+                ListaAeropuertos(if (esOrigen) tx(R.string.desde_donde_sale) else tx(R.string.a_donde_va), { eligiendo = null }) { a ->
                     if (esOrigen) origen = a else destino = a
                     eligiendo = null; limpiar()
                 }
@@ -266,7 +269,7 @@ private fun CasillaAeropuerto(etiqueta: String, a: Aeropuerto?, onClick: () -> U
     Tarjeta(onClick) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Texto(etiqueta, 15, C.gris, FontWeight.Bold, mono = true, modifier = Modifier.width((64 * Escala.current).dp))
-            if (a == null) Texto("ELEGIR AEROPUERTO", 18, C.ambar, FontWeight.Bold)
+            if (a == null) Texto(tx(R.string.elegir_aeropuerto), 18, C.ambar, FontWeight.Bold)
             else {
                 Paletas(a.iata, 20)
                 Spacer(Modifier.width(10.dp))
@@ -283,9 +286,9 @@ private fun CasillaAeropuerto(etiqueta: String, a: Aeropuerto?, onClick: () -> U
 @Composable
 fun BuscarAeropuerto(origen: String?, atras: () -> Unit, elegido: (Aeropuerto) -> Unit) {
     val titulo = when {
-        origen == null -> "VER UN AEROPUERTO"
-        origen.isEmpty() -> "TRAYECTO: ¿DESDE DÓNDE SALE?"
-        else -> "TRAYECTO DESDE $origen: ¿A DÓNDE VA?"
+        origen == null -> tx(R.string.ver_un_aeropuerto)
+        origen.isEmpty() -> tx(R.string.trayecto_desde_donde_sale)
+        else -> tx(R.string.trayecto_desde_x_a_donde_va, origen)
     }
     ListaAeropuertos(titulo, atras, elegido)
 }
@@ -297,9 +300,9 @@ private fun ListaAeropuertos(titulo: String, atras: () -> Unit, elegido: (Aeropu
     val lista = remember(texto) { Aeropuertos.buscar(texto) }
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Cabecera(titulo, atras)
-        Texto("Escriba la ciudad o el código (MAD, BCN…):", 18)
+        Texto(tx(R.string.escriba_la_ciudad_o_el_codigo_mad_bcn), 18)
         Spacer(Modifier.height(8.dp))
-        Campo(texto, { texto = it.take(30) }, "Ej: MÁLAGA", { lista.firstOrNull()?.let(elegido) })
+        Campo(texto, { texto = it.take(30) }, tx(R.string.ej_malaga), { lista.firstOrNull()?.let(elegido) })
         Spacer(Modifier.height(8.dp))
         LazyColumn {
             items(lista, key = { it.iata }) { a ->
@@ -318,7 +321,7 @@ private fun ListaAeropuertos(titulo: String, atras: () -> Unit, elegido: (Aeropu
     }
 }
 
-private val FECHA_LARGA = DateTimeFormatter.ofPattern("EEEE d 'de' MMMM yyyy", Locale.forLanguageTag("es-ES"))
+private val FECHA_LARGA get() = DateTimeFormatter.ofPattern(tx(R.string.formato_fecha_larga), Locale.getDefault())
 
 private fun aMillis(d: LocalDate) = d.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
 private fun deMillis(ms: Long): LocalDate = Instant.ofEpochMilli(ms).atZone(ZoneOffset.UTC).toLocalDate()
@@ -352,12 +355,12 @@ private fun ElegirFecha(inicial: LocalDate, elegir: (LocalDate) -> Unit, cerrar:
         colors = colores,
         confirmButton = {
             TextButton(onClick = { estado.selectedDateMillis?.let { elegir(deMillis(it)) }; cerrar() }) {
-                Texto("ACEPTAR", 18, C.ambar, FontWeight.Bold)
+                Texto(tx(R.string.aceptar), 18, C.ambar, FontWeight.Bold)
             }
         },
-        dismissButton = { TextButton(onClick = cerrar) { Texto("CANCELAR", 18, C.gris, FontWeight.Bold) } },
+        dismissButton = { TextButton(onClick = cerrar) { Texto(tx(R.string.cancelar), 18, C.gris, FontWeight.Bold) } },
     ) {
         DatePicker(estado, colors = colores, showModeToggle = false,
-            title = { Texto("¿Qué día sale el vuelo?", 20, C.texto, FontWeight.Bold, modifier = Modifier.padding(start = 24.dp, top = 16.dp)) })
+            title = { Texto(tx(R.string.que_dia_sale_el_vuelo), 20, C.texto, FontWeight.Bold, modifier = Modifier.padding(start = 24.dp, top = 16.dp)) })
     }
 }

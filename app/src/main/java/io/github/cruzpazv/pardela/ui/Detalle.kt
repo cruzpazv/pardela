@@ -1,5 +1,7 @@
 package io.github.cruzpazv.pardela.ui
 
+import io.github.cruzpazv.pardela.tx
+
 import io.github.cruzpazv.pardela.data.Aerolineas
 import io.github.cruzpazv.pardela.data.intentar
 
@@ -114,16 +116,16 @@ fun Detalle(inicial: Vuelo, atras: () -> Unit, verHistorial: (Avion) -> Unit, ve
     }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
-        Cabecera("VUELO ${v.numero}", atras) {
+        Cabecera(tx(R.string.vuelo_x_2, v.numero), atras) {
             IconButton(onClick = { scope.launch { refrescar() } }) {
-                Icon(Icons.Default.Refresh, "Actualizar", tint = if (cargando) C.gris else C.ambar, modifier = Modifier.size(34.dp))
+                Icon(Icons.Default.Refresh, tx(R.string.actualizar), tint = if (cargando) C.gris else C.ambar, modifier = Modifier.size(34.dp))
             }
         }
 
         if (Aerolineas.posicionamiento(v.numero)) {
             Box(Modifier.fillMaxWidth().padding(bottom = 10.dp).clip(RoundedCornerShape(12.dp)).background(C.ambar.copy(alpha = .15f)).padding(14.dp)) {
-                Texto("ⓘ Seguramente es un vuelo de posicionamiento: el avión vuela vacío para empezar el día en otra isla. " +
-                    "No se vende al público, por eso puede faltar información.", 17, C.texto)
+                Texto(tx(R.string.i_seguramente_es_un_vuelo_de_posiciona) +
+                    tx(R.string.no_se_vende_al_publico_por_eso_puede_f), 17, C.texto)
             }
         }
         Tarjeta {
@@ -148,54 +150,54 @@ fun Detalle(inicial: Vuelo, atras: () -> Unit, verHistorial: (Avion) -> Unit, ve
             }
             Spacer(Modifier.height(14.dp))
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                if (v.estado == Estado.DESCONOCIDO) Texto("SIN DATOS AHORA MISMO", 18, C.gris, mono = true)
+                if (v.estado == Estado.DESCONOCIDO) Texto(tx(R.string.sin_datos_ahora_mismo), 18, C.gris, mono = true)
                 else Paletas(v.estado.texto.replace("Ó", "O").replace("Ñ", "N"), 20, colorEstado(v.estado))
             }
         }
 
         Spacer(Modifier.height(10.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            BotonSecundario("🔊 ESCUCHAR", Modifier.weight(1f)) { voz.decir(Resumen.voz(v)) }
-            BotonSecundario("COMPARTIR", Modifier.weight(1f), icono = Icons.Default.Share) { compartirVuelo(ctx, v) }
+            BotonSecundario(tx(R.string.escuchar), Modifier.weight(1f)) { voz.decir(Resumen.voz(v)) }
+            BotonSecundario(tx(R.string.compartir), Modifier.weight(1f), icono = Icons.Default.Share) { compartirVuelo(ctx, v) }
         }
 
         Progreso(v)
         if (hayMapa(v)) MapaPequeno(v) { verMapa(v) }
 
         if (v.conHorarios) {
-            Seccion("SALIDA")
+            Seccion(tx(R.string.salida))
             Horario(v.salida, salida = true)
-            Seccion("LLEGADA")
+            Seccion(tx(R.string.llegada))
             Horario(v.llegada, salida = false)
         } else {
             Spacer(Modifier.height(10.dp))
-            Texto("ℹ Horarios, puertas y retrasos: añada una clave API en AJUSTES.", 15, C.gris)
+            Texto(tx(R.string.i_horarios_puertas_y_retrasos_anada_un), 15, C.gris)
         }
         EnDestino(v)
 
         Spacer(Modifier.height(22.dp))
-        if (seguido) BotonSecundario("DEJAR DE SEGUIR", icono = Icons.Default.Close) { Almacen.dejar(v.numero, v.fecha) }
-        else Boton("SEGUIR ESTE VUELO", icono = Icons.Default.Star) { Almacen.seguir(v) }
-        Texto("Le avisaremos de despegue, aterrizaje, retrasos y puerta.", 15, C.gris, modifier = Modifier.padding(4.dp))
+        if (seguido) BotonSecundario(tx(R.string.dejar_de_seguir), icono = Icons.Default.Close) { Almacen.dejar(v.numero, v.fecha) }
+        else Boton(tx(R.string.seguir_este_vuelo), icono = Icons.Default.Star) { Almacen.seguir(v) }
+        Texto(tx(R.string.le_avisaremos_de_despegue_aterrizaje_r), 15, C.gris, modifier = Modifier.padding(4.dp))
         if (puedeIrAlCalendario(v)) {
             Spacer(Modifier.height(8.dp))
-            BotonSecundario("AÑADIR AL CALENDARIO", icono = Icons.Default.DateRange) { anadirAlCalendario(ctx, v) }
+            BotonSecundario(tx(R.string.anadir_al_calendario), icono = Icons.Default.DateRange) { anadirAlCalendario(ctx, v) }
         }
 
         Spacer(Modifier.height(12.dp))
-        if (esteVigilado) BotonSecundario("DEJAR DE VIGILAR", icono = Icons.Default.Close) { VigilanciaService.parar(ctx) }
-        else if (!Repositorio.radarUtil(v) && !v.estado.terminado) Texto("Podrá vigilarlo en directo el día del vuelo, unas horas antes de salir.", 16, C.gris, modifier = Modifier.padding(4.dp))
-        else Boton("VIGILAR AHORA", icono = Icons.Default.Notifications, fondo = C.azul, letra = C.sobreAzul) {
+        if (esteVigilado) BotonSecundario(tx(R.string.dejar_de_vigilar), icono = Icons.Default.Close) { VigilanciaService.parar(ctx) }
+        else if (!Repositorio.radarUtil(v) && !v.estado.terminado) Texto(tx(R.string.podra_vigilarlo_en_directo_el_dia_del), 16, C.gris, modifier = Modifier.padding(4.dp))
+        else Boton(tx(R.string.vigilar_ahora), icono = Icons.Default.Notifications, fondo = C.azul, letra = C.sobreAzul) {
             if (Build.VERSION.SDK_INT >= 33) permiso.launch(Manifest.permission.POST_NOTIFICATIONS) else VigilanciaService.empezar(ctx, v)
         }
-        if (esteVigilado || Repositorio.radarUtil(v) || v.estado.terminado) Texto("Aviso fijo en la pantalla del móvil que se actualiza cada minuto.", 15, C.gris, modifier = Modifier.padding(4.dp))
+        if (esteVigilado || Repositorio.radarUtil(v) || v.estado.terminado) Texto(tx(R.string.aviso_fijo_en_la_pantalla_del_movil_qu), 15, C.gris, modifier = Modifier.padding(4.dp))
 
         Spacer(Modifier.height(12.dp))
-        BotonSecundario(if (verAvion) "OCULTAR EL AVIÓN" else "VER EL AVIÓN", icono = Icons.Default.Info) { verAvion = !verAvion }
+        BotonSecundario(if (verAvion) tx(R.string.ocultar_el_avion) else tx(R.string.ver_el_avion), icono = Icons.Default.Info) { verAvion = !verAvion }
         if (verAvion) FichaAvion(v, conAvion, verHistorial)
 
-        Seccion("VER EN OTRAS WEBS")
-        Texto("Se abre en el navegador del móvil.", 15, C.gris, modifier = Modifier.padding(bottom = 8.dp))
+        Seccion(tx(R.string.ver_en_otras_webs))
+        Texto(tx(R.string.se_abre_en_el_navegador_del_movil), 15, C.gris, modifier = Modifier.padding(bottom = 8.dp))
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             enlacesExternos(v).forEach { (nombre, url) ->
                 BotonSecundario(nombre, icono = Icons.AutoMirrored.Filled.ExitToApp) {
@@ -217,7 +219,7 @@ private fun enlacesExternos(v: Vuelo): List<Pair<String, String>> {
     return listOfNotNull(
         "FLIGHTRADAR24" to "https://www.flightradar24.com/data/flights/$numero",
         "FLIGHTAWARE" to "https://www.flightaware.com/live/flight/${indicativo.uppercase()}",
-        v.avion.hex?.let { "ADSB.LOL (MAPA EN DIRECTO)" to "https://adsb.lol/?icao=${it.lowercase()}" },
+        v.avion.hex?.let { tx(R.string.adsb_lol_mapa_en_directo) to "https://adsb.lol/?icao=${it.lowercase()}" },
     )
 }
 
@@ -225,7 +227,7 @@ private fun enlacesExternos(v: Vuelo): List<Pair<String, String>> {
 private fun Progreso(v: Vuelo) {
     val d = v.directo ?: return
     val p = Repositorio.progreso(v)
-    Seccion("EN DIRECTO")
+    Seccion(tx(R.string.en_directo))
     Tarjeta {
         if (p != null && !d.enTierra) {
             BoxWithConstraints(Modifier.fillMaxWidth().height(40.dp)) {
@@ -240,15 +242,15 @@ private fun Progreso(v: Vuelo) {
         }
         val minutos = ((System.currentTimeMillis() - d.momento) / 60_000L).toInt()
         if (!d.reciente) {
-            Texto("Sin señal de radar desde hace ${if (minutos >= 60) "${minutos / 60} h ${minutos % 60} min" else "$minutos min"}. Es normal sobre el mar: se muestra la última posición conocida.", 16, C.gris)
+            Texto(tx(R.string.sin_senal_de_radar_desde_hace_x_es_nor, if (minutos >= 60) "${minutos / 60} h ${minutos % 60} min" else "$minutos min"), 16, C.gris)
             return@Tarjeta
         }
         val filas = buildList {
-            if (d.enTierra) add("EN TIERRA" to "")
-            d.altitudPies?.takeIf { !d.enTierra }?.let { add("ALTURA" to Formato.altura(it, Almacen.ajustes.unidades)) }
-            d.velocidadNudos?.let { add("VELOCIDAD" to Formato.velocidad(it, Almacen.ajustes.unidades)) }
+            if (d.enTierra) add(tx(R.string.en_tierra) to "")
+            d.altitudPies?.takeIf { !d.enTierra }?.let { add(tx(R.string.altura) to Formato.altura(it, Almacen.ajustes.unidades)) }
+            d.velocidadNudos?.let { add(tx(R.string.velocidad) to Formato.velocidad(it, Almacen.ajustes.unidades)) }
             Repositorio.minutosRestantes(v)?.takeIf { !d.enTierra }?.let {
-                add("LLEGA EN" to if (it >= 60) "${it / 60} h ${it % 60} min" else "$it min")
+                add(tx(R.string.llega_en) to if (it >= 60) tx(R.string.x_h_x_min, it / 60, it % 60) else tx(R.string.x_min, it))
             }
         }
         filas.forEach { (k, valor) -> Dato(k, valor) }
@@ -269,47 +271,47 @@ private fun Horario(e: Extremo, salida: Boolean) {
     Tarjeta {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Texto("HORA", 15, C.gris, mono = true)
+                Texto(tx(R.string.hora), 15, C.gris, mono = true)
                 Paletas(e.hora ?: "--:--", 26)
             }
             val r = e.retraso
             if (e.horaPrevista != null && e.horaPrevista != e.hora) Column(horizontalAlignment = Alignment.End) {
-                Texto(if (salida) "SALE A LAS" else "LLEGA A LAS", 15, C.gris, mono = true)
+                Texto(if (salida) tx(R.string.sale_a_las) else tx(R.string.llega_a_las), 15, C.gris, mono = true)
                 Paletas(e.horaPrevista, 26, if ((r ?: 0) >= 15) C.rojo else C.verde)
             }
         }
         // La hora nueva siempre va con texto, no solo con color.
         val r2 = e.retraso
         when {
-            r2 != null && r2 >= 5 -> Texto("⚠ Retraso: $r2 min", 18, C.rojo, FontWeight.Bold)
-            r2 != null && r2 <= -5 -> Texto("✔ Adelantado ${-r2} min", 18, C.verde, FontWeight.Bold)
-            e.horaPrevista != null -> Texto("✔ A su hora", 18, C.verde, FontWeight.Bold)
+            r2 != null && r2 >= 5 -> Texto(tx(R.string.retraso_x_min, r2), 18, C.rojo, FontWeight.Bold)
+            r2 != null && r2 <= -5 -> Texto(tx(R.string.adelantado_x_min, -r2), 18, C.verde, FontWeight.Bold)
+            e.horaPrevista != null -> Texto(tx(R.string.a_su_hora), 18, C.verde, FontWeight.Bold)
         }
         Spacer(Modifier.height(6.dp))
-        Dato("TERMINAL", e.terminal)
-        Dato(if (salida) "PUERTA" else "PUERTA LLEGADA", e.puerta)
-        if (!salida) Dato("CINTA EQUIPAJE", e.cinta)
+        Dato(tx(R.string.terminal), e.terminal)
+        Dato(if (salida) tx(R.string.puerta) else tx(R.string.puerta_llegada), e.puerta)
+        if (!salida) Dato(tx(R.string.cinta_equipaje), e.cinta)
     }
 }
 
 @Composable
 private fun FichaAvion(v: Vuelo, completo: Boolean, verHistorial: (Avion) -> Unit) {
     val a = v.avion
-    Seccion("EL AVIÓN")
+    Seccion(tx(R.string.el_avion))
     Tarjeta {
-        if (!completo) { Cargando("CARGANDO…"); return@Tarjeta }
+        if (!completo) { Cargando(tx(R.string.cargando)); return@Tarjeta }
         if (a.hex == null && a.matricula == null && a.modelo == null) {
-            Texto("Todavía no hay información del avión de este vuelo.", 18, C.texto, FontWeight.Bold)
-            Texto("La aerolínea suele asignar el avión el mismo día, unas horas antes de salir. Vuelva a mirarlo entonces.", 16, C.gris, modifier = Modifier.padding(top = 4.dp))
+            Texto(tx(R.string.todavia_no_hay_informacion_del_avion_d), 18, C.texto, FontWeight.Bold)
+            Texto(tx(R.string.la_aerolinea_suele_asignar_el_avion_el), 16, C.gris, modifier = Modifier.padding(top = 4.dp))
             return@Tarjeta
         }
         a.foto?.let { url ->
             AsyncImage(
-                model = url, contentDescription = "Foto del avión",
+                model = url, contentDescription = tx(R.string.foto_del_avion),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxWidth().aspectRatio(1.5f).clip(RoundedCornerShape(10.dp)),
             )
-            Texto("Foto: ${a.fotoAutor ?: "—"} · planespotters.net", 13, C.gris, modifier = Modifier.padding(top = 4.dp, bottom = 12.dp))
+            Texto(tx(R.string.foto_x_planespotters_net, a.fotoAutor ?: "—"), 13, C.gris, modifier = Modifier.padding(top = 4.dp, bottom = 12.dp))
         } ?: Box(
             Modifier.fillMaxWidth().padding(bottom = 12.dp).clip(RoundedCornerShape(10.dp)).background(C.celda).padding(18.dp),
             contentAlignment = Alignment.Center,
@@ -319,10 +321,10 @@ private fun FichaAvion(v: Vuelo, completo: Boolean, verHistorial: (Avion) -> Uni
                 Spacer(Modifier.height(6.dp))
                 // Solo se sabe el modelo: aún no hay un avión concreto (matrícula) del que buscar foto.
                 val sinAvion = a.matricula == null && a.hex == null
-                Texto(if (sinAvion) "Aún no se sabe qué avión hará este vuelo" else "No hay foto de este avión", 18, Oscura.texto, FontWeight.Bold)
+                Texto(if (sinAvion) tx(R.string.aun_no_se_sabe_que_avion_hara_este_vue) else tx(R.string.no_hay_foto_de_este_avion), 18, Oscura.texto, FontWeight.Bold)
                 Texto(
-                    if (sinAvion) "La aerolínea solo ha indicado el modelo. La matrícula y la foto suelen aparecer el mismo día del vuelo, unas horas antes."
-                    else "planespotters.net todavía no tiene ninguna.",
+                    if (sinAvion) tx(R.string.la_aerolinea_solo_ha_indicado_el_model)
+                    else tx(R.string.planespotters_net_todavia_no_tiene_nin),
                     15, Oscura.gris,
                 )
             }
@@ -332,14 +334,14 @@ private fun FichaAvion(v: Vuelo, completo: Boolean, verHistorial: (Avion) -> Uni
         val nombre = Fabricantes.modelo(a.tipoIcao) ?: listOfNotNull(a.fabricante, a.modelo).joinToString(" ").ifBlank { null }
         nombre?.let { Texto(it, 22, C.texto, FontWeight.Bold) }
         Spacer(Modifier.height(6.dp))
-        Dato("MATRÍCULA", a.matricula)
-        Dato("MODELO EXACTO", a.modelo)
-        Dato("CÓDIGO", a.tipoIcao)
-        Dato("PROPIETARIO", a.propietario)
-        Dato("CÓDIGO RADAR", a.hex?.uppercase())
+        Dato(tx(R.string.matricula), a.matricula)
+        Dato(tx(R.string.modelo_exacto), a.modelo)
+        Dato(tx(R.string.codigo), a.tipoIcao)
+        Dato(tx(R.string.propietario), a.propietario)
+        Dato(tx(R.string.codigo_radar), a.hex?.uppercase())
         if (a.matricula != null || a.hex != null) {
             Spacer(Modifier.height(12.dp))
-            BotonSecundario("VUELOS ANTERIORES DE ESTE AVIÓN", icono = Icons.Default.DateRange) { verHistorial(a) }
+            BotonSecundario(tx(R.string.vuelos_anteriores_de_este_avion), icono = Icons.Default.DateRange) { verHistorial(a) }
         }
     }
 }

@@ -20,6 +20,7 @@
         android:icon="@drawable/ic_launcher"
         android:roundIcon="@drawable/ic_launcher"
         android:allowBackup="false"
+        android:localeConfig="@xml/locales_config"
         android:dataExtractionRules="@xml/sin_copia"
         android:fullBackupContent="false"
         android:supportsRtl="true"

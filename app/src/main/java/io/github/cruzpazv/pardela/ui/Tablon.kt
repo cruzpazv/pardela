@@ -1,5 +1,8 @@
 package io.github.cruzpazv.pardela.ui
 
+import io.github.cruzpazv.pardela.R
+import io.github.cruzpazv.pardela.tx
+
 import io.github.cruzpazv.pardela.data.intentar
 
 import android.content.Intent
@@ -93,7 +96,7 @@ fun Tablon(iata: String, e: EstadoTablon, atras: () -> Unit, verCerca: (Pantalla
         if (e.cargado != pedido) {
             lista = null; error = null
             intentar { Repositorio.tablon(iata, salidas) }
-                .onSuccess { lista = it; e.cargado = pedido }.onFailure { error = it.message ?: "Sin conexión" }
+                .onSuccess { lista = it; e.cargado = pedido }.onFailure { error = it.message ?: tx(R.string.sin_conexion) }
         }
         // Sin clave el radar cambia rápido: se refresca solo cada 2 min.
         if (!Almacen.tieneClave) { delay(120_000); vuelta++ }
@@ -101,17 +104,17 @@ fun Tablon(iata: String, e: EstadoTablon, atras: () -> Unit, verCerca: (Pantalla
 
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Cabecera("$iata · ${ap?.ciudad?.uppercase() ?: ""}", atras) {
-            if (ap != null) IconButton(onClick = { verCerca(Pantalla.Cerca(ap.lat, ap.lon, "AVIONES CERCA DE $iata")) }) {
-                Icon(Icons.Default.LocationOn, "Aviones cerca en el mapa", tint = C.ambar, modifier = Modifier.size(34.dp))
+            if (ap != null) IconButton(onClick = { verCerca(Pantalla.Cerca(ap.lat, ap.lon, tx(R.string.aviones_cerca_de_x, iata))) }) {
+                Icon(Icons.Default.LocationOn, tx(R.string.aviones_cerca_en_el_mapa), tint = C.ambar, modifier = Modifier.size(34.dp))
             }
             IconButton(onClick = { Almacen.alternarAeropuerto(iata) }) {
-                Icon(Icons.Default.Star, if (guardado) "Quitar de mis aeropuertos" else "Guardar aeropuerto",
+                Icon(Icons.Default.Star, if (guardado) tx(R.string.quitar_de_mis_aeropuertos) else tx(R.string.guardar_aeropuerto),
                     tint = if (guardado) C.ambar else C.gris, modifier = Modifier.size(38.dp))
             }
-            IconButton(onClick = { vuelta++ }) { Icon(Icons.Default.Refresh, "Actualizar", tint = C.ambar, modifier = Modifier.size(34.dp)) }
+            IconButton(onClick = { vuelta++ }) { Icon(Icons.Default.Refresh, tx(R.string.actualizar), tint = C.ambar, modifier = Modifier.size(34.dp)) }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf(true to "SALIDAS", false to "LLEGADAS").forEach { (s, nombre) ->
+            listOf(true to tx(R.string.salidas), false to tx(R.string.llegadas)).forEach { (s, nombre) ->
                 val sel = s == salidas
                 Box(
                     Modifier.weight(1f).heightIn(min = 60.dp).clip(RoundedCornerShape(12.dp))
@@ -121,8 +124,8 @@ fun Tablon(iata: String, e: EstadoTablon, atras: () -> Unit, verCerca: (Pantalla
                 ) { Texto(nombre, 20, if (sel) C.sobreBoton else C.ambar, FontWeight.Black, mono = true) }
             }
         }
-        if (!guardado) Texto("Pulse ★ para guardar este aeropuerto en el inicio.", 15, C.gris, modifier = Modifier.padding(top = 8.dp))
-        if (!Almacen.tieneClave) Texto("Sin clave API: solo aviones en el aire cerca del aeropuerto ahora mismo.", 15, C.gris, modifier = Modifier.padding(top = 4.dp))
+        if (!guardado) Texto(tx(R.string.pulse_para_guardar_este_aeropuerto_en), 15, C.gris, modifier = Modifier.padding(top = 8.dp))
+        if (!Almacen.tieneClave) Texto(tx(R.string.sin_clave_api_solo_aviones_en_el_aire), 15, C.gris, modifier = Modifier.padding(top = 4.dp))
         Spacer(Modifier.height(6.dp))
         // Copias locales: el contenido de LazyColumn se evalúa más tarde, cuando el estado ya puede ser null.
         val err = error
@@ -131,7 +134,7 @@ fun Tablon(iata: String, e: EstadoTablon, atras: () -> Unit, verCerca: (Pantalla
         when {
             err != null -> AvisoError(err)
             vuelos == null -> Cargando()
-            vuelos.isEmpty() -> Texto("No hay vuelos que mostrar ahora.", 18, C.gris, modifier = Modifier.padding(16.dp))
+            vuelos.isEmpty() -> Texto(tx(R.string.no_hay_vuelos_que_mostrar_ahora), 18, C.gris, modifier = Modifier.padding(16.dp))
             else -> LazyColumn(state = e.scroll) { items(vuelos) { v -> FilaVuelo(v, esSalidas) { abrir(v) } } }
         }
     }

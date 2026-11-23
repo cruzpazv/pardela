@@ -1,5 +1,8 @@
 package io.github.cruzpazv.pardela.data
 
+import io.github.cruzpazv.pardela.R
+import io.github.cruzpazv.pardela.tx
+
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.doubleOrNull
 import java.time.Instant
@@ -48,28 +51,31 @@ object Tiempo {
         info.porHoras.minByOrNull { kotlin.math.abs(it.first - momento) }?.takeIf { kotlin.math.abs(it.first - momento) <= 90 * 60_000L }?.second
 
     /** Código WMO → símbolo y texto. */
-    fun describir(p: Parte): Pair<String, String> = when (p.codigo) {
-        0 -> (if (p.deDia) "☀" else "🌙") to "despejado"
-        1 -> (if (p.deDia) "🌤" else "🌙") to "casi despejado"
-        2 -> "⛅" to "nubes y claros"
-        3 -> "☁" to "nublado"
-        45, 48 -> "🌫" to "niebla"
-        51, 53, 55 -> "🌦" to "llovizna"
-        56, 57 -> "🌧" to "llovizna helada"
-        61 -> "🌦" to "lluvia débil"
-        63 -> "🌧" to "lluvia"
-        65 -> "🌧" to "lluvia fuerte"
-        66, 67 -> "🌧" to "lluvia helada"
-        71 -> "🌨" to "nieve débil"
-        73 -> "🌨" to "nieve"
-        75 -> "❄" to "nieve fuerte"
-        77 -> "🌨" to "nieve granulada"
-        80, 81 -> "🌦" to "chubascos"
-        82 -> "🌧" to "chubascos fuertes"
-        85, 86 -> "🌨" to "chubascos de nieve"
-        95 -> "⛈" to "tormenta"
-        96, 99 -> "⛈" to "tormenta con granizo"
-        else -> "🌡" to ""
+    fun describir(p: Parte): Pair<String, String> {
+        val (simbolo, texto) = when (p.codigo) {
+            0 -> (if (p.deDia) "☀" else "🌙") to R.string.cielo_despejado
+            1 -> (if (p.deDia) "🌤" else "🌙") to R.string.cielo_casi_despejado
+            2 -> "⛅" to R.string.cielo_nubes_y_claros
+            3 -> "☁" to R.string.cielo_nublado
+            45, 48 -> "🌫" to R.string.cielo_niebla
+            51, 53, 55 -> "🌦" to R.string.cielo_llovizna
+            56, 57 -> "🌧" to R.string.cielo_llovizna_helada
+            61 -> "🌦" to R.string.cielo_lluvia_debil
+            63 -> "🌧" to R.string.cielo_lluvia
+            65 -> "🌧" to R.string.cielo_lluvia_fuerte
+            66, 67 -> "🌧" to R.string.cielo_lluvia_helada
+            71 -> "🌨" to R.string.cielo_nieve_debil
+            73 -> "🌨" to R.string.cielo_nieve
+            75 -> "❄" to R.string.cielo_nieve_fuerte
+            77 -> "🌨" to R.string.cielo_nieve_granulada
+            80, 81 -> "🌦" to R.string.cielo_chubascos
+            82 -> "🌧" to R.string.cielo_chubascos_fuertes
+            85, 86 -> "🌨" to R.string.cielo_chubascos_de_nieve
+            95 -> "⛈" to R.string.cielo_tormenta
+            96, 99 -> "⛈" to R.string.cielo_tormenta_con_granizo
+            else -> "🌡" to 0
+        }
+        return simbolo to (if (texto == 0) "" else tx(texto))
     }
 
     fun grados(p: Parte) = "${Math.round(p.temperatura)} °C"
@@ -78,10 +84,10 @@ object Tiempo {
     fun diferencia(zona: ZoneId): String {
         val ahora = Instant.now()
         val seg = zona.rules.getOffset(ahora).totalSeconds - ZoneId.systemDefault().rules.getOffset(ahora).totalSeconds
-        if (seg == 0) return "la misma hora que aquí"
+        if (seg == 0) return tx(R.string.la_misma_hora_que_aqui)
         val min = kotlin.math.abs(seg) / 60
-        val texto = if (min % 60 == 0) "${min / 60} h" else "${min / 60} h ${min % 60} min"
-        return texto + if (seg > 0) " más que aquí" else " menos que aquí"
+        val texto = if (min % 60 == 0) tx(R.string.x_h_2, min / 60) else tx(R.string.x_h_x_min, min / 60, min % 60)
+        return texto + if (seg > 0) tx(R.string.mas_que_aqui) else tx(R.string.menos_que_aqui)
     }
 
     fun horaAhora(zona: ZoneId): String = ZonedDateTime.now(zona).format(DateTimeFormatter.ofPattern("HH:mm"))

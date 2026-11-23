@@ -1,5 +1,7 @@
 package io.github.cruzpazv.pardela.ui
 
+import io.github.cruzpazv.pardela.tx
+
 import android.content.Context
 import android.graphics.DashPathEffect
 import android.graphics.drawable.GradientDrawable
@@ -56,16 +58,16 @@ fun hayMapa(v: Vuelo) = v.directo != null ||
 /** Mapa pequeño para la ficha del vuelo. Al tocarlo se abre a pantalla completa. */
 @Composable
 fun MapaPequeno(v: Vuelo, abrir: () -> Unit) {
-    Seccion("EN EL MAPA")
+    Seccion(tx(R.string.en_el_mapa))
     Box(Modifier.fillMaxWidth().height(230.dp).clip(RoundedCornerShape(12.dp))) {
         val recorrido by produceState(Repositorio.rastro(v), v.avion.hex, v.directo?.momento) { value = Repositorio.recorrido(v) }
         MapaVuelo(v, recorrido, interactivo = false, modifier = Modifier.matchParentSize())
         // Capa encima: el mapa pequeño no se mueve, solo se abre (así no estorba al deslizar la ficha).
-        Box(Modifier.matchParentSize().clickable(onClickLabel = "Ver mapa grande", onClick = abrir))
+        Box(Modifier.matchParentSize().clickable(onClickLabel = tx(R.string.ver_mapa_grande), onClick = abrir))
         Box(
             Modifier.align(Alignment.BottomEnd).padding(8.dp).clip(RoundedCornerShape(8.dp)).background(C.boton)
                 .padding(horizontal = 12.dp, vertical = 6.dp),
-        ) { Texto("VER GRANDE", 15, C.sobreBoton, FontWeight.Bold) }
+        ) { Texto(tx(R.string.ver_grande), 15, C.sobreBoton, FontWeight.Bold) }
     }
 }
 
@@ -80,13 +82,13 @@ fun MapaPantalla(inicial: Vuelo, atras: () -> Unit) {
         }
     }
     Column(Modifier.fillMaxSize().padding(16.dp)) {
-        Cabecera("VUELO ${v.numero} · MAPA", atras)
+        Cabecera(tx(R.string.vuelo_x_mapa, v.numero), atras)
         val d = v.directo
         Texto(
             when {
-                d == null -> "${v.salida.lugar.iata.ifBlank { "?" }} → ${v.llegada.lugar.iata.ifBlank { "?" }} · sin posición del radar"
-                !d.reciente -> "Última posición conocida (el avión está fuera de la cobertura del radar)"
-                d.enTierra -> "En tierra"
+                d == null -> tx(R.string.x_x_sin_posicion_del_radar, v.salida.lugar.iata.ifBlank { "?" }, v.llegada.lugar.iata.ifBlank { "?" })
+                !d.reciente -> tx(R.string.ultima_posicion_conocida_el_avion_esta)
+                d.enTierra -> tx(R.string.en_tierra_2)
                 else -> listOfNotNull(d.altitudPies?.let { Formato.altura(it, Almacen.ajustes.unidades) }, d.velocidadNudos?.let { Formato.velocidad(it, Almacen.ajustes.unidades) }).joinToString("  ·  ")
             },
             16, C.gris,

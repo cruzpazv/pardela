@@ -1,5 +1,7 @@
 package io.github.cruzpazv.pardela.ui
 
+import io.github.cruzpazv.pardela.tx
+
 import io.github.cruzpazv.pardela.BuildConfig
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -112,7 +114,7 @@ fun Bienvenida() {
         Spacer(Modifier.height(18.dp))
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { Paletas("PARDELA", 26) }
         Spacer(Modifier.height(10.dp))
-        Texto("Sus vuelos, como en el tablón del aeropuerto.", 20, C.texto)
+        Texto(tx(R.string.sus_vuelos_como_en_el_tablon_del_aerop), 20, C.texto)
         BuildConfig.DEDICATORIA.takeIf { it.isNotBlank() }?.let { mensaje ->
             Spacer(Modifier.height(16.dp))
             Box(
@@ -121,19 +123,19 @@ fun Bienvenida() {
                 contentAlignment = Alignment.Center,
             ) { Texto("♥  $mensaje", 21, C.texto, FontWeight.Bold) }
         }
-        Seccion("CLAVE DE AERODATABOX")
+        Seccion(tx(R.string.clave_de_aerodatabox))
         Texto(
-            "Opcional. Con ella verá horarios, retrasos, puertas y el tablón completo de cada aeropuerto. " +
-                "Sin ella la aplicación funciona igual con radar: aviones en el aire, su ruta y sus datos.\n\n" +
-                "La clave se guarda solo en este móvil y no se envía a nadie más que a AeroDataBox. " +
-                "Puede ponerla o cambiarla después en AJUSTES.",
+            tx(R.string.opcional_con_ella_vera_horarios_retras) +
+                tx(R.string.sin_ella_la_aplicacion_funciona_igual) +
+                tx(R.string.la_clave_se_guarda_solo_en_este_movil) +
+                tx(R.string.puede_ponerla_o_cambiarla_despues_en_a),
             17, C.gris,
         )
         Spacer(Modifier.height(14.dp))
         OutlinedTextField(
             value = clave, onValueChange = { clave = it.trim() }, singleLine = true,
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Texto("Pegue aquí su X-RapidAPI-Key", 17, C.gris) },
+            placeholder = { Texto(tx(R.string.pegue_aqui_su_x_rapidapi_key), 17, C.gris) },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, autoCorrectEnabled = false),
             textStyle = TextStyle(fontSize = t(18), fontFamily = Mono, color = C.ambar),
@@ -141,9 +143,9 @@ fun Bienvenida() {
             colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = C.ambar, unfocusedBorderColor = C.gris, cursorColor = C.ambar),
         )
         Spacer(Modifier.height(16.dp))
-        Boton(if (clave.isBlank()) "EMPEZAR SIN CLAVE" else "GUARDAR Y EMPEZAR") { empezar(guardarClave = true) }
+        Boton(if (clave.isBlank()) tx(R.string.empezar_sin_clave) else tx(R.string.guardar_y_empezar)) { empezar(guardarClave = true) }
         Spacer(Modifier.height(10.dp))
-        if (clave.isNotBlank()) BotonSecundario("AHORA NO") { empezar(guardarClave = false) }
-        Texto("Cómo conseguir la clave gratis: vea AJUSTES dentro de la aplicación.", 15, C.gris, FontWeight.Normal, modifier = Modifier.padding(top = 14.dp))
+        if (clave.isNotBlank()) BotonSecundario(tx(R.string.ahora_no)) { empezar(guardarClave = false) }
+        Texto(tx(R.string.como_conseguir_la_clave_gratis_vea_aju), 15, C.gris, FontWeight.Normal, modifier = Modifier.padding(top = 14.dp))
     }
 }

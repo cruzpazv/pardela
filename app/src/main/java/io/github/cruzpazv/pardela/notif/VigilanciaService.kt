@@ -1,5 +1,7 @@
 package io.github.cruzpazv.pardela.notif
 
+import io.github.cruzpazv.pardela.tx
+
 import io.github.cruzpazv.pardela.data.intentar
 
 import android.app.PendingIntent
@@ -84,7 +86,7 @@ class VigilanciaService : Service() {
         .setColor(0xFFE5B45C.toInt())
         .setContentIntent(Avisos.abrirApp(this, v.clave))
         .apply { Repositorio.progreso(v)?.let { setProgress(100, (it * 100).toInt(), false) } }
-        .addAction(0, "DEJAR DE VIGILAR", PendingIntent.getService(
+        .addAction(0, tx(R.string.dejar_de_vigilar), PendingIntent.getService(
             this, 1, Intent(this, VigilanciaService::class.java).setAction(PARAR), PendingIntent.FLAG_IMMUTABLE,
         ))
         .build()
@@ -96,7 +98,7 @@ class VigilanciaService : Service() {
             d.velocidadNudos?.let { p += Formato.velocidad(it, Almacen.ajustes.unidades) }
         }
         Repositorio.minutosRestantes(v)?.takeIf { v.estado == Estado.EN_VUELO || v.estado == Estado.APROXIMANDO }
-            ?.let { p += "llega en ${if (it >= 60) "${it / 60} h ${it % 60} min" else "$it min"}" }
+            ?.let { p += tx(R.string.llega_en_x, if (it >= 60) "${it / 60} h ${it % 60} min" else "$it min") }
         return p.joinToString(" · ")
     }
 

@@ -1,6 +1,8 @@
 package io.github.cruzpazv.pardela
 
 import android.app.Application
+import android.content.Context
+import androidx.annotation.StringRes
 import android.os.Build
 import io.github.cruzpazv.pardela.data.Aeropuertos
 import io.github.cruzpazv.pardela.data.Almacen
@@ -17,9 +19,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.io.File
 
+/** Texto en el idioma del móvil: inglés por defecto, español si el móvil está en español. */
+fun tx(@StringRes id: Int, vararg args: Any?): String =
+    if (args.isEmpty()) App.contexto.getString(id) else App.contexto.getString(id, *args)
+
 class App : Application() {
     override fun onCreate() {
         super.onCreate()
+        contexto = this
         guardarFallos()
         prepararMapa(this, "Pardela/${BuildConfig.VERSION_NAME} (Android; +${BuildConfig.CONTACTO})")
         Almacen.iniciar(this)
@@ -49,6 +56,9 @@ class App : Application() {
     }
 
     companion object {
+        /** Contexto de la aplicación, para los textos traducidos fuera de las pantallas. */
+        lateinit var contexto: Context
+            private set
         fun ficheroFallo(app: android.content.Context) = File(app.filesDir, "fallo.txt")
     }
 }

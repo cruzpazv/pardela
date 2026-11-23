@@ -1,5 +1,8 @@
 package io.github.cruzpazv.pardela.data
 
+import io.github.cruzpazv.pardela.R
+import io.github.cruzpazv.pardela.tx
+
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -197,19 +200,19 @@ object Repositorio {
 
     /** Todos los vuelos directos de un día entre dos aeropuertos. Necesita clave. */
     suspend fun buscarTrayecto(origen: String, destino: String, fecha: LocalDate): List<Vuelo> {
-        if (!Almacen.tieneClave) error("Para buscar por trayecto hace falta la clave API. Ver AJUSTES.")
+        if (!Almacen.tieneClave) error(tx(R.string.para_buscar_por_trayecto_hace_falta_la))
         return AeroDataBox.porTrayecto(origen, destino, fecha.toString()).map { conAerolinea(it) }
     }
 
     /** Vuelos del avión en los últimos 7 días, del más reciente al más antiguo. Necesita clave. */
     suspend fun historialAvion(a: Avion): List<Vuelo> {
-        if (!Almacen.tieneClave) error("Para ver los vuelos anteriores del avión hace falta la clave API. Ver AJUSTES.")
+        if (!Almacen.tieneClave) error(tx(R.string.para_ver_los_vuelos_anteriores_del_avi))
         val hoy = LocalDate.now()
         val l = try {
             AeroDataBox.porAvion(a, hoy.minusDays(6).toString(), hoy.toString())
         } catch (e: ErrorRed) {
             // 401/403 aquí suele ser el plan, no la clave: la consulta de historial es de un nivel superior.
-            if (e.message?.contains("clave") == true) error("No se ha podido consultar el historial. Puede que su plan de AeroDataBox no incluya esta consulta.")
+            if (e.codigo == 401 || e.codigo == 403) error(tx(R.string.no_se_ha_podido_consultar_el_historial))
             throw e
         }
         val ahora = System.currentTimeMillis()

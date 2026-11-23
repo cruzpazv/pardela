@@ -1,5 +1,8 @@
 package io.github.cruzpazv.pardela.data
 
+import io.github.cruzpazv.pardela.R
+import io.github.cruzpazv.pardela.tx
+
 import io.github.cruzpazv.pardela.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -20,7 +23,7 @@ import okhttp3.Request
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
-class ErrorRed(msg: String) : IOException(msg)
+class ErrorRed(msg: String, val codigo: Int = 0) : IOException(msg)
 
 /** Peticiones HTTP y utilidades JSON tolerantes (las APIs cambian campos a menudo). */
 internal object Red {
@@ -65,11 +68,11 @@ internal object Red {
                 if (url.contains("rapidapi.com")) apuntarCuota(r)
                 when {
                     r.code == 204 || r.code == 404 -> null
-                    r.code == 401 || r.code == 403 -> throw ErrorRed("La clave API no es válida")
+                    r.code == 401 || r.code == 403 -> throw ErrorRed(tx(R.string.la_clave_api_no_es_valida), r.code)
                     r.code == 429 && url.contains("rapidapi.com") ->
-                        throw ErrorRed("Se han agotado las consultas de la clave de este mes, o ha hecho demasiadas seguidas")
-                    r.code == 429 -> throw ErrorRed("Demasiadas consultas. Espere un momento")
-                    !r.isSuccessful -> throw ErrorRed("Error del servidor (${r.code})")
+                        throw ErrorRed(tx(R.string.se_han_agotado_las_consultas_de_la_cla))
+                    r.code == 429 -> throw ErrorRed(tx(R.string.demasiadas_consultas_espere_un_momento))
+                    !r.isSuccessful -> throw ErrorRed(tx(R.string.error_del_servidor_x, r.code))
                     else -> r.body?.string()?.takeIf { it.isNotBlank() }?.let { intentar { json.parseToJsonElement(it) }.getOrNull() }
                 }
             }

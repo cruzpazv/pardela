@@ -1,5 +1,8 @@
 package io.github.cruzpazv.pardela.ui
 
+import io.github.cruzpazv.pardela.R
+import io.github.cruzpazv.pardela.tx
+
 import android.content.Context
 import android.content.Intent
 import android.provider.CalendarContract
@@ -17,9 +20,9 @@ import java.util.Locale
 /** Abre el menú de compartir de Android con el resumen del vuelo. */
 fun compartirVuelo(ctx: Context, v: Vuelo) {
     val i = Intent(Intent.ACTION_SEND).setType("text/plain")
-        .putExtra(Intent.EXTRA_SUBJECT, "Vuelo ${v.numero}")
+        .putExtra(Intent.EXTRA_SUBJECT, tx(R.string.vuelo_x, v.numero))
         .putExtra(Intent.EXTRA_TEXT, Resumen.compartir(v))
-    ctx.startActivity(Intent.createChooser(i, "Compartir vuelo ${v.numero}"))
+    ctx.startActivity(Intent.createChooser(i, tx(R.string.compartir_vuelo_x, v.numero)))
 }
 
 /** ¿Se sabe la hora de salida? Sin ella no se puede crear el evento. */
@@ -37,7 +40,7 @@ fun anadirAlCalendario(ctx: Context, v: Vuelo) {
         .putExtra(CalendarContract.Events.EVENT_LOCATION, aeropuerto)
         .putExtra(CalendarContract.Events.DESCRIPTION, Resumen.compartir(v))
     runCatching { ctx.startActivity(i) }.onFailure {
-        Toast.makeText(ctx, "No se ha encontrado una aplicación de calendario.", Toast.LENGTH_LONG).show()
+        Toast.makeText(ctx, tx(R.string.no_se_ha_encontrado_una_aplicacion_de), Toast.LENGTH_LONG).show()
     }
 }
 
@@ -50,8 +53,9 @@ class Voz(ctx: Context) : TextToSpeech.OnInitListener {
 
     override fun onInit(estado: Int) {
         if (estado != TextToSpeech.SUCCESS) { falla = true; return }
-        val r = tts.setLanguage(Locale.forLanguageTag("es-ES"))
-        if (r == TextToSpeech.LANG_MISSING_DATA || r == TextToSpeech.LANG_NOT_SUPPORTED) tts.setLanguage(Locale.forLanguageTag("es"))
+        val idioma = Locale.getDefault()
+        val r = tts.setLanguage(idioma)
+        if (r == TextToSpeech.LANG_MISSING_DATA || r == TextToSpeech.LANG_NOT_SUPPORTED) tts.setLanguage(Locale.forLanguageTag(idioma.language))
         tts.setSpeechRate(0.9f) // un poco más despacio que lo normal
         lista = true
         pendiente?.let { decir(it) }

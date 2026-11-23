@@ -1,20 +1,25 @@
 package io.github.cruzpazv.pardela.data
 
+import io.github.cruzpazv.pardela.R
+import io.github.cruzpazv.pardela.tx
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class Estado(val texto: String, val simbolo: String = "") {
-    PROGRAMADO("PROGRAMADO"),
-    FACTURACION("FACTURACIÓN"),
-    EMBARCANDO("EMBARCANDO", "»"),
-    PUERTA_CERRADA("PUERTA CERRADA", "■"),
-    RETRASADO("RETRASADO", "⚠"),
-    EN_VUELO("EN VUELO", "✈"),
-    APROXIMANDO("EN APROXIMACIÓN", "▼"),
-    ATERRIZADO("ATERRIZADO", "✔"),
-    CANCELADO("CANCELADO", "✕"),
-    DESVIADO("DESVIADO", "↪"),
-    DESCONOCIDO("—");
+enum class Estado(private val texto0: Int, val simbolo: String = "") {
+    PROGRAMADO(R.string.estado_programado),
+    FACTURACION(R.string.estado_facturacion),
+    EMBARCANDO(R.string.estado_embarcando, "»"),
+    PUERTA_CERRADA(R.string.estado_puerta_cerrada, "■"),
+    RETRASADO(R.string.estado_retrasado, "⚠"),
+    EN_VUELO(R.string.estado_en_vuelo, "✈"),
+    APROXIMANDO(R.string.estado_aproximando, "▼"),
+    ATERRIZADO(R.string.estado_aterrizado, "✔"),
+    CANCELADO(R.string.estado_cancelado, "✕"),
+    DESVIADO(R.string.estado_desviado, "↪"),
+    DESCONOCIDO(0);
+
+    /** Texto en el idioma del móvil. */
+    val texto: String get() = if (texto0 == 0) "—" else tx(texto0)
 
     /** Texto con símbolo: el estado se entiende sin depender del color. */
     val etiqueta get() = if (simbolo.isEmpty()) texto else "$simbolo $texto"
@@ -114,17 +119,23 @@ data class Trayecto(
 }
 
 @Serializable
-enum class Tema(val texto: String) { AUTO("AUTO"), CLARO("CLARO"), OSCURO("OSCURO") }
+enum class Tema(private val texto0: Int) {
+    AUTO(R.string.tema_auto), CLARO(R.string.tema_claro), OSCURO(R.string.tema_oscuro);
+    val texto: String get() = tx(texto0)
+}
 
 @Serializable
-enum class Unidades(val texto: String) { METRICO("METROS · KM/H"), AVIACION("PIES · NUDOS") }
+enum class Unidades(private val texto0: Int) {
+    METRICO(R.string.unidades_metrico), AVIACION(R.string.unidades_aviacion);
+    val texto: String get() = tx(texto0)
+}
 
 /** Formato de alturas y velocidades según el ajuste de unidades. */
 object Formato {
-    private val es = java.util.Locale("es", "ES")
+    // Separador de miles según el idioma del móvil (10.400 m en español, 10,400 m en inglés).
     fun altura(pies: Int, u: Unidades) =
-        if (u == Unidades.METRICO) String.format(es, "%,d m", (pies * 0.3048).toInt() / 100 * 100)
-        else String.format(es, "%,d ft", pies / 100 * 100)
+        if (u == Unidades.METRICO) String.format(java.util.Locale.getDefault(), "%,d m", (pies * 0.3048).toInt() / 100 * 100)
+        else String.format(java.util.Locale.getDefault(), "%,d ft", pies / 100 * 100)
     fun velocidad(nudos: Int, u: Unidades) =
         if (u == Unidades.METRICO) "${(nudos * 1.852).toInt()} km/h" else "$nudos kt"
 }

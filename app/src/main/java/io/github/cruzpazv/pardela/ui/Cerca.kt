@@ -1,5 +1,7 @@
 package io.github.cruzpazv.pardela.ui
 
+import io.github.cruzpazv.pardela.tx
+
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
@@ -73,14 +75,14 @@ fun AvionesCerca(lat: Double?, lon: Double?, titulo: String, atras: () -> Unit, 
     var lista by remember { mutableStateOf<List<Repositorio.Cercano>?>(null) }
 
     val permiso = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
-        if (!ok) aviso = "Sin permiso de ubicación. Puede elegir uno de sus aeropuertos."
+        if (!ok) aviso = tx(R.string.sin_permiso_de_ubicacion_puede_elegir)
         else buscando = true
     }
     // Pedir la posición (aproximada basta: solo hace falta saber la zona).
     LaunchedEffect(buscando) {
         if (!buscando) return@LaunchedEffect
         val l = ubicacion(ctx)
-        if (l != null) centro = GeoPoint(l.latitude, l.longitude) else aviso = "No se ha podido saber dónde está. ¿Tiene activada la ubicación del móvil?"
+        if (l != null) centro = GeoPoint(l.latitude, l.longitude) else aviso = tx(R.string.no_se_ha_podido_saber_donde_esta_tiene)
         buscando = false
     }
     LaunchedEffect(Unit) {
@@ -102,27 +104,27 @@ fun AvionesCerca(lat: Double?, lon: Double?, titulo: String, atras: () -> Unit, 
         val c = centro
         when {
             c != null -> {
-                Texto("Aviones en el aire a menos de unos 50 km. Toque uno para ver su vuelo.", 16, C.gris)
+                Texto(tx(R.string.aviones_en_el_aire_a_menos_de_unos_50), 16, C.gris)
                 Spacer(Modifier.height(8.dp))
                 MapaCerca(c, lista.orEmpty(), Modifier.fillMaxWidth().weight(1f).clip(RoundedCornerShape(12.dp))) { abrir(it) }
                 Spacer(Modifier.height(8.dp))
                 val l = lista
                 when {
                     l == null -> Cargando()
-                    l.isEmpty() -> Texto("Ahora mismo no hay aviones a la vista del radar por aquí.", 17, C.gris)
+                    l.isEmpty() -> Texto(tx(R.string.ahora_mismo_no_hay_aviones_a_la_vista), 17, C.gris)
                     else -> LazyColumn(Modifier.weight(1f)) { items(l) { a -> FilaCercano(a) { abrir(a.vuelo) } } }
                 }
             }
-            buscando -> Cargando("BUSCANDO SU POSICIÓN…")
+            buscando -> Cargando(tx(R.string.buscando_su_posicion))
             else -> {
                 aviso?.let { AvisoError(it) }
-                Boton("USAR MI UBICACIÓN", icono = Icons.Default.LocationOn) {
+                Boton(tx(R.string.usar_mi_ubicacion), icono = Icons.Default.LocationOn) {
                     aviso = null
                     if (tienePermiso(ctx)) buscando = true else permiso.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
                 }
                 val datos by Almacen.datos.collectAsState()
                 if (datos.aeropuertos.isNotEmpty()) {
-                    Seccion("O CERCA DE UN AEROPUERTO")
+                    Seccion(tx(R.string.o_cerca_de_un_aeropuerto))
                     datos.aeropuertos.mapNotNull { Aeropuertos.iata(it) }.forEach { a ->
                         BotonSecundario("${a.iata} · ${a.ciudad.uppercase()}", Modifier.padding(bottom = 8.dp), icono = Icons.Default.Place) {
                             centro = GeoPoint(a.lat, a.lon)
@@ -146,14 +148,14 @@ private fun FilaCercano(a: Repositorio.Cercano, onClick: () -> Unit) {
             Texto(v.numero, 20, C.texto, FontWeight.Bold, mono = true, lineas = 1)
         }
         Spacer(Modifier.height(6.dp))
-        val ruta = if (v.salida.lugar.iata.isBlank() && v.llegada.lugar.iata.isBlank()) "Ruta desconocida"
+        val ruta = if (v.salida.lugar.iata.isBlank() && v.llegada.lugar.iata.isBlank()) tx(R.string.ruta_desconocida)
         else "${v.salida.lugar.ciudad.ifBlank { v.salida.lugar.iata.ifBlank { "?" } }} → ${v.llegada.lugar.ciudad.ifBlank { v.llegada.lugar.iata.ifBlank { "?" } }}"
         Texto(ruta.uppercase(), 18, C.ambar, FontWeight.Bold, mono = true)
         Texto(
             listOfNotNull(
                 d?.altitudPies?.let { Formato.altura(it, u) },
                 d?.velocidadNudos?.let { Formato.velocidad(it, u) },
-                "a ${Math.round(a.km)} km",
+                tx(R.string.a_x_km, Math.round(a.km)),
             ).joinToString("  ·  "),
             16, C.gris,
         )

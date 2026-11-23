@@ -1,5 +1,7 @@
 package io.github.cruzpazv.pardela.notif
 
+import io.github.cruzpazv.pardela.tx
+
 import io.github.cruzpazv.pardela.data.intentar
 
 import android.Manifest
@@ -32,13 +34,13 @@ object Avisos {
     fun crearCanales(ctx: Context) {
         val nm = ctx.getSystemService(NotificationManager::class.java)
         nm.createNotificationChannel(
-            NotificationChannel(CANAL_AVISOS, "Cambios en vuelos", NotificationManager.IMPORTANCE_HIGH).apply {
-                description = "Despegues, aterrizajes, retrasos y cambios de puerta"
+            NotificationChannel(CANAL_AVISOS, tx(R.string.cambios_en_vuelos), NotificationManager.IMPORTANCE_HIGH).apply {
+                description = tx(R.string.despegues_aterrizajes_retrasos_y_cambi)
             }
         )
         nm.createNotificationChannel(
-            NotificationChannel(CANAL_DIRECTO, "Vuelo en directo", NotificationManager.IMPORTANCE_LOW).apply {
-                description = "Aviso fijo mientras vigila un vuelo"
+            NotificationChannel(CANAL_DIRECTO, tx(R.string.vuelo_en_directo), NotificationManager.IMPORTANCE_LOW).apply {
+                description = tx(R.string.aviso_fijo_mientras_vigila_un_vuelo)
                 setShowBadge(false)
             }
         )
@@ -102,28 +104,28 @@ object Avisos {
         if (ahora.estado != antes.estado && ahora.estado != Estado.DESCONOCIDO) {
             when (ahora.estado) {
                 Estado.EN_VUELO -> if (a.avisoDespegue)
-                    r += Cambio("✈ HA DESPEGADO" + (ahora.llegada.horaPrevista ?: ahora.llegada.hora)?.let { ". Llegada prevista $it" }.orEmpty())
-                Estado.APROXIMANDO -> if (a.avisoAterrizaje) r += Cambio("▼ Está llegando a $destino")
+                    r += Cambio(tx(R.string.ha_despegado) + (ahora.llegada.horaPrevista ?: ahora.llegada.hora)?.let { tx(R.string.llegada_prevista_x, it) }.orEmpty())
+                Estado.APROXIMANDO -> if (a.avisoAterrizaje) r += Cambio(tx(R.string.esta_llegando_a_x, destino))
                 Estado.ATERRIZADO -> if (a.avisoAterrizaje)
-                    r += Cambio("✔ HA ATERRIZADO en $destino" + ahora.llegada.cinta?.takeIf { a.avisoCinta }?.let { ". Equipaje: cinta $it" }.orEmpty())
-                Estado.EMBARCANDO -> if (a.avisoEmbarque) r += Cambio("» EMBARCANDO" + ahora.salida.puerta?.let { " por la puerta $it" }.orEmpty())
-                Estado.PUERTA_CERRADA -> if (a.avisoEmbarque) r += Cambio("■ Puerta cerrada")
-                Estado.FACTURACION -> if (a.avisoEmbarque) r += Cambio("Facturación abierta")
-                Estado.CANCELADO -> r += Cambio("✕ VUELO CANCELADO", urgente = true)
-                Estado.DESVIADO -> r += Cambio("↪ VUELO DESVIADO", urgente = true)
-                Estado.RETRASADO -> if (a.avisoRetraso) r += Cambio("⚠ RETRASADO" + ahora.salida.horaPrevista?.let { ". Nueva salida $it" }.orEmpty())
+                    r += Cambio(tx(R.string.ha_aterrizado_en_x, destino) + ahora.llegada.cinta?.takeIf { a.avisoCinta }?.let { tx(R.string.equipaje_cinta_x, it) }.orEmpty())
+                Estado.EMBARCANDO -> if (a.avisoEmbarque) r += Cambio(tx(R.string.embarcando) + ahora.salida.puerta?.let { tx(R.string.por_la_puerta_x, it) }.orEmpty())
+                Estado.PUERTA_CERRADA -> if (a.avisoEmbarque) r += Cambio(tx(R.string.puerta_cerrada))
+                Estado.FACTURACION -> if (a.avisoEmbarque) r += Cambio(tx(R.string.facturacion_abierta))
+                Estado.CANCELADO -> r += Cambio(tx(R.string.vuelo_cancelado), urgente = true)
+                Estado.DESVIADO -> r += Cambio(tx(R.string.vuelo_desviado), urgente = true)
+                Estado.RETRASADO -> if (a.avisoRetraso) r += Cambio(tx(R.string.retrasado) + ahora.salida.horaPrevista?.let { tx(R.string.nueva_salida_x, it) }.orEmpty())
                 else -> {}
             }
         }
         val rA = antes.salida.retraso ?: 0
         val rN = ahora.salida.retraso ?: 0
         if (a.avisoRetraso && ahora.estado != Estado.RETRASADO && ahora.estado.ordinal < Estado.EN_VUELO.ordinal && kotlin.math.abs(rN - rA) >= 10) {
-            r += Cambio(if (rN > 0) "⚠ Retraso de $rN min. Nueva salida ${ahora.salida.horaPrevista}" else "✔ Sale a su hora: ${ahora.salida.horaPrevista ?: ahora.salida.hora}")
+            r += Cambio(if (rN > 0) tx(R.string.retraso_de_x_min_nueva_salida_x, rN, ahora.salida.horaPrevista) else tx(R.string.sale_a_su_hora_x, ahora.salida.horaPrevista ?: ahora.salida.hora))
         }
         if (a.avisoPuerta && ahora.salida.puerta != null && ahora.salida.puerta != antes.salida.puerta && ahora.estado != Estado.EMBARCANDO)
-            r += Cambio("Puerta de embarque: ${ahora.salida.puerta}")
+            r += Cambio(tx(R.string.puerta_de_embarque_x, ahora.salida.puerta))
         if (a.avisoCinta && ahora.llegada.cinta != null && ahora.llegada.cinta != antes.llegada.cinta && ahora.estado != Estado.ATERRIZADO)
-            r += Cambio("Equipaje: cinta ${ahora.llegada.cinta}")
+            r += Cambio(tx(R.string.equipaje_cinta_x_2, ahora.llegada.cinta))
         return r
     }
 }

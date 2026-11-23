@@ -10,7 +10,7 @@ Letra grande, botones grandes y avisos claros. Sin cuentas: todo se queda en su 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/licencia-MIT-blue" alt="Licencia MIT"></a>
   <img src="https://img.shields.io/badge/Android-8.0%2B-3ddc84" alt="Android 8.0 o superior">
-  <img src="https://img.shields.io/badge/idioma-español-orange" alt="En español">
+  <img src="https://img.shields.io/badge/idioma-español%20%7C%20English-orange" alt="En español e inglés">
 </p>
 
 > **Estado:** primera versión (1.0.0). Si encuentra un fallo, abra un [issue](https://github.com/cruzpazv/pardela/issues).
@@ -40,6 +40,7 @@ Todas las versiones van firmadas con la misma clave, así que cada una se instal
 
 ## Pensada para que la use cualquiera
 - Letra grande por defecto y botones de al menos 68 dp.
+- En español o en inglés, según el idioma del móvil (en Android 13 o superior también se puede elegir solo para Pardela).
 - Modo claro, oscuro o automático.
 - **Colores para daltonismo** (paleta Okabe-Ito). Además, cada estado lleva siempre su símbolo y su texto, nunca solo color: ✔ aterrizado, ⚠ retrasado, ✕ cancelado, ✈ en vuelo.
 - Animaciones que se pueden desactivar.
