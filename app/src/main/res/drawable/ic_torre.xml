@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Torre de control: cabina acristalada arriba, fuste y base. Se tiñe desde el código. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <!-- antena -->
+    <path android:fillColor="#FFFFFFFF" android:pathData="M11.3,0.8h1.4v3.2h-1.4z" />
+    <!-- cabina con ventanas (hueco) -->
+    <path android:fillColor="#FFFFFFFF" android:fillType="evenOdd"
+        android:pathData="M5.5,4L18.5,4L16.8,9.4L7.2,9.4Z M7.9,5.5L16.1,5.5L15.4,7.9L8.6,7.9Z" />
+    <!-- balcón -->
+    <path android:fillColor="#FFFFFFFF" android:pathData="M6.8,9.4h10.4v1.6h-10.4z" />
+    <!-- fuste -->
+    <path android:fillColor="#FFFFFFFF" android:pathData="M9.9,11L14.1,11L15.1,21.2L8.9,21.2Z" />
+    <!-- base -->
+    <path android:fillColor="#FFFFFFFF" android:pathData="M5.5,21.2h13v2h-13z" />
+</vector>

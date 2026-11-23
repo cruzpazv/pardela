@@ -321,7 +321,7 @@ private fun ListaAeropuertos(titulo: String, atras: () -> Unit, elegido: (Aeropu
     }
 }
 
-private val FECHA_LARGA get() = DateTimeFormatter.ofPattern(tx(R.string.formato_fecha_larga), Locale.getDefault())
+private val FECHA_LARGA get() = DateTimeFormatter.ofPattern(tx(R.string.formato_fecha_larga), io.github.cruzpazv.pardela.Idioma.locale())
 
 private fun aMillis(d: LocalDate) = d.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
 private fun deMillis(ms: Long): LocalDate = Instant.ofEpochMilli(ms).atZone(ZoneOffset.UTC).toLocalDate()

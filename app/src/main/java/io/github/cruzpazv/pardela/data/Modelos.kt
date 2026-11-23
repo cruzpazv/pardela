@@ -134,8 +134,8 @@ enum class Unidades(private val texto0: Int) {
 object Formato {
     // Separador de miles según el idioma del móvil (10.400 m en español, 10,400 m en inglés).
     fun altura(pies: Int, u: Unidades) =
-        if (u == Unidades.METRICO) String.format(java.util.Locale.getDefault(), "%,d m", (pies * 0.3048).toInt() / 100 * 100)
-        else String.format(java.util.Locale.getDefault(), "%,d ft", pies / 100 * 100)
+        if (u == Unidades.METRICO) String.format(io.github.cruzpazv.pardela.Idioma.locale(), "%,d m", (pies * 0.3048).toInt() / 100 * 100)
+        else String.format(io.github.cruzpazv.pardela.Idioma.locale(), "%,d ft", pies / 100 * 100)
     fun velocidad(nudos: Int, u: Unidades) =
         if (u == Unidades.METRICO) "${(nudos * 1.852).toInt()} km/h" else "$nudos kt"
 }

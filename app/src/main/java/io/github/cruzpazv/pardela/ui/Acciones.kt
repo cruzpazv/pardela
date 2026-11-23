@@ -53,7 +53,7 @@ class Voz(ctx: Context) : TextToSpeech.OnInitListener {
 
     override fun onInit(estado: Int) {
         if (estado != TextToSpeech.SUCCESS) { falla = true; return }
-        val idioma = Locale.getDefault()
+        val idioma = io.github.cruzpazv.pardela.Idioma.locale()
         val r = tts.setLanguage(idioma)
         if (r == TextToSpeech.LANG_MISSING_DATA || r == TextToSpeech.LANG_NOT_SUPPORTED) tts.setLanguage(Locale.forLanguageTag(idioma.language))
         tts.setSpeechRate(0.9f) // un poco más despacio que lo normal

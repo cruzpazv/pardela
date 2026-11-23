@@ -117,4 +117,4 @@ rsvg-convert -w 512 -h 512 tools/icono/pardela-tienda.svg -o fastlane/metadata/a
 Pardela se ha desarrollado con la ayuda de [Claude](https://claude.com/claude-code), un asistente de IA de Anthropic. El diseño, las decisiones y las pruebas son de [cruzpazv](https://github.com/cruzpazv). Los commits en los que ha participado lo indican con la línea `Co-Authored-By`.
 
 ## Licencia
-[MIT](LICENSE). Datos de aeropuertos: OurAirports (dominio público). Las fotos son de sus autores en planespotters.net y los logotipos son marcas de sus aerolíneas.
+[MIT](LICENSE). Algunos iconos son de Material Icons (Google, licencia Apache 2.0). Datos de aeropuertos: OurAirports (dominio público). Las fotos son de sus autores en planespotters.net y los logotipos son marcas de sus aerolíneas.

@@ -55,6 +55,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -105,7 +106,7 @@ fun Tablon(iata: String, e: EstadoTablon, atras: () -> Unit, verCerca: (Pantalla
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Cabecera("$iata · ${ap?.ciudad?.uppercase() ?: ""}", atras) {
             if (ap != null) IconButton(onClick = { verCerca(Pantalla.Cerca(ap.lat, ap.lon, tx(R.string.aviones_cerca_de_x, iata))) }) {
-                Icon(Icons.Default.LocationOn, tx(R.string.aviones_cerca_en_el_mapa), tint = C.ambar, modifier = Modifier.size(34.dp))
+                Icon(painterResource(R.drawable.ic_mapa), tx(R.string.aviones_cerca_en_el_mapa), tint = C.ambar, modifier = Modifier.size(34.dp))
             }
             IconButton(onClick = { Almacen.alternarAeropuerto(iata) }) {
                 Icon(Icons.Default.Star, if (guardado) tx(R.string.quitar_de_mis_aeropuertos) else tx(R.string.guardar_aeropuerto),

@@ -9,7 +9,7 @@ import java.util.Locale
 
 /** Textos de un vuelo para compartir, leer en voz alta o guardar en el calendario. */
 object Resumen {
-    private val es get() = Locale.getDefault()
+    private val es get() = io.github.cruzpazv.pardela.Idioma.locale()
     private val diaLargo get() = DateTimeFormatter.ofPattern(tx(R.string.formato_dia), es)
 
     private fun lugar(l: Lugar) = when {

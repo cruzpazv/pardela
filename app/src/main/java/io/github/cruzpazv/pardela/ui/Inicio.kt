@@ -49,6 +49,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -86,7 +89,8 @@ fun Inicio(ir: (Pantalla) -> Unit) {
 
     var guardados by Pantalla.Inicio.guardados
 
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
+    Column(Modifier.fillMaxSize()) {
+    Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
             Paletas("PARDELA", 24)
             IconButton(onClick = { ir(Pantalla.Ajustes) }, modifier = Modifier.size(56.dp)) {
@@ -102,21 +106,6 @@ fun Inicio(ir: (Pantalla) -> Unit) {
             }
         }
 
-        // Dos pestañas: lo que se puede hacer y lo que tiene guardado.
-        Spacer(Modifier.height(14.dp))
-        val total = datos.vuelos.size + datos.aeropuertos.size + datos.trayectos.size
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf(false to tx(R.string.pestana_inicio), true to tx(R.string.pestana_guardados) + if (total > 0) " ($total)" else "").forEach { (g, nombre) ->
-                val sel = g == guardados
-                Box(
-                    Modifier.weight(1f).heightIn(min = 60.dp).clip(RoundedCornerShape(12.dp))
-                        .background(if (sel) C.boton else C.panel).border(2.dp, C.ambar, RoundedCornerShape(12.dp))
-                        .clickable { guardados = g },
-                    contentAlignment = Alignment.Center,
-                ) { Texto(nombre, 19, if (sel) C.sobreBoton else C.ambar, FontWeight.Bold) }
-            }
-        }
-
         if (!guardados) {
         Spacer(Modifier.height(18.dp))
         Boton(tx(R.string.buscar_un_vuelo), icono = Icons.Default.Search) { ir(Pantalla.BuscarVuelo()) }
@@ -125,7 +114,7 @@ fun Inicio(ir: (Pantalla) -> Unit) {
         Spacer(Modifier.height(10.dp))
         BotonSecundario(tx(R.string.avisarme_de_un_trayecto), icono = Icons.Default.Notifications) { ir(Pantalla.BuscarAeropuerto("")) }
         Spacer(Modifier.height(10.dp))
-        BotonSecundario(tx(R.string.que_avion_pasa_por_aqui), icono = Icons.Default.LocationOn) { ir(Pantalla.Cerca(null, null, tx(R.string.aviones_cerca_de_usted))) }
+        BotonSecundario(tx(R.string.que_avion_pasa_por_aqui), icono = ImageVector.vectorResource(R.drawable.ic_mapa)) { ir(Pantalla.Cerca(null, null, tx(R.string.aviones_cerca_de_usted))) }
         } else {
 
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -168,6 +157,30 @@ fun Inicio(ir: (Pantalla) -> Unit) {
 
         }
         Spacer(Modifier.height(30.dp))
+    }
+
+    // Pestañas abajo, fijas (al alcance del pulgar): torre de control = inicio; avión despegando = guardados.
+    val total = datos.vuelos.size + datos.aeropuertos.size + datos.trayectos.size
+    Row(
+        Modifier.fillMaxWidth().background(C.panel).padding(horizontal = 12.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        listOf(
+            Triple(false, tx(R.string.pestana_inicio), R.drawable.ic_torre),
+            Triple(true, tx(R.string.pestana_guardados) + if (total > 0) " ($total)" else "", R.drawable.ic_despegue),
+        ).forEach { (g, nombre, icono) ->
+            val sel = g == guardados
+            val color = if (sel) C.sobreBoton else C.ambar
+            Column(
+                Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).background(if (sel) C.boton else C.fondo)
+                    .border(2.dp, C.ambar, RoundedCornerShape(14.dp)).clickable { guardados = g }.padding(vertical = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Icon(painterResource(icono), null, tint = color, modifier = Modifier.size(34.dp))
+                Texto(nombre, 17, color, FontWeight.Bold, lineas = 1)
+            }
+        }
+    }
     }
 
     borrarTrayecto?.let { tr ->
