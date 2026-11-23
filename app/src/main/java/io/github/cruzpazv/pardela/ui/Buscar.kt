@@ -177,7 +177,10 @@ fun BuscarVuelo(e: EstadoBusqueda, atras: () -> Unit, abrir: (Vuelo) -> Unit) {
 
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Cabecera(tx(R.string.buscar_un_vuelo), atras)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        // Modo sencillo: solo por número.
+        val sencillo = Almacen.ajustes.modoSencillo
+        LaunchedEffect(sencillo) { if (sencillo) porTrayecto = false }
+        if (!sencillo) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             listOf(false to tx(R.string.por_numero), true to tx(R.string.por_trayecto)).forEach { (t, nombre) ->
                 val sel = t == porTrayecto
                 Box(

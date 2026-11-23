@@ -93,6 +93,7 @@ fun Inicio(ir: (Pantalla) -> Unit) {
     LaunchedEffect(Unit) { refrescarTodo(forzar = false) }
 
     var guardados by Pantalla.Inicio.guardados
+    val sencillo = datos.ajustes.modoSencillo
 
     Column(Modifier.fillMaxSize()) {
     Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp)) {
@@ -111,17 +112,7 @@ fun Inicio(ir: (Pantalla) -> Unit) {
             }
         }
 
-        if (!guardados) {
-        Spacer(Modifier.height(18.dp))
-        Boton(tx(R.string.buscar_un_vuelo), icono = Icons.Default.Search) { ir(Pantalla.BuscarVuelo()) }
-        Spacer(Modifier.height(10.dp))
-        Boton(tx(R.string.ver_un_aeropuerto), icono = Icons.Default.Place) { ir(Pantalla.BuscarAeropuerto(null)) }
-        Spacer(Modifier.height(10.dp))
-        BotonSecundario(tx(R.string.avisarme_de_un_trayecto), icono = Icons.Default.Notifications) { ir(Pantalla.BuscarAeropuerto("")) }
-        Spacer(Modifier.height(10.dp))
-        BotonSecundario(tx(R.string.que_avion_pasa_por_aqui), icono = ImageVector.vectorResource(R.drawable.ic_mapa)) { ir(Pantalla.Cerca(null, null, tx(R.string.aviones_cerca_de_usted))) }
-        } else {
-
+        val misVuelos: @Composable () -> Unit = {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.weight(1f)) { Seccion(tx(R.string.mis_vuelos)) }
             if (datos.vuelos.isNotEmpty()) IconButton(onClick = { refrescarTodo() }, modifier = Modifier.padding(top = 14.dp)) {
@@ -130,6 +121,27 @@ fun Inicio(ir: (Pantalla) -> Unit) {
         }
         if (datos.vuelos.isEmpty()) Texto(tx(R.string.aun_no_sigue_ningun_vuelo_pulse_buscar), 17, C.gris)
         datos.vuelos.forEach { s -> s.ultimo?.let { v -> FilaVuelo(v, salidas = true) { ir(Pantalla.Detalle(v)) } } }
+
+        }
+        when {
+            // Modo sencillo: una sola pantalla con buscar y sus vuelos, sin pestañas.
+            sencillo -> {
+                Spacer(Modifier.height(18.dp))
+                Boton(tx(R.string.buscar_un_vuelo), icono = Icons.Default.Search) { ir(Pantalla.BuscarVuelo()) }
+                misVuelos()
+            }
+            !guardados -> {
+        Spacer(Modifier.height(18.dp))
+        Boton(tx(R.string.buscar_un_vuelo), icono = Icons.Default.Search) { ir(Pantalla.BuscarVuelo()) }
+        Spacer(Modifier.height(10.dp))
+        Boton(tx(R.string.ver_un_aeropuerto), icono = Icons.Default.Place) { ir(Pantalla.BuscarAeropuerto(null)) }
+        Spacer(Modifier.height(10.dp))
+        BotonSecundario(tx(R.string.avisarme_de_un_trayecto), icono = Icons.Default.Notifications) { ir(Pantalla.BuscarAeropuerto("")) }
+        Spacer(Modifier.height(10.dp))
+        BotonSecundario(tx(R.string.que_avion_pasa_por_aqui), icono = ImageVector.vectorResource(R.drawable.ic_mapa)) { ir(Pantalla.Cerca(null, null, tx(R.string.aviones_cerca_de_usted))) }
+            }
+            else -> {
+        misVuelos()
 
         Seccion(tx(R.string.mis_aeropuertos))
         if (datos.aeropuertos.isEmpty()) Texto(tx(R.string.guarde_aqui_los_aeropuertos_que_mira_a), 17, C.gris)
@@ -160,11 +172,13 @@ fun Inicio(ir: (Pantalla) -> Unit) {
             }
         }
 
+            }
         }
         Spacer(Modifier.height(30.dp))
     }
 
     // Pestañas abajo, fijas (al alcance del pulgar): torre de control = inicio; avión despegando = guardados.
+    if (!sencillo) {
     val total = datos.vuelos.size + datos.aeropuertos.size + datos.trayectos.size
     Row(
         Modifier.fillMaxWidth().background(C.panel).padding(horizontal = 12.dp, vertical = 8.dp),
@@ -185,6 +199,7 @@ fun Inicio(ir: (Pantalla) -> Unit) {
                 Texto(nombre, 17, color, FontWeight.Bold, lineas = 1)
             }
         }
+    }
     }
     }
 

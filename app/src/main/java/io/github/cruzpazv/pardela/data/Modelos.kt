@@ -171,6 +171,8 @@ data class Ajustes(
     val idioma: String = "",
     // Ocultar vuelos sin pasajeros (posicionamientos de las filiales de Binter).
     val ocultarPosicionamiento: Boolean = false,
+    // Modo sencillo: solo buscar, seguir y escuchar vuelos.
+    val modoSencillo: Boolean = false,
 )
 
 @Serializable

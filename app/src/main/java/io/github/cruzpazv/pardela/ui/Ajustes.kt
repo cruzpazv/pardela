@@ -142,6 +142,7 @@ fun AjustesSeccion(seccion: SeccionAjustes, atras: () -> Unit) {
         Cabecera(titulo, atras)
         when (seccion) {
             SeccionAjustes.ASPECTO -> {
+                Interruptor(tx(R.string.modo_sencillo), aj.modoSencillo, tx(R.string.modo_sencillo_detalle)) { v -> ajustar { it.copy(modoSencillo = v) } }
                 Interruptor(tx(R.string.letra_grande_2), aj.textoGrande) { v -> ajustar { it.copy(textoGrande = v) } }
                 Interruptor(tx(R.string.animaciones), aj.animaciones, tx(R.string.las_letras_del_tablon_giran_al_cambiar)) { v -> ajustar { it.copy(animaciones = v) } }
                 Interruptor(tx(R.string.colores_para_daltonismo_2), aj.daltonismo, tx(R.string.azul_y_naranja_en_vez_de_verde_y_rojo)) { v -> ajustar { it.copy(daltonismo = v) } }

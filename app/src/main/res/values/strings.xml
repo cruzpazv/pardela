@@ -375,4 +375,6 @@
     <string name="parar">"■ STOP"</string>
     <string name="falta_voz_x">"The phone does not have the %1$s voice installed, so it cannot read aloud in this language."</string>
     <string name="instalar_la_voz">"INSTALL THE VOICE"</string>
+    <string name="modo_sencillo">"SIMPLE MODE"</string>
+    <string name="modo_sencillo_detalle">"Only the essentials: find a flight, follow it and listen to it. Hides maps, airports, routes and aircraft details."</string>
 </resources>

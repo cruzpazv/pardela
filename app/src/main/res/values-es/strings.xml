@@ -375,4 +375,6 @@
     <string name="parar">"■ PARAR"</string>
     <string name="falta_voz_x">"El móvil no tiene instalada la voz en %1$s, así que no puede leer en voz alta en este idioma."</string>
     <string name="instalar_la_voz">"INSTALAR LA VOZ"</string>
+    <string name="modo_sencillo">"MODO SENCILLO"</string>
+    <string name="modo_sencillo_detalle">"Solo lo esencial: buscar un vuelo, seguirlo y escucharlo. Oculta mapas, aeropuertos, trayectos y datos del avión."</string>
 </resources>

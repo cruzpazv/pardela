@@ -149,6 +149,8 @@ private const val FICHAS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:-→"
 /** Una ficha del panel de paletas. Al cambiar, gira por varias letras antes de parar. */
 @Composable
 private fun Ficha(c: Char, tam: Int, color: Color) {
+    // Sin animación (ajuste o lista larga): ficha fija, mucho más ligera.
+    if (!Animar.current) { FichaFija(c, tam, color); return }
     var mostrado by remember { mutableStateOf(c) }
     val giro = remember { Animatable(0f) }
     val animar = Animar.current
@@ -173,6 +175,18 @@ private fun Ficha(c: Char, tam: Int, color: Color) {
             modifier = Modifier.graphicsLayer { rotationX = (1f - giro.value) * 70f * if (giro.isRunning) 1f else 0f },
             style = TextStyle(fontSize = t(tam), fontFamily = Mono, fontWeight = FontWeight.Bold),
         )
+        Box(Modifier.fillMaxWidth().height(1.dp).background(Oscura.raya))
+    }
+}
+
+@Composable
+private fun FichaFija(c: Char, tam: Int, color: Color) {
+    Box(
+        Modifier.padding(horizontal = 1.dp).clip(RoundedCornerShape(3.dp)).background(Oscura.celda)
+            .width((tam * 0.72f * Escala.current).dp).heightIn(min = (tam * 1.35f * Escala.current).dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(c.toString(), color = color, style = TextStyle(fontSize = t(tam), fontFamily = Mono, fontWeight = FontWeight.Bold))
         Box(Modifier.fillMaxWidth().height(1.dp).background(Oscura.raya))
     }
 }

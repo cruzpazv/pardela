@@ -47,6 +47,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -137,7 +138,9 @@ fun Tablon(iata: String, e: EstadoTablon, atras: () -> Unit, verCerca: (Pantalla
             err != null -> AvisoError(err)
             vuelos == null -> Cargando()
             vuelos.isEmpty() -> Texto(tx(R.string.no_hay_vuelos_que_mostrar_ahora), 18, C.gris, modifier = Modifier.padding(16.dp))
-            else -> LazyColumn(state = e.scroll) { items(vuelos) { v -> FilaVuelo(v, esSalidas, conFecha = false) { abrir(v) } } }
+            else -> CompositionLocalProvider(Animar provides (Animar.current && vuelos.size <= 20)) {
+                LazyColumn(state = e.scroll) { items(vuelos) { v -> FilaVuelo(v, esSalidas, conFecha = false) { abrir(v) } } }
+            }
         }
     }
 }

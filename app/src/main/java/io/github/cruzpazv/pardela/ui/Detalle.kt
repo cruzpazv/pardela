@@ -166,7 +166,8 @@ fun Detalle(inicial: Vuelo, atras: () -> Unit, verHistorial: (Avion) -> Unit, ve
         }
 
         Progreso(v)
-        if (hayMapa(v)) MapaPequeno(v) { verMapa(v) }
+        val sencillo = datos.ajustes.modoSencillo
+        if (hayMapa(v) && !sencillo) MapaPequeno(v) { verMapa(v) }
 
         if (v.conHorarios) {
             Seccion(tx(R.string.salida))
@@ -196,6 +197,8 @@ fun Detalle(inicial: Vuelo, atras: () -> Unit, verHistorial: (Avion) -> Unit, ve
         }
         if (esteVigilado || Repositorio.radarUtil(v) || v.estado.terminado) Texto(tx(R.string.aviso_fijo_en_la_pantalla_del_movil_qu), 15, C.gris, modifier = Modifier.padding(4.dp))
 
+        // Modo sencillo: sin ficha del avión ni enlaces a otras webs.
+        if (!sencillo) {
         Spacer(Modifier.height(12.dp))
         BotonSecundario(if (verAvion) tx(R.string.ocultar_el_avion) else tx(R.string.ver_el_avion), icono = Icons.Default.Info) { verAvion = !verAvion }
         if (verAvion) FichaAvion(v, conAvion, verHistorial)
@@ -208,6 +211,7 @@ fun Detalle(inicial: Vuelo, atras: () -> Unit, verHistorial: (Avion) -> Unit, ve
                     runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
                 }
             }
+        }
         }
         Spacer(Modifier.height(30.dp))
     }
