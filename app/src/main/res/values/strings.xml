@@ -368,4 +368,6 @@
     <string name="idioma_auto">"AUTO: the phone's language."</string>
     <string name="pestana_inicio">"HOME"</string>
     <string name="pestana_guardados">"SAVED"</string>
+    <string name="widget_nombre_mini">"Next flight (small)"</string>
+    <string name="widget_descripcion_mini">"The next flight you follow, in a small size."</string>
 </resources>

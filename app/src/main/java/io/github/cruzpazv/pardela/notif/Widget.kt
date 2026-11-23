@@ -21,6 +21,14 @@ class WidgetVuelo : AppWidgetProvider() {
     }
 }
 
+/** Versión pequeña (2×1): lo esencial en dos líneas. */
+class WidgetVueloMini : AppWidgetProvider() {
+    override fun onUpdate(ctx: Context, gestor: AppWidgetManager, ids: IntArray) {
+        Almacen.iniciar(ctx)
+        Widget.actualizar(ctx)
+    }
+}
+
 object Widget {
     /**
      * Vuelo a mostrar: el que está en marcha o el próximo en salir. Uno aterrizado sigue
@@ -40,10 +48,11 @@ object Widget {
 
     fun actualizar(ctx: Context) {
         val gestor = AppWidgetManager.getInstance(ctx)
-        val ids = gestor.getAppWidgetIds(ComponentName(ctx, WidgetVuelo::class.java))
-        if (ids.isEmpty()) return
         val d = Almacen.datos.value
         val v = elegir(d.vuelos.mapNotNull { it.ultimo })
+        actualizarMini(ctx, gestor, v, d.ajustes.daltonismo)
+        val ids = gestor.getAppWidgetIds(ComponentName(ctx, WidgetVuelo::class.java))
+        if (ids.isEmpty()) return
         val r = RemoteViews(ctx.packageName, R.layout.widget_vuelo)
         if (v == null) {
             r.setTextViewText(R.id.numero, "PARDELA")
@@ -59,6 +68,32 @@ object Widget {
             r.setTextViewText(R.id.estado, if (v.estado == Estado.DESCONOCIDO) "" else v.estado.etiqueta)
             r.setTextColor(R.id.estado, color(v.estado, d.ajustes.daltonismo))
             r.setTextViewText(R.id.horas, horas(v))
+            r.setOnClickPendingIntent(R.id.widget, Avisos.abrirApp(ctx, v.clave))
+        }
+        gestor.updateAppWidget(ids, r)
+    }
+
+    private fun actualizarMini(ctx: Context, gestor: AppWidgetManager, v: Vuelo?, daltonismo: Boolean) {
+        val ids = gestor.getAppWidgetIds(ComponentName(ctx, WidgetVueloMini::class.java))
+        if (ids.isEmpty()) return
+        val r = RemoteViews(ctx.packageName, R.layout.widget_vuelo_mini)
+        if (v == null) {
+            r.setTextViewText(R.id.linea1, "PARDELA")
+            r.setTextViewText(R.id.linea2, tx(R.string.sin_vuelos_proximos))
+            r.setTextColor(R.id.linea2, 0xFFA6A6A6.toInt())
+            r.setOnClickPendingIntent(R.id.widget, Avisos.abrirApp(ctx))
+        } else {
+            // "IB3166  LPA→MAD" / "✈ EN VUELO · 13:45" (con el día delante si no es hoy).
+            val ruta = "${v.salida.lugar.iata.ifBlank { "?" }}→${v.llegada.lugar.iata.ifBlank { "?" }}"
+            r.setTextViewText(R.id.linea1, "${v.numero}  $ruta")
+            val enMarcha = v.estado == Estado.EN_VUELO || v.estado == Estado.APROXIMANDO || v.estado == Estado.ATERRIZADO
+            val e = if (enMarcha) v.llegada else v.salida
+            val hora = e.horaPrevista ?: e.hora
+            val dia = dia(v.fecha).takeIf { it.isNotEmpty() && v.fecha != LocalDate.now().toString() }
+            val cuando = listOfNotNull(dia, hora).joinToString(" ")
+            val estado = if (v.estado == Estado.DESCONOCIDO) "" else v.estado.etiqueta
+            r.setTextViewText(R.id.linea2, listOf(estado, cuando).filter { it.isNotEmpty() }.joinToString(" · "))
+            r.setTextColor(R.id.linea2, if (v.estado == Estado.DESCONOCIDO) 0xFFF2F2F2.toInt() else color(v.estado, daltonismo))
             r.setOnClickPendingIntent(R.id.widget, Avisos.abrirApp(ctx, v.clave))
         }
         gestor.updateAppWidget(ids, r)

@@ -368,4 +368,6 @@
     <string name="idioma_auto">"AUTO: el idioma del móvil."</string>
     <string name="pestana_inicio">"INICIO"</string>
     <string name="pestana_guardados">"GUARDADOS"</string>
+    <string name="widget_nombre_mini">"Próximo vuelo (pequeño)"</string>
+    <string name="widget_descripcion_mini">"El próximo vuelo que sigue, en tamaño pequeño."</string>
 </resources>
