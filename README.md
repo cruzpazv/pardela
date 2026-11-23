@@ -38,7 +38,7 @@ Todas las versiones van firmadas con la misma clave, así que cada una se instal
 - **Compartir, calendario y voz:** envíe el vuelo por WhatsApp, guárdelo en el calendario u oiga su estado en voz alta.
 - **Recordatorio** unas horas antes de salir.
 - **Widget** para la pantalla de inicio con el próximo vuelo, su estado y sus horas.
-- **Modo pantalla** para dejar una tablet fija (por ejemplo, una Amazon Fire): aviones cerca, el tablón de un aeropuerto o sus vuelos, siempre encendida y actualizándose sola.
+- **Modo pantalla** para dejar una tablet fija (por ejemplo, una Amazon Fire): aviones cerca (en radar, tabla, letrero LED, el más cercano con su foto, su ruta o la pista del aeropuerto), el tablón de un aeropuerto o sus vuelos, siempre encendida y actualizándose sola.
 - **¿Qué avión pasa por aquí?** Mapa y lista de los aviones en el aire cerca de usted o de un aeropuerto, con su ruta.
 - **Buscar por trayecto:** todos los vuelos directos de un día entre dos aeropuertos, hasta un año vista.
 - **Historial del avión:** sus vuelos de los últimos 7 días.

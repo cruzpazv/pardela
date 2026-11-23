@@ -266,9 +266,9 @@ object Repositorio {
     data class Cercano(val vuelo: Vuelo, val km: Double)
 
     /** Aviones en el aire a menos de ~55 km (30 millas náuticas) de un punto, con su ruta si se conoce. */
-    suspend fun cerca(lat: Double, lon: Double): List<Cercano> = coroutineScope {
+    suspend fun cerca(lat: Double, lon: Double, conSuelo: Boolean = false): List<Cercano> = coroutineScope {
         val hoy = LocalDate.now().toString()
-        val aviones = Radar.cerca(lat, lon, 30).filter { !it.directo.enTierra }
+        val aviones = Radar.cerca(lat, lon, 30).filter { conSuelo || !it.directo.enTierra }
             .map { it to km(it.directo.lat, it.directo.lon, lat, lon) }.sortedBy { it.second }.take(30)
         val limite = Semaphore(4)
         aviones.map { (c, distancia) ->

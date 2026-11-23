@@ -25,5 +25,5 @@ Primera versión · First version.
 - Letra grande, modo sencillo, guía rápida, colores para daltonismo, modo claro/oscuro, horas de silencio.
 - Español e inglés.
 - Widgets grande y pequeño.
-- Modo pantalla para tablets fijas.
+- Modo pantalla para tablets fijas, con vistas de radar, tabla, avión más cercano, letrero LED, ruta y pista.
 - Sin cuentas: todo se guarda en el móvil; copia de seguridad sin la clave.

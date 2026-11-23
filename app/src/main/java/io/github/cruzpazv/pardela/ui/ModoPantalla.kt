@@ -31,6 +31,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -96,6 +97,24 @@ fun ModoPantallaElegir(atras: () -> Unit, empezar: () -> Unit) {
             }
             if (datos.aeropuertos.isEmpty()) Texto(tx(R.string.guarde_antes_aeropuerto), 16, C.gris)
         }
+        if (aj.pantallaModo == ModosPantalla.CERCA) {
+            Seccion(tx(R.string.vista))
+            listOf(
+                Triple(VistasPantalla.ROTAR, R.string.vista_rotar, R.string.vista_rotar_detalle),
+                Triple(VistasPantalla.RADAR, R.string.vista_radar, R.string.vista_radar_detalle),
+                Triple(VistasPantalla.CERCANO, R.string.vista_cercano, R.string.vista_cercano_detalle),
+                Triple(VistasPantalla.TABLA, R.string.vista_tabla, R.string.vista_tabla_detalle),
+                Triple(VistasPantalla.LED, R.string.vista_led, R.string.vista_led_detalle),
+                Triple(VistasPantalla.RUTA, R.string.vista_ruta, R.string.vista_ruta_detalle),
+                Triple(VistasPantalla.MAPA, R.string.vista_mapa, R.string.vista_mapa_detalle),
+                Triple(VistasPantalla.PISTA, R.string.vista_pista, R.string.vista_pista_detalle),
+            ).forEach { (vista, titulo, detalle) ->
+                val posible = vista != VistasPantalla.PISTA || aj.pantallaIata.isNotEmpty()
+                Opcion(tx(titulo), tx(detalle) + if (posible) "" else " " + tx(R.string.solo_con_aeropuerto), aj.pantallaVista == vista) {
+                    if (posible) Almacen.ajustar { it.copy(pantallaVista = vista) }
+                }
+            }
+        }
         Spacer(Modifier.height(10.dp))
         Interruptor(tx(R.string.abrir_siempre_asi), aj.pantallaAlAbrir, tx(R.string.abrir_siempre_asi_detalle)) { v ->
             Almacen.ajustar { it.copy(pantallaAlAbrir = v) }
@@ -144,7 +163,7 @@ fun ModoPantalla(atras: () -> Unit, abrir: (Vuelo) -> Unit) {
             }
             Spacer(Modifier.height(10.dp))
             when (aj.pantallaModo) {
-                ModosPantalla.CERCA -> PantallaCerca(aj.pantallaIata, abrir)
+                ModosPantalla.CERCA -> PantallaCerca(aj.pantallaIata, aj.pantallaVista, abrir)
                 ModosPantalla.TABLON -> PantallaTablon(aj.pantallaIata, salidas, abrir)
                 else -> PantallaVuelos(abrir)
             }
@@ -179,11 +198,13 @@ private fun PantallaFija() {
 }
 
 @Composable
-private fun PantallaCerca(iata: String, abrir: (Vuelo) -> Unit) {
+private fun PantallaCerca(iata: String, vista: String, abrir: (Vuelo) -> Unit) {
     val ctx = LocalContext.current
     var centro by remember(iata) { mutableStateOf(Aeropuertos.iata(iata)?.let { GeoPoint(it.lat, it.lon) }) }
     var sinSitio by remember(iata) { mutableStateOf(false) }
     var lista by remember { mutableStateOf<List<Repositorio.Cercano>>(emptyList()) }
+    // Altura de la lectura anterior de cada avión: para saber si sube o baja.
+    var anteriores by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
     LaunchedEffect(iata) {
         if (centro == null) {
             val l = if (tienePermiso(ctx)) ubicacion(ctx) else null
@@ -193,18 +214,42 @@ private fun PantallaCerca(iata: String, abrir: (Vuelo) -> Unit) {
     LaunchedEffect(centro) {
         val c = centro ?: return@LaunchedEffect
         while (true) {
-            intentar { Repositorio.cerca(c.latitude, c.longitude) }.getOrNull()?.let { l ->
+            // Con aeropuerto también los aviones en tierra (para la vista de pista).
+            intentar { Repositorio.cerca(c.latitude, c.longitude, conSuelo = iata.isNotEmpty()) }.getOrNull()?.let { l ->
+                anteriores = lista.associate { (it.vuelo.avion.hex ?: it.vuelo.numero) to (it.vuelo.directo?.altitudPies ?: 0) }
                 val visibles = Aerolineas.visibles(l.map { it.vuelo }).toSet()
                 lista = l.filter { it.vuelo in visibles }
             }
-            delay(30_000)
+            delay(20_000)
         }
+    }
+    val disponibles = VistasPantalla.disponibles(iata.isNotEmpty())
+    var indice by remember { mutableIntStateOf(0) }
+    LaunchedEffect(vista) {
+        if (vista != VistasPantalla.ROTAR) return@LaunchedEffect
+        while (true) { delay(20_000); indice++ }
     }
     val c = centro
     if (c == null) {
         if (sinSitio) Texto(tx(R.string.pantalla_sin_ubicacion), 20, C.gris) else Cargando(tx(R.string.buscando_su_posicion))
         return
     }
+    val aire = lista.filter { it.vuelo.directo?.enTierra != true }
+    val actual = if (vista == VistasPantalla.ROTAR || vista !in disponibles) disponibles[indice % disponibles.size] else vista
+    when (actual) {
+        VistasPantalla.RADAR -> VistaRadar(c, aire, abrir)
+        VistasPantalla.TABLA -> VistaTabla(aire, abrir)
+        VistasPantalla.CERCANO -> VistaCercano(c, aire, anteriores, abrir)
+        VistasPantalla.LED -> VistaLed(c, aire, anteriores)
+        VistasPantalla.RUTA -> VistaRuta(c, aire, Aeropuertos.iata(iata)?.nombre.orEmpty())
+        VistasPantalla.PISTA -> VistaPista(iata, lista, anteriores, abrir)
+        else -> VistaMapa(c, aire, abrir)
+    }
+}
+
+/** Mapa y lista de los aviones cercanos (en horizontal, uno al lado del otro). */
+@Composable
+private fun VistaMapa(c: GeoPoint, lista: List<Repositorio.Cercano>, abrir: (Vuelo) -> Unit) {
     val u = Almacen.ajustes.unidades
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val horizontal = maxWidth > maxHeight

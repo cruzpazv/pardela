@@ -181,6 +181,7 @@ data class Ajustes(
     val pantallaModo: String = "",
     val pantallaIata: String = "",
     val pantallaAlAbrir: Boolean = false,
+    val pantallaVista: String = "rotar",
 )
 
 @Serializable
