@@ -199,35 +199,48 @@ fun Confirmar(pregunta: String, si: String, alAceptar: () -> Unit, alCancelar: (
     )
 }
 
-/** Fila de tablón: hora | logo + número | ciudad | estado. */
+/**
+ * Fila de un vuelo, de arriba abajo: fecha, horas de salida y llegada, aerolínea y número, destino.
+ * El estado va a la derecha del destino si cabe; si no, debajo (nunca tapa el nombre).
+ * [conFecha] = false en el tablón de un aeropuerto, donde todos son del mismo día.
+ */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun FilaVuelo(v: Vuelo, salidas: Boolean, conOrigen: Boolean = false, onClick: () -> Unit) {
+fun FilaVuelo(v: Vuelo, salidas: Boolean, conOrigen: Boolean = false, conFecha: Boolean = true, onClick: () -> Unit) {
     val ext = if (salidas) v.salida else v.llegada
     val otro = if (salidas) v.llegada else v.salida
     Tarjeta(onClick) {
+        if (conFecha) fechaLarga(v.fecha)?.let { Texto(it, 16, C.gris, FontWeight.Bold, modifier = Modifier.padding(bottom = 6.dp)) }
+        val horas = listOfNotNull(v.salida.hora ?: "--:--", v.llegada.hora).joinToString(" - ")
+        Paletas(horas, 20)
+        Spacer(Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Paletas(ext.hora ?: "--:--", 20)
-            Spacer(Modifier.width(10.dp))
             LogoAerolinea(v.aerolineaIata, 30, nombre = v.aerolineaNombre)
             Spacer(Modifier.width(10.dp))
             Texto(v.numero, 20, C.texto, FontWeight.Bold, mono = true, lineas = 1)
         }
         Spacer(Modifier.height(8.dp))
         fun nombre(l: Extremo) = l.lugar.ciudad.ifBlank { l.lugar.iata.ifBlank { "?" } }.uppercase()
-        // Con origen (historial del avión): la ruta entera ocupa su propia línea, sin cortar.
-        if (conOrigen) Texto("${nombre(v.salida)} → ${nombre(v.llegada)}", 19, C.ambar, FontWeight.Bold, mono = true, modifier = Modifier.padding(bottom = 6.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                if (!conOrigen) Texto((if (salidas) tx(R.string.a) else tx(R.string.de)) + nombre(otro), 19, C.ambar, FontWeight.Bold, mono = true, lineas = 1)
-                val extra = buildList {
-                    v.fecha?.let { add(it.takeLast(5).split("-").reversed().joinToString("/")) }
-                    ext.horaPrevista?.takeIf { it != ext.hora }?.let { add(tx(R.string.previsto_x, it)) }
-                    ext.puerta?.let { add(tx(R.string.puerta_x, it)) }
-                }
-                if (extra.isNotEmpty()) Texto(extra.joinToString("  ·  "), 15, C.gris, lineas = if (conOrigen) 2 else 1)
-                if (Aerolineas.posicionamiento(v.numero)) Texto(tx(R.string.i_probable_posicionamiento_sin_pasajer), 15, C.gris, lineas = 1)
-            }
-            EtiquetaEstado(v.estado)
+        val destino = if (conOrigen) "${nombre(v.salida)} → ${nombre(v.llegada)}"
+        else (if (salidas) tx(R.string.a) else tx(R.string.de)) + nombre(otro)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Texto(destino, 19, C.ambar, FontWeight.Bold, mono = true, modifier = Modifier.align(Alignment.CenterVertically))
+            Box(Modifier.align(Alignment.CenterVertically)) { EtiquetaEstado(v.estado) }
         }
+        val extra = buildList {
+            ext.horaPrevista?.takeIf { it != ext.hora }?.let { add(tx(R.string.previsto_x, it)) }
+            ext.puerta?.let { add(tx(R.string.puerta_x, it)) }
+        }
+        if (extra.isNotEmpty()) Texto(extra.joinToString("  ·  "), 15, C.gris, modifier = Modifier.padding(top = 4.dp))
+        if (Aerolineas.posicionamiento(v.numero)) Texto(tx(R.string.i_probable_posicionamiento_sin_pasajer), 15, C.gris)
     }
+}
+
+/** "Viernes 18 de diciembre 2026" (en el idioma elegido). */
+fun fechaLarga(fecha: String?): String? = fecha?.let {
+    intentar {
+        java.time.LocalDate.parse(it)
+            .format(java.time.format.DateTimeFormatter.ofPattern(tx(R.string.formato_fecha_larga), io.github.cruzpazv.pardela.Idioma.locale()))
+            .replaceFirstChar { c -> c.titlecase(io.github.cruzpazv.pardela.Idioma.locale()) }
+    }.getOrNull()
 }

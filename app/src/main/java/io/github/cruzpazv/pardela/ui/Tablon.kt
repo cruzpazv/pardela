@@ -136,7 +136,7 @@ fun Tablon(iata: String, e: EstadoTablon, atras: () -> Unit, verCerca: (Pantalla
             err != null -> AvisoError(err)
             vuelos == null -> Cargando()
             vuelos.isEmpty() -> Texto(tx(R.string.no_hay_vuelos_que_mostrar_ahora), 18, C.gris, modifier = Modifier.padding(16.dp))
-            else -> LazyColumn(state = e.scroll) { items(vuelos) { v -> FilaVuelo(v, esSalidas) { abrir(v) } } }
+            else -> LazyColumn(state = e.scroll) { items(vuelos) { v -> FilaVuelo(v, esSalidas, conFecha = false) { abrir(v) } } }
         }
     }
 }
