@@ -37,6 +37,7 @@ import io.github.cruzpazv.pardela.ui.BuscarAeropuerto
 import io.github.cruzpazv.pardela.ui.BuscarVuelo
 import io.github.cruzpazv.pardela.ui.C
 import io.github.cruzpazv.pardela.ui.Detalle
+import io.github.cruzpazv.pardela.ui.Guia
 import io.github.cruzpazv.pardela.ui.HistorialAvion
 import io.github.cruzpazv.pardela.ui.MapaPantalla
 import io.github.cruzpazv.pardela.ui.AvionesCerca
@@ -77,7 +78,10 @@ class MainActivity : ComponentActivity() {
                 val ir: (Pantalla) -> Unit = { pila.add(it) }
                 val atras: () -> Unit = { if (pila.size > 1) pila.removeAt(pila.lastIndex) }
                 Box(Modifier.fillMaxSize().background(C.fondo).safeDrawingPadding()) {
-                    if (!datos.ajustes.bienvenidaVista) Bienvenida() else when (actual) {
+                    if (!datos.ajustes.bienvenidaVista) Bienvenida()
+                    // Guía rápida: una vez, justo después de la bienvenida.
+                    else if (!datos.ajustes.guiaVista) Guia { Almacen.ajustar { it.copy(guiaVista = true) } }
+                    else when (actual) {
                         Pantalla.Inicio -> Inicio(ir)
                         is Pantalla.BuscarVuelo -> BuscarVuelo(actual.estado, atras) { v -> pila.add(Pantalla.Detalle(v)) }
                         is Pantalla.BuscarAeropuerto -> BuscarAeropuerto(actual.origen, atras) { a ->
@@ -92,7 +96,8 @@ class MainActivity : ComponentActivity() {
                         is Pantalla.Mapa -> key(actual) { MapaPantalla(actual.vuelo, atras) }
                         is Pantalla.HistorialAvion -> key(actual) { HistorialAvion(actual.avion, atras) { v -> pila.add(Pantalla.Detalle(v)) } }
                         is Pantalla.Tablon -> Tablon(actual.iata, actual.estado, atras, { c -> pila.add(c) }) { v -> pila.add(Pantalla.Detalle(v)) }
-                        Pantalla.Ajustes -> AjustesPantalla(atras) { s -> pila.add(Pantalla.AjustesDe(s)) }
+                        Pantalla.Guia -> Guia(atras)
+                        Pantalla.Ajustes -> AjustesPantalla(atras, { pila.add(Pantalla.Guia) }) { s -> pila.add(Pantalla.AjustesDe(s)) }
                         is Pantalla.AjustesDe -> key(actual) { AjustesSeccion(actual.seccion, atras) }
                     }
                 }

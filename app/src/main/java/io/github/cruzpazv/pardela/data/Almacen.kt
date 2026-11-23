@@ -95,4 +95,7 @@ object Almacen {
     fun quitarTrayecto(t: Trayecto) = cambiar { d -> d.copy(trayectos = d.trayectos.filterNot { it.clave == t.clave }) }
 
     fun ajustar(f: (Ajustes) -> Ajustes) = cambiar { it.copy(ajustes = f(it.ajustes)) }
+
+    /** Guarda una búsqueda (sin repetir; como mucho 6). */
+    fun anadirReciente(b: String) = cambiar { d -> d.copy(recientes = (listOf(b) + d.recientes.filter { it != b }).take(6)) }
 }

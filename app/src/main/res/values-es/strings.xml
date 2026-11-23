@@ -379,4 +379,19 @@
     <string name="modo_sencillo_detalle">"Solo lo esencial: buscar un vuelo, seguirlo y escucharlo. Oculta mapas, aeropuertos, trayectos y datos del avión."</string>
     <string name="sin_conexion_ultimos_datos">"Sin conexión: se muestran los últimos datos guardados."</string>
     <string name="actualizado_x">"Actualizado %1$s"</string>
+    <string name="guia_1_titulo">"Busque su vuelo"</string>
+    <string name="guia_1_texto">"Pulse BUSCAR UN VUELO y escriba el número del billete, por ejemplo IB3166. También puede buscar por trayecto y día."</string>
+    <string name="guia_2_titulo">"Sígalo"</string>
+    <string name="guia_2_texto">"En el vuelo, pulse SEGUIR ESTE VUELO. Quedará en GUARDADOS y le avisaremos de la puerta, los retrasos, el despegue y el aterrizaje."</string>
+    <string name="guia_3_titulo">"Avisos y voz"</string>
+    <string name="guia_3_texto">"Los avisos llegan aunque la app esté cerrada. Con 🔊 ESCUCHAR, el móvil le lee cómo va el vuelo."</string>
+    <string name="guia_4_titulo">"A su gusto"</string>
+    <string name="guia_4_texto">"En ⚙ AJUSTES puede poner la letra más grande, el modo sencillo, el idioma y las horas de silencio."</string>
+    <string name="guia_siguiente">"SIGUIENTE"</string>
+    <string name="guia_empezar">"EMPEZAR"</string>
+    <string name="guia_atras">"ATRÁS"</string>
+    <string name="guia_saltar">"SALTAR"</string>
+    <string name="como_se_usa">"CÓMO SE USA"</string>
+    <string name="como_se_usa_detalle">"Guía rápida en 4 pasos"</string>
+    <string name="recientes">"RECIENTES"</string>
 </resources>

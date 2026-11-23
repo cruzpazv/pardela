@@ -81,7 +81,7 @@ enum class SeccionAjustes { ASPECTO, AVISOS, CLAVE, COPIA, DATOS }
 
 /** Menú principal de Ajustes: un apartado por fila, con un resumen de cómo está. */
 @Composable
-fun AjustesPantalla(atras: () -> Unit, abrir: (SeccionAjustes) -> Unit) {
+fun AjustesPantalla(atras: () -> Unit, verGuia: () -> Unit, abrir: (SeccionAjustes) -> Unit) {
     val ctx = LocalContext.current
     val datos by Almacen.datos.collectAsState()
     val aj = datos.ajustes
@@ -107,6 +107,7 @@ fun AjustesPantalla(atras: () -> Unit, abrir: (SeccionAjustes) -> Unit) {
         ) { abrir(SeccionAjustes.CLAVE) }
         Apartado(tx(R.string.copia_de_seguridad), Icons.Default.Share, tx(R.string.pasar_sus_datos_a_otro_movil)) { abrir(SeccionAjustes.COPIA) }
         Apartado(tx(R.string.datos_y_privacidad), Icons.Default.Info, tx(R.string.de_donde_salen_los_datos_borrar_todo)) { abrir(SeccionAjustes.DATOS) }
+        Apartado(tx(R.string.como_se_usa), Icons.Default.Star, tx(R.string.como_se_usa_detalle)) { verGuia() }
     }
 }
 

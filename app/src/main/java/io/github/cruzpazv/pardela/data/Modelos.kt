@@ -175,6 +175,8 @@ data class Ajustes(
     val ocultarPosicionamiento: Boolean = false,
     // Modo sencillo: solo buscar, seguir y escuchar vuelos.
     val modoSencillo: Boolean = false,
+    // La guía rápida ya se ha visto.
+    val guiaVista: Boolean = false,
 )
 
 @Serializable
@@ -183,4 +185,6 @@ data class Datos(
     val aeropuertos: List<String> = emptyList(),
     val trayectos: List<Trayecto> = emptyList(),
     val ajustes: Ajustes = Ajustes(),
+    /** Últimas búsquedas: "IB3166" (número) o "LPA>MAD" (trayecto), la más reciente primero. */
+    val recientes: List<String> = emptyList(),
 )

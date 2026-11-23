@@ -140,6 +140,7 @@ class EstadoBusqueda {
 
 @Composable
 fun BuscarVuelo(e: EstadoBusqueda, atras: () -> Unit, abrir: (Vuelo) -> Unit) {
+    val datosRecientes = Almacen.datos.collectAsState().value.recientes
     var porTrayecto by e.porTrayecto
     var texto by e.texto
     var origen by e.origen
@@ -166,10 +167,13 @@ fun BuscarVuelo(e: EstadoBusqueda, atras: () -> Unit, abrir: (Vuelo) -> Unit) {
         cargando = true; error = null; resultados = null
         scope.launch {
             if (porTrayecto) intentar { Repositorio.buscarTrayecto(o!!.iata, d!!.iata, fecha) }
-                .onSuccess { resultados = it }
+                .onSuccess { resultados = it; Almacen.anadirReciente("${o!!.iata}>${d!!.iata}") }
                 .onFailure { error = it.message ?: tx(R.string.sin_conexion) }
             else intentar { Repositorio.buscarVuelo(texto, fecha) }
-                .onSuccess { r -> if (r.size == 1) abrir(r[0]) else resultados = r }
+                .onSuccess { r ->
+                    if (r.isNotEmpty()) Almacen.anadirReciente(r[0].numero)
+                    if (r.size == 1) abrir(r[0]) else resultados = r
+                }
                 .onFailure { error = it.message ?: tx(R.string.sin_conexion) }
             cargando = false
         }
@@ -196,6 +200,7 @@ fun BuscarVuelo(e: EstadoBusqueda, atras: () -> Unit, abrir: (Vuelo) -> Unit) {
             Texto(tx(R.string.escriba_el_numero_que_aparece_en_el_bi), 18)
             Spacer(Modifier.height(8.dp))
             Campo(texto, { texto = it.uppercase().take(10) }, tx(R.string.ej_ib3166), ::buscar)
+            Recientes(datosRecientes.filter { '>' !in it }, { it }) { n -> texto = n; buscar() }
         } else {
             Texto(tx(R.string.todos_los_vuelos_directos_de_un_dia_en), 18)
             Spacer(Modifier.height(8.dp))
@@ -207,6 +212,9 @@ fun BuscarVuelo(e: EstadoBusqueda, atras: () -> Unit, abrir: (Vuelo) -> Unit) {
                 IconButton(onClick = { val o = origen; origen = destino; destino = o; limpiar() }) {
                     Texto("⇅", 34, C.ambar, FontWeight.Black, modifier = Modifier.semantics { contentDescription = tx(R.string.intercambiar_salida_y_llegada) })
                 }
+            }
+            Recientes(datosRecientes.filter { '>' in it }, { it.replace(">", " → ") }) { t ->
+                origen = Aeropuertos.iata(t.substringBefore('>')); destino = Aeropuertos.iata(t.substringAfter('>')); limpiar(); buscar()
             }
         }
         if (Almacen.tieneClave) {
@@ -366,5 +374,21 @@ private fun ElegirFecha(inicial: LocalDate, elegir: (LocalDate) -> Unit, cerrar:
     ) {
         DatePicker(estado, colors = colores, showModeToggle = false,
             title = { Texto(tx(R.string.que_dia_sale_el_vuelo), 20, C.texto, FontWeight.Bold, modifier = Modifier.padding(start = 24.dp, top = 16.dp)) })
+    }
+}
+
+/** Búsquedas recientes como botones pequeños: un toque y se repite la búsqueda. */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+private fun Recientes(lista: List<String>, nombre: (String) -> String, elegir: (String) -> Unit) {
+    if (lista.isEmpty()) return
+    Texto(tx(R.string.recientes), 14, C.gris, FontWeight.Bold, modifier = Modifier.padding(top = 10.dp, bottom = 4.dp))
+    androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        lista.forEach { r ->
+            Box(
+                Modifier.clip(RoundedCornerShape(10.dp)).background(C.panel).border(1.dp, C.ambar, RoundedCornerShape(10.dp))
+                    .clickable { elegir(r) }.padding(horizontal = 14.dp, vertical = 10.dp),
+            ) { Texto(nombre(r), 17, C.ambar, FontWeight.Bold, mono = true) }
+        }
     }
 }

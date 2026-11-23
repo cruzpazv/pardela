@@ -9,6 +9,7 @@ sealed interface Pantalla {
     /** Cada pantalla de la pila guarda su estado: al volver atrás se ve igual que se dejó. */
     class BuscarVuelo : Pantalla { val estado = EstadoBusqueda() }
     data object Ajustes : Pantalla
+    data object Guia : Pantalla
     data class AjustesDe(val seccion: SeccionAjustes) : Pantalla
     /** origen: null = ver tablón; "" = elegir origen de trayecto; "MAD" = elegir destino. */
     data class BuscarAeropuerto(val origen: String?) : Pantalla

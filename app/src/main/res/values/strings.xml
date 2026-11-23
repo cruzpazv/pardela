@@ -379,4 +379,19 @@
     <string name="modo_sencillo_detalle">"Only the essentials: find a flight, follow it and listen to it. Hides maps, airports, routes and aircraft details."</string>
     <string name="sin_conexion_ultimos_datos">"No connection: showing the last saved data."</string>
     <string name="actualizado_x">"Updated %1$s"</string>
+    <string name="guia_1_titulo">"Find your flight"</string>
+    <string name="guia_1_texto">"Tap FIND A FLIGHT and type the number on your ticket, for example IB3166. You can also search by route and day."</string>
+    <string name="guia_2_titulo">"Follow it"</string>
+    <string name="guia_2_texto">"On the flight, tap FOLLOW THIS FLIGHT. It is kept in SAVED and you will be alerted about the gate, delays, take-off and landing."</string>
+    <string name="guia_3_titulo">"Alerts and voice"</string>
+    <string name="guia_3_texto">"Alerts arrive even when the app is closed. With 🔊 LISTEN, the phone reads out how the flight is going."</string>
+    <string name="guia_4_titulo">"Make it yours"</string>
+    <string name="guia_4_texto">"In ⚙ SETTINGS you can choose larger text, simple mode, the language and quiet hours."</string>
+    <string name="guia_siguiente">"NEXT"</string>
+    <string name="guia_empezar">"START"</string>
+    <string name="guia_atras">"BACK"</string>
+    <string name="guia_saltar">"SKIP"</string>
+    <string name="como_se_usa">"HOW TO USE IT"</string>
+    <string name="como_se_usa_detalle">"Quick guide in 4 steps"</string>
+    <string name="recientes">"RECENT"</string>
 </resources>
